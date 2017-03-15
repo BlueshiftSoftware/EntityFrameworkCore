@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net452;netstandard1.5</TargetFrameworks>
+    <Authors>Blueshift Software, LLC</Authors>
+    <Company>Blueshift Software, LLC</Company>
+    <Product>Blueshift MongoDb Provider for EntityFrameworkCore</Product>
+    <Description>Blueshift Software MongoDb Provider for Microsoft EntityFramework Core</Description>
+    <Copyright>© Blueshift Software, LLC @ 2017. All rights reserved.</Copyright>
+    <Version>1.2.0-alpha</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\Check.cs" Link="Check.cs" />
+    <Compile Include="..\Shared\CodeAnnotations.cs" Link="CodeAnnotations.cs" />
+    <Compile Include="..\Shared\MemberInfoExtensions.cs" Link="MemberInfoExtensions.cs" />
+    <Compile Include="..\Shared\PropertyInfoExtensions.cs" Link="PropertyInfoExtensions.cs" />
+    <Compile Include="..\Shared\SharedTypeExtensions.cs" Link="SharedTypeExtensions.cs" />
+    <Compile Include="..\Shared\StringBuilderExtensions.cs" Link="StringBuilderExtensions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="1.2.0-preview1-23814" />
+    <PackageReference Include="MongoDB.Driver" Version="2.4.3" />
+  </ItemGroup>
+
+</Project>
