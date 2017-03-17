@@ -9,8 +9,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{258D5057-8
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Globals", "Globals", "{6841D576-C833-4614-89D8-4CF4DECD1CFA}"
 	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
 		build.ps1 = build.ps1
 		NuGet.config = NuGet.config
+		README.md = README.md
 		version.props = version.props
 	EndProjectSection
 EndProject
