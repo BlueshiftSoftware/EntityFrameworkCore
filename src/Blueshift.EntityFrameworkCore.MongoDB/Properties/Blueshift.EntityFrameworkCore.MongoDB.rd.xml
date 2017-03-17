@@ -2,7 +2,7 @@
 
 <Directives xmlns="http://schemas.microsoft.com/netfx/2013/01/metadata">
   <Library>
-    <Assembly Name="Microsoft.EntityFrameworkCore.MongoDB" Dynamic="Required All" />
+    <Assembly Name="Blueshift.EntityFrameworkCore.MongoDB" Dynamic="Required All" />
     <!-- TODO optimize this for types that actually need reflection -->
   </Library>
 </Directives>

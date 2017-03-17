@@ -1,3 +1,4 @@
+using System;
 using Blueshift.EntityFrameworkCore.MongoDB.Adapter;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -38,9 +39,6 @@ namespace Blueshift.EntityFrameworkCore.Infrastructure
             [param: NotNull] set
             {
                 _connectionString = Check.NotEmpty(value, nameof(ConnectionString));
-                _mongoClient = new MongoClient(_connectionString);
-                _mongoClientSettings = null;
-                _mongoUrl = null;
             }
         }
 
@@ -50,9 +48,6 @@ namespace Blueshift.EntityFrameworkCore.Infrastructure
             [param: NotNull] set
             {
                 _mongoClient = Check.NotNull(value, nameof(MongoClient));
-                _mongoClientSettings = null;
-                _mongoUrl = null;
-                _connectionString = null;
             }
         }
 
@@ -62,9 +57,6 @@ namespace Blueshift.EntityFrameworkCore.Infrastructure
             [param: NotNull] set
             {
                 _mongoClientSettings = Check.NotNull(value, nameof(MongoClientSettings)).Clone();
-                _mongoClient = new MongoClient(_mongoClientSettings);
-                _mongoUrl = null;
-                _connectionString = null;
             }
         }
 
@@ -74,9 +66,6 @@ namespace Blueshift.EntityFrameworkCore.Infrastructure
             [param: NotNull] set
             {
                 _mongoUrl = Check.NotNull(value, nameof(MongoUrl));
-                _mongoClient = new MongoClient(_mongoUrl);
-                _mongoClientSettings = null;
-                _connectionString = null;
             }
         }
 
@@ -88,6 +77,19 @@ namespace Blueshift.EntityFrameworkCore.Infrastructure
                 filter: type => true);
             Check.NotNull(services, nameof(services)).AddEntityFrameworkMongoDb();
             return true;
+        }
+
+        public virtual long GetServiceProviderHashCode() => 0;
+
+        public virtual void Validate(IDbContextOptions options)
+        {
+            if (_mongoClient != null ^
+                _mongoUrl != null ^
+                _mongoClientSettings != null ^
+                string.IsNullOrWhiteSpace(_connectionString))
+            {
+                throw new InvalidOperationException("Only one of either MongoClient, MongoUrl, MongoClientSettings, or ConnectionString may be set at one time.");
+            }
         }
     }
 }

@@ -11,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Globals", "Globals", "{6841
 	ProjectSection(SolutionItems) = preProject
 		build.ps1 = build.ps1
 		NuGet.config = NuGet.config
+		version.props = version.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{2B598BE4-9107-4F65-90E7-749F3A41F9D6}"
@@ -26,6 +27,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blueshift.EntityFrameworkCore.MongoDB", "src\Blueshift.EntityFrameworkCore.MongoDB\Blueshift.EntityFrameworkCore.MongoDB.csproj", "{E0841FBC-A266-41BF-AA5F-4514692D2161}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blueshift.EntityFrameworkCore.MongoDb.Tests", "test\Blueshift.EntityFrameworkCore.MongoDb.Tests\Blueshift.EntityFrameworkCore.MongoDb.Tests.csproj", "{314B80D1-CBB7-4EF5-A5BD-3AD9F14069E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{FAF9C31C-A1AF-42A9-9306-EC190DCACCC7}"
+	ProjectSection(SolutionItems) = preProject
+		build\common.props = build\common.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

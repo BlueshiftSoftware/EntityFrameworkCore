@@ -52,8 +52,31 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
             {
                 serviceCollectionMap.TryAddScoped<IMongoDbConnection, MongoDbConnection>();
                 serviceCollectionMap.TryAddScoped(serviceProvider =>
-                    serviceProvider.GetRequiredService<IDbContextOptions>().FindExtension<MongoDbOptionsExtension>()?.MongoClient
-                    ?? new MongoClient());
+                {
+                    var extension = serviceProvider.GetRequiredService<IDbContextOptions>().FindExtension<MongoDbOptionsExtension>();
+                    IMongoClient mongoClient;
+                    if (extension?.MongoClient != null)
+                    {
+                        mongoClient = extension.MongoClient;
+                    }
+                    else if (extension?.MongoUrl != null)
+                    {
+                        mongoClient = new MongoClient(extension.MongoUrl);
+                    }
+                    else if (extension?.MongoClientSettings != null)
+                    {
+                        mongoClient = new MongoClient(extension.MongoClientSettings);
+                    }
+                    else if (!string.IsNullOrWhiteSpace(extension.ConnectionString))
+                    {
+                        mongoClient = new MongoClient(extension.ConnectionString);
+                    }
+                    else
+                    {
+                        mongoClient = new MongoClient();
+                    }
+                    return mongoClient;
+                });
             });
 
             return base.TryAddCoreServices();
