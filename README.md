@@ -7,4 +7,4 @@ MongoDb is a highly popular No-SQL database solution for storing structured, non
 
 Find out how to get started by visiting the [Wiki pages](https://github.com/crhairr/EntityFrameworkCore.MongoDb/wiki). Feel free to contribute to this repository with code, comments, wiki entries, and/or issues.
 
-The latest release and CI previews builds are available at the EntityFrameworkCore.MongoDb [MyGet Feed](https://www.myget.org/F/efcore-mongodb/api/v3/index.json) (VS2012, use [this feed](https://www.myget.org/F/efcore-mongodb/api/v2)).
+The latest release and CI previews builds are available at the EntityFrameworkCore.MongoDb [MyGet Feed](https://www.myget.org/gallery/efcore-mongodb/).
