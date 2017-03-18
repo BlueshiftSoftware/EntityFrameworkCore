@@ -7,10 +7,10 @@ using MongoDB.Bson.Serialization.Conventions;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter
 {
-    public class AbstractClassMapConvention : ConventionBase, IClassMapConvention
+    public class AbstractClassConvention : ConventionBase, IClassMapConvention
     {
-        public AbstractClassMapConvention()
-            : base(Regex.Replace(nameof(AbstractClassMapConvention), pattern: "Convention$", replacement: ""))
+        public AbstractClassConvention()
+            : base(Regex.Replace(nameof(AbstractClassConvention), pattern: "Convention$", replacement: ""))
         {
         }
 

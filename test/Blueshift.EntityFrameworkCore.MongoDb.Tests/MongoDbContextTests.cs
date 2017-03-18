@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using Blueshift.EntityFrameworkCore.MongoDB.Tests.TestDomain;
-using Microsoft.EntityFrameworkCore.Specification.Tests.TestUtilities.Xunit;
+using MongoDB.Bson;
 using Xunit;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
 {
-    [MongoDbInstalledTestCondition]
     public class MongoDbContextTests : IClassFixture<MongoDbFixture>, IDisposable
     {
         private TestMongoDbContext _testMongoDbContext;
@@ -18,7 +17,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
             _testMongoDbContext.Database.EnsureCreated();
         }
 
-        [ConditionalFact]
+        [Fact]
         public void Can_query_from_mongodb()
         {
             Assert.Empty(_testMongoDbContext.SimpleRecords.ToList());
@@ -26,7 +25,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
             Assert.Empty(_testMongoDbContext.RootTypes.ToList());
         }
 
-        [ConditionalFact]
+        [Fact]
         public void Can_write_simple_record()
         {
             var simpleRecord = new SimpleRecord();
@@ -35,7 +34,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
             Assert.Equal(simpleRecord, _testMongoDbContext.SimpleRecords.Single());
         }
 
-        [ConditionalFact]
+        [Fact]
         public void Can_write_complex_record()
         {
             var complexRecord = new ComplexRecord();
@@ -44,9 +43,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
             Assert.Equal(complexRecord, _testMongoDbContext.ComplexRecords.Single());
         }
 
-        [ConditionalFact]
+        [Fact]
         public void Can_write_polymorphic_records()
         {
+            _testMongoDbContext.Find<RootType>(ObjectId.Empty);
             IList<RootType> insertedEntities = new RootType[]
                 {
                     new DerivedType1(),
@@ -55,7 +55,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                 }
                 .OrderBy(rootType => rootType.StringProperty)
                 .ToList();
-            _testMongoDbContext.AddRange(insertedEntities);
+            _testMongoDbContext.RootTypes.AddRange(insertedEntities);
             _testMongoDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
             IList<RootType> queriedEntities = _testMongoDbContext.RootTypes
                 .OrderBy(rootType => rootType.StringProperty)
@@ -67,7 +67,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
             }
         }
 
-        [ConditionalFact]
+        [Fact]
         public void Can_query_polymorphic_sub_types()
         {
             IList<RootType> insertedEntities = new RootType[]
@@ -78,7 +78,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                 }
                 .OrderBy(rootType => rootType.StringProperty)
                 .ToList();
-            _testMongoDbContext.AddRange(insertedEntities);
+            _testMongoDbContext.RootTypes.AddRange(insertedEntities);
             _testMongoDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
             Assert.Equal(
                 insertedEntities.OfType<DerivedType1>().Single(),

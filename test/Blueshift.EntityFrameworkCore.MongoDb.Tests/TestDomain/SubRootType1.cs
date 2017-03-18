@@ -1,10 +1,11 @@
 ﻿using System;
-using Blueshift.EntityFrameworkCore.Annotations;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.TestDomain
 {
-    [DerivedType(typeof(SubDerivedType1))]
-    [DerivedType(typeof(SubDerivedType2))]
+    [BsonKnownTypes(
+        typeof(SubDerivedType1),
+        typeof(SubDerivedType2))]
     public abstract class SubRootType1 : RootType, IEquatable<SubRootType1>
     {
         public byte ByteProperty { get; set; } = (byte)new Random().Next(maxValue: 0x0FF);

@@ -1,4 +1,5 @@
-﻿using Blueshift.EntityFrameworkCore.Metadata.Conventions;
+﻿using System;
+using Blueshift.EntityFrameworkCore.Metadata.Conventions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
@@ -34,9 +35,7 @@ namespace Blueshift.EntityFrameworkCore.Metadata.Builders
             conventionSet.EntityTypeAddedConventions
                 .Replace(mongoDbPropertyDiscoveryConvention)
                 .Replace(mongoDbRelationshipDiscoveryConvention)
-                .With(new MongoDbDerivedTypeAttributeConvention())
-                .With(new MongoDbDiscriminatorAttributeConvention())
-                .With(new MongoDbRootTypeAttributeConvention());
+                .With(new BsonDiscriminatorAttributeConvention());
 
             conventionSet.BaseEntityTypeSetConventions
                 .Replace(mongoDbPropertyDiscoveryConvention)
@@ -58,7 +57,8 @@ namespace Blueshift.EntityFrameworkCore.Metadata.Builders
                 .Replace(mongoDbRelationshipDiscoveryConvention);
 
             conventionSet.ModelBuiltConventions
-                .Replace(mongoDbPropertyMappingValidationConvention);
+                .Replace(mongoDbPropertyMappingValidationConvention)
+                .With(new MongoDbRegisterKnownTypesConvention());
 
             return conventionSet;
         }

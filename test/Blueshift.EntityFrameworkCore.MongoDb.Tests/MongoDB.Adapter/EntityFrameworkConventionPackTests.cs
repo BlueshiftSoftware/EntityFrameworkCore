@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using Blueshift.EntityFrameworkCore.Annotations;
 using Blueshift.EntityFrameworkCore.MongoDB.Adapter;
 using MongoDB.Bson.Serialization.Conventions;
 using Xunit;
@@ -10,8 +9,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.MongoDB.Adapter
     public class EntityFrameworkConventionPackTests
     {
         [Theory]
-        [InlineData(typeof(AbstractClassMapConvention))]
-        [InlineData(typeof(BsonClassMapAttributeConvention<DerivedTypeAttribute>))]
+        [InlineData(typeof(AbstractClassConvention))]
         [InlineData(typeof(KeyAttributeConvention))]
         [InlineData(typeof(IgnoreEmptyEnumerablesConvention))]
         [InlineData(typeof(IgnoreNullOrEmptyStringsConvention))]

@@ -1,5 +1,4 @@
-﻿using Blueshift.EntityFrameworkCore.Annotations;
-using MongoDB.Bson.Serialization.Conventions;
+﻿using MongoDB.Bson.Serialization.Conventions;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter
 {
@@ -11,10 +10,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter
         {
             AddRange(new IConvention[]
             {
-                new AbstractClassMapConvention(),
-                new BsonClassMapAttributeConvention<DerivedTypeAttribute>(),
-                new BsonClassMapAttributeConvention<DiscriminatorAttribute>(),
-                new BsonClassMapAttributeConvention<RootTypeAttribute>(),
+                new AbstractClassConvention(),
                 new IgnoreEmptyEnumerablesConvention(),
                 new IgnoreNullOrEmptyStringsConvention(),
                 new KeyAttributeConvention()

@@ -1,14 +1,16 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Blueshift.EntityFrameworkCore.Annotations;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.TestDomain
 {
-    [RootType]
-    [DerivedType(typeof(DerivedType1))]
-    [DerivedType(typeof(SubRootType1))]
+    [BsonDiscriminator(Required = true, RootClass = true)]
+    [BsonKnownTypes(
+        typeof(DerivedType1),
+        typeof(SubRootType1)
+    )]
     public abstract class RootType : IEquatable<RootType>
     {
         [Key]

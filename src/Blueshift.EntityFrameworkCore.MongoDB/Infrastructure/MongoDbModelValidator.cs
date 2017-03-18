@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore.Utilities;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Blueshift.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
+using MongoDB.Bson.Serialization.Attributes;
 
 // ReSharper disable once CheckNamespace
 namespace Blueshift.EntityFrameworkCore.Infrastructure
@@ -26,6 +28,7 @@ namespace Blueshift.EntityFrameworkCore.Infrastructure
             base.Validate(model);
 
             EnsureDistinctCollectionNames(model);
+            EnsureKnownTypes(model);
             ValidateDerivedTypes(model);
         }
 
@@ -45,6 +48,31 @@ namespace Blueshift.EntityFrameworkCore.Infrastructure
             foreach (var tuple in duplicateCollectionNames)
             {
                 ShowError($"Duplicate collection name \"{tuple.CollectionName}\" defined on entity type \"{tuple.DisplayName}\".");
+            }
+        }
+
+        protected virtual void EnsureKnownTypes([NotNull] IModel model)
+        {
+            Check.NotNull(model, nameof(model));
+            var unregisteredTypes = model
+                .GetEntityTypes()
+                .Where(entityType => entityType.HasClrType()
+                    && entityType.ClrType.GetTypeInfo().IsDefined(typeof(BsonKnownTypesAttribute), false))
+                .SelectMany(entityType => entityType.ClrType.GetTypeInfo()
+                    .GetCustomAttributes<BsonKnownTypesAttribute>(false)
+                    .SelectMany(bsonKnownTypesAttribute => bsonKnownTypesAttribute.KnownTypes)
+                    .Select(derivedType =>  new
+                    {
+                        BaseType = entityType.ClrType,
+                        DerivedType = derivedType
+                    }))
+                .Where(tuple => model.FindEntityType(tuple.DerivedType.Name) == null)
+                .ToList();
+            InternalModelBuilder modelBuilder = model.AsModel().Builder;
+            foreach (var pair in unregisteredTypes)
+            {
+                if (!pair.BaseType.GetTypeInfo().IsAssignableFrom(pair.DerivedType))
+                    ShowError($"Known type {pair.DerivedType} declared on base type {pair.BaseType} does not inherit from base type.");
             }
         }
 
