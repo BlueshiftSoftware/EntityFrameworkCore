@@ -35,6 +35,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{FAF9C31C
 		build\common.props = build\common.props
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blueshift.EntityFrameworkCore.MongoDb.SampleDomain", "src\Blueshift.EntityFrameworkCore.MongoDb.SampleDomain\Blueshift.EntityFrameworkCore.MongoDb.SampleDomain.csproj", "{169261F6-0B97-47A5-98B8-E6AA084FF6A4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +51,10 @@ Global
 		{314B80D1-CBB7-4EF5-A5BD-3AD9F14069E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{314B80D1-CBB7-4EF5-A5BD-3AD9F14069E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{314B80D1-CBB7-4EF5-A5BD-3AD9F14069E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{169261F6-0B97-47A5-98B8-E6AA084FF6A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{169261F6-0B97-47A5-98B8-E6AA084FF6A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{169261F6-0B97-47A5-98B8-E6AA084FF6A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{169261F6-0B97-47A5-98B8-E6AA084FF6A4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -57,5 +63,6 @@ Global
 		{2B598BE4-9107-4F65-90E7-749F3A41F9D6} = {CE6B50B2-34AE-44C9-940A-4E48C3E1B3BC}
 		{E0841FBC-A266-41BF-AA5F-4514692D2161} = {CE6B50B2-34AE-44C9-940A-4E48C3E1B3BC}
 		{314B80D1-CBB7-4EF5-A5BD-3AD9F14069E8} = {258D5057-81B9-40EC-A872-D21E27452749}
+		{169261F6-0B97-47A5-98B8-E6AA084FF6A4} = {CE6B50B2-34AE-44C9-940A-4E48C3E1B3BC}
 	EndGlobalSection
 EndGlobal

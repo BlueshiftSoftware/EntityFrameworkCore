@@ -1,14 +1,12 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.TestDomain
 {
     public class ComplexRecord : IEquatable<ComplexRecord>
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [BsonId]
         public ObjectId Id { get; private set; }
 
         public ComplexSubDocument ComplexSubDocument { get; set; } = new ComplexSubDocument();

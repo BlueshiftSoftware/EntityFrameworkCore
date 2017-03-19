@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 
-// ReSharper disable once CheckNamespace
 namespace Blueshift.EntityFrameworkCore.Infrastructure
 {
     public class MongoDbOptionsExtension : IDbContextOptionsExtension

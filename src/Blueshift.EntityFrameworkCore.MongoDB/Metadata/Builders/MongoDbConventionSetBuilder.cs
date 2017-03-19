@@ -1,5 +1,4 @@
-﻿using System;
-using Blueshift.EntityFrameworkCore.Metadata.Conventions;
+﻿using Blueshift.EntityFrameworkCore.Metadata.Conventions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
@@ -45,7 +44,9 @@ namespace Blueshift.EntityFrameworkCore.Metadata.Builders
                 .Replace(mongoDbRelationshipDiscoveryConvention);
 
             conventionSet.PropertyAddedConventions
-                .Replace(mongoDbDatabaseGeneratedAttributeConvention);
+                .Replace(mongoDbDatabaseGeneratedAttributeConvention)
+                .With(new BsonIdAttributeConvention())
+                .With(new BsonIgnoreAttributeConvention());
 
             conventionSet.PropertyFieldChangedConventions
                 .Replace(mongoDbDatabaseGeneratedAttributeConvention);

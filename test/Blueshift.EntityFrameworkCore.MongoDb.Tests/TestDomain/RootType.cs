@@ -1,6 +1,4 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -13,8 +11,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.TestDomain
     )]
     public abstract class RootType : IEquatable<RootType>
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [BsonId]
         public ObjectId Id { get; private set; }
 
         public string StringProperty { get; set; } = Guid.NewGuid().ToString(format: "D");
@@ -28,6 +25,5 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.TestDomain
         public virtual bool Equals(RootType other)
             => Id.Equals(other?.Id) &&
                    string.Equals(StringProperty, other?.StringProperty);
-
     }
 }

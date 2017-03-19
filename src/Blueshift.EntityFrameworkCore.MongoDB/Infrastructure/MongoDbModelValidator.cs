@@ -11,7 +11,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using MongoDB.Bson.Serialization.Attributes;
 
-// ReSharper disable once CheckNamespace
 namespace Blueshift.EntityFrameworkCore.Infrastructure
 {
     public class MongoDbModelValidator : ModelValidator

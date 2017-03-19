@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using Blueshift.EntityFrameworkCore.Infrastructure;
 using Blueshift.EntityFrameworkCore.MongoDB.Tests.TestDomain;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Tests

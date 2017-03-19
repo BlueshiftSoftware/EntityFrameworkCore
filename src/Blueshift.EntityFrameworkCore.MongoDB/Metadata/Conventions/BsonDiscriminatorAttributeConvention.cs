@@ -15,7 +15,7 @@ namespace Blueshift.EntityFrameworkCore.Metadata.Conventions
         {
             Check.NotNull(entityTypeBuilder, nameof(entityTypeBuilder));
             Check.NotNull(attribute, nameof(attribute));
-            MongoDbDocumentBuilder documentBuilder = entityTypeBuilder.MongoDb(ConfigurationSource.Convention);
+            MongoDbDocumentBuilder documentBuilder = entityTypeBuilder.MongoDb(ConfigurationSource.DataAnnotation);
             if (!string.IsNullOrWhiteSpace(attribute.Discriminator))
                 documentBuilder.HasDiscriminator(attribute.Discriminator);
             documentBuilder.SetDiscriminatorIsRequired(attribute.Required);

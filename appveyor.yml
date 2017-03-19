@@ -15,6 +15,7 @@ branches:
   only:
     - release
     - develop
+    - master
     - /^(.*\/)?ci-.*$/
 environment:
   global:

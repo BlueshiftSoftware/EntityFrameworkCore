@@ -2,10 +2,11 @@
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Utilities;
 using MongoDB.Driver;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Blueshift.EntityFrameworkCore.Infrastructure;
 
-namespace Blueshift.EntityFrameworkCore.Infrastructure
+// ReSharper disable once CheckNamespace
+namespace Microsoft.EntityFrameworkCore
 {
     public static class MongoDbContextOptionsBuilderExtensions
     {

@@ -2,7 +2,6 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Utilities;
 
-// ReSharper disable once CheckNamespace
 namespace Blueshift.EntityFrameworkCore.Infrastructure
 {
     public class MongoDbContextOptionsBuilder

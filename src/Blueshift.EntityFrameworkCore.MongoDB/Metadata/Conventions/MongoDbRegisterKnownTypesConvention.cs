@@ -27,7 +27,7 @@ namespace Blueshift.EntityFrameworkCore.Metadata.Conventions
                 .ToList();
             foreach (var type in unregisteredKnownTypes)
             {
-                modelBuilder.Entity(type, ConfigurationSource.Convention);
+                modelBuilder.Entity(type, ConfigurationSource.DataAnnotation);
             }
             return modelBuilder;
         }
