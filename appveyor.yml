@@ -1,14 +1,13 @@
-only_commits:
-  # Start a build if commit message contains 'appveyor'
-  message: /appveyor/
 init:
   - git config --global core.autocrlf true
 build_script:
   - ps: .\build.ps1
 clone_depth: 1
 test: off
-deploy: off
-# See http://www.appveyor.com/docs/services-databases
+deploy:
+  provider: Environment
+  name: MyGet
+  artifact: /artifacts\\build\\((?!SampleDomain)[^\.]+\.)*nupk+/
 services:
   - mongodb
 branches:

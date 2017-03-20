@@ -4,6 +4,7 @@ using Blueshift.EntityFrameworkCore.Annotations;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Driver;
 
 namespace Blueshift.EntityFrameworkCore.MongoDb.SampleDomain
 {
@@ -15,7 +16,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDb.SampleDomain
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseMongoDb($"mongodb://localhost");
+            MongoClientSettings settings = MongoClientSettings.FromUrl(new MongoUrl($"mongodb://localhost"));
+            settings.SslSettings = new SslSettings
+            {
+                EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12
+            };
+            optionsBuilder.UseMongoDb(settings);
+            //optionsBuilder.UseMongoDb(new MongoClient(settings));
+            //optionsBuilder.UseMongoDb($"mongodb://localhost");
         }
     }
 
