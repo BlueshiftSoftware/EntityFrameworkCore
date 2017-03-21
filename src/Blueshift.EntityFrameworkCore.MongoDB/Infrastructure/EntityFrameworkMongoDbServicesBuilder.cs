@@ -59,13 +59,13 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
                     {
                         mongoClient = extension.MongoClient;
                     }
-                    else if (extension?.MongoUrl != null)
-                    {
-                        mongoClient = new MongoClient(extension.MongoUrl);
-                    }
                     else if (extension?.MongoClientSettings != null)
                     {
                         mongoClient = new MongoClient(extension.MongoClientSettings);
+                    }
+                    else if (extension?.MongoUrl != null)
+                    {
+                        mongoClient = new MongoClient(extension.MongoUrl);
                     }
                     else if (!string.IsNullOrWhiteSpace(extension.ConnectionString))
                     {

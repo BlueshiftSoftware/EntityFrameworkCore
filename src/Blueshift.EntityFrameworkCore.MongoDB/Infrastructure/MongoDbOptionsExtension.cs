@@ -82,13 +82,6 @@ namespace Blueshift.EntityFrameworkCore.Infrastructure
 
         public virtual void Validate(IDbContextOptions options)
         {
-            if (_mongoClient != null ^
-                _mongoUrl != null ^
-                _mongoClientSettings != null ^
-                string.IsNullOrWhiteSpace(_connectionString))
-            {
-                throw new InvalidOperationException("Only one of either MongoClient, MongoUrl, MongoClientSettings, or ConnectionString may be set at one time.");
-            }
         }
     }
 }
