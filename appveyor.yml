@@ -7,7 +7,7 @@ test: off
 deploy:
   provider: Environment
   name: MyGet
-  artifact: /artifacts\\build\\((?!SampleDomain).)+\.nupkg/
+  artifact: artifacts\build\Blueshift.EntityFrameworkCore.MongoDb(-preview*).nupkg
 services:
   - mongodb
 branches:

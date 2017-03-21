@@ -1,5 +1,5 @@
 ﻿using Blueshift.EntityFrameworkCore.MongoDB.Adapter;
-using Blueshift.EntityFrameworkCore.MongoDB.Tests.TestDomain;
+using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
 using MongoDB.Bson.Serialization;
 using Xunit;
 
@@ -14,15 +14,15 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.MongoDB.Adapter
         [InlineData("TestData")]
         public void Should_not_serialize_null_or_empty_strings(string value)
         {
-            var bsonClassMap = new BsonClassMap<SimpleRecord>();
-            BsonMemberMap bsonMemberMap = bsonClassMap.MapMember(cr => cr.StringProperty);
+            var bsonClassMap = new BsonClassMap<Employee>();
+            BsonMemberMap bsonMemberMap = bsonClassMap.MapMember(e => e.FirstName);
             var ignoreNullOrEmptyStringsConvention = new IgnoreNullOrEmptyStringsConvention();
             ignoreNullOrEmptyStringsConvention.Apply(bsonMemberMap);
-            var simpleRecord = new SimpleRecord
+            var employee = new Employee
             {
-                StringProperty = value
+                FirstName = value
             };
-            Assert.Equal(!string.IsNullOrEmpty(value), bsonMemberMap.ShouldSerialize(simpleRecord, simpleRecord.StringProperty));
+            Assert.Equal(!string.IsNullOrEmpty(value), bsonMemberMap.ShouldSerialize(employee, employee.FirstName));
         }
     }
 }

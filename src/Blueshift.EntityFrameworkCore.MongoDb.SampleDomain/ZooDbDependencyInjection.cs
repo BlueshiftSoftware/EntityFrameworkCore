@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 
-namespace Blueshift.EntityFrameworkCore.MongoDb.SampleDomain
+namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
 {
     public static class ZooDbDependencyInjection
     {

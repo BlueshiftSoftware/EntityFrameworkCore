@@ -28,14 +28,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{2B598B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blueshift.EntityFrameworkCore.MongoDB", "src\Blueshift.EntityFrameworkCore.MongoDB\Blueshift.EntityFrameworkCore.MongoDB.csproj", "{E0841FBC-A266-41BF-AA5F-4514692D2161}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blueshift.EntityFrameworkCore.MongoDb.Tests", "test\Blueshift.EntityFrameworkCore.MongoDb.Tests\Blueshift.EntityFrameworkCore.MongoDb.Tests.csproj", "{314B80D1-CBB7-4EF5-A5BD-3AD9F14069E8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blueshift.EntityFrameworkCore.MongoDB.Tests", "test\Blueshift.EntityFrameworkCore.MongoDb.Tests\Blueshift.EntityFrameworkCore.MongoDB.Tests.csproj", "{314B80D1-CBB7-4EF5-A5BD-3AD9F14069E8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{FAF9C31C-A1AF-42A9-9306-EC190DCACCC7}"
 	ProjectSection(SolutionItems) = preProject
 		build\common.props = build\common.props
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blueshift.EntityFrameworkCore.MongoDb.SampleDomain", "src\Blueshift.EntityFrameworkCore.MongoDb.SampleDomain\Blueshift.EntityFrameworkCore.MongoDb.SampleDomain.csproj", "{169261F6-0B97-47A5-98B8-E6AA084FF6A4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blueshift.EntityFrameworkCore.MongoDB.SampleDomain", "src\Blueshift.EntityFrameworkCore.MongoDb.SampleDomain\Blueshift.EntityFrameworkCore.MongoDB.SampleDomain.csproj", "{169261F6-0B97-47A5-98B8-E6AA084FF6A4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

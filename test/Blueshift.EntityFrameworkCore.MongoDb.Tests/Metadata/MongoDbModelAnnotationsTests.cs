@@ -1,5 +1,5 @@
 ﻿using Blueshift.EntityFrameworkCore.Metadata;
-using Blueshift.EntityFrameworkCore.MongoDB.Tests.TestDomain;
+using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Xunit;
 
@@ -33,7 +33,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Metadata
         public void Can_add_complex_type()
         {
             var model = new Model();
-            var entityType = new EntityType(typeof(RootType), model, ConfigurationSource.Explicit);
+            var entityType = new EntityType(typeof(Specialty), model, ConfigurationSource.Explicit);
             var mongoDbModelAnnotations = new MongoDbModelAnnotations(model)
             {
                 ComplexTypes =

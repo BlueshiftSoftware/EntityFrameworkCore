@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Blueshift.EntityFrameworkCore.Metadata;
-using Blueshift.EntityFrameworkCore.MongoDB.Tests.TestDomain;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Blueshift.EntityFrameworkCore.Metadata;
+using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Xunit;
 
@@ -17,9 +11,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Metadata
         public void Collection_name_is_pluralized_camel_cased_entity_type_by_default()
         {
             var model = new Model();
-            var entityType = new EntityType(typeof(RootType), model, ConfigurationSource.Explicit);
+            var entityType = new EntityType(typeof(Animal), model, ConfigurationSource.Explicit);
             var mongoDbEntityTypeAnnotations = new MongoDbEntityTypeAnnotations(entityType);
-            Assert.Equal(MongoDbUtilities.Pluralize(MongoDbUtilities.ToCamelCase(nameof(RootType))),
+            Assert.Equal(MongoDbUtilities.Pluralize(MongoDbUtilities.ToCamelCase(nameof(Animal))),
                 mongoDbEntityTypeAnnotations.CollectionName);
         }
 
@@ -28,7 +22,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Metadata
         {
             var collectionName = "myCollection";
             var model = new Model();
-            var entityType = new EntityType(typeof(RootType), model, ConfigurationSource.Explicit);
+            var entityType = new EntityType(typeof(Animal), model, ConfigurationSource.Explicit);
             var mongoDbEntityTypeAnnotations = new MongoDbEntityTypeAnnotations(entityType)
             {
                 CollectionName = collectionName
@@ -40,9 +34,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Metadata
         public void Discriminator_is_type_name_by_default()
         {
             var model = new Model();
-            var entityType = new EntityType(typeof(RootType), model, ConfigurationSource.Explicit);
+            var entityType = new EntityType(typeof(Animal), model, ConfigurationSource.Explicit);
             var mongoDbEntityTypeAnnotations = new MongoDbEntityTypeAnnotations(entityType);
-            Assert.Equal(typeof(RootType).Name, mongoDbEntityTypeAnnotations.Discriminator);
+            Assert.Equal(typeof(Animal).Name, mongoDbEntityTypeAnnotations.Discriminator);
         }
 
         [Fact]
@@ -50,7 +44,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Metadata
         {
             var discriminator = "discriminator";
             var model = new Model();
-            var entityType = new EntityType(typeof(RootType), model, ConfigurationSource.Explicit);
+            var entityType = new EntityType(typeof(Animal), model, ConfigurationSource.Explicit);
             var mongoDbEntityTypeAnnotations = new MongoDbEntityTypeAnnotations(entityType)
             {
                 Discriminator = discriminator

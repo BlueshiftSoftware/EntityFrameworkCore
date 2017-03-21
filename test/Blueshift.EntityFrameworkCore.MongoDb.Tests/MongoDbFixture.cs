@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using Blueshift.EntityFrameworkCore.MongoDB.Tests.TestDomain;
+using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -34,10 +34,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
             }
         }
 
-        public TestMongoDbContext TestMongoDbContext => new ServiceCollection()
-                .AddDbContext<TestMongoDbContext>(options => options.UseMongoDb(connectionString: MongoDbConstants.MongoUrl))
+        public ZooDbContext ZooDbContext => new ServiceCollection()
+                .AddDbContext<ZooDbContext>(options => options.UseMongoDb(connectionString: MongoDbConstants.MongoUrl))
                 .BuildServiceProvider()
-                .GetService<TestMongoDbContext>();
+                .GetService<ZooDbContext>();
 
         public void Dispose()
         {

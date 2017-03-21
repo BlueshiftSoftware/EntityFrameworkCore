@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using Blueshift.EntityFrameworkCore.MongoDB.Tests.TestDomain;
+using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
 using Blueshift.EntityFrameworkCore.ValueGeneration;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
@@ -13,10 +13,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.ValueGeneration
         public void X()
         {
             var model = new Model();
-            EntityType entityType = model.AddEntityType(typeof(SimpleRecord));
-            Property property = entityType.AddProperty(typeof(SimpleRecord)
+            EntityType entityType = model.AddEntityType(typeof(Employee));
+            Property property = entityType.AddProperty(typeof(Employee)
                 .GetTypeInfo()
-                .GetProperty(nameof(SimpleRecord.Id)));
+                .GetProperty(nameof(Employee.Id)));
 
             var valueGeneratorCacheDependencies = new ValueGeneratorCacheDependencies();
             var valueGeneratorCache = new ValueGeneratorCache(valueGeneratorCacheDependencies);

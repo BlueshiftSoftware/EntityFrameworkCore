@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Blueshift.EntityFrameworkCore.Annotations;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +7,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 
-namespace Blueshift.EntityFrameworkCore.MongoDb.SampleDomain
+namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
 {
     [MongoDatabase("zooDb")]
     public class ZooDbContext : DbContext
@@ -14,23 +15,29 @@ namespace Blueshift.EntityFrameworkCore.MongoDb.SampleDomain
         public DbSet<Animal> Animals { get; set; }
         public DbSet<Employee> Employees { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public ZooDbContext(DbContextOptions<ZooDbContext> zooDbContextOptions)
+            : base(zooDbContextOptions)
         {
-            MongoClientSettings settings = MongoClientSettings.FromUrl(new MongoUrl($"mongodb://localhost"));
-            settings.SslSettings = new SslSettings
-            {
-                EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12
-            };
-            optionsBuilder.UseMongoDb(settings);
-            //optionsBuilder.UseMongoDb(new MongoClient(settings));
-            //optionsBuilder.UseMongoDb($"mongodb://localhost");
         }
+
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    MongoClientSettings settings = MongoClientSettings.FromUrl(new MongoUrl($"mongodb://localhost"));
+        //    settings.SslSettings = new SslSettings
+        //    {
+        //        EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12
+        //    };
+        //    optionsBuilder.UseMongoDb(settings);
+        //    optionsBuilder.UseMongoDb(new MongoClient(settings));
+        //    optionsBuilder.UseMongoDb($"mongodb://localhost");
+        //}
     }
 
     [BsonKnownTypes(typeof(Tiger), typeof(PolarBear), typeof(Otter))]
     [BsonDiscriminator(Required = true, RootClass = true)]
     public abstract class Animal
     {
+        [BsonId]
         public ObjectId Id { get; private set; }
         public string Name { get; set; }
         public double Age { get; set; }
@@ -39,16 +46,24 @@ namespace Blueshift.EntityFrameworkCore.MongoDb.SampleDomain
     }
 
     [BsonDiscriminator("panthera tigris")]
-    public class Tiger { }
+    public class Tiger : Animal { }
 
     [BsonDiscriminator("Ursus maritimus")]
-    public class PolarBear { }
+    public class PolarBear : Animal { }
 
     [BsonDiscriminator("Lutrinae")]
-    public class Otter { }
+    [BsonKnownTypes(typeof(SeaOtter), typeof(EurasianOtter))]
+    public abstract class Otter : Animal { }
+
+    [BsonDiscriminator("Enhydra lutris")]
+    public class SeaOtter : Otter { }
+
+    [BsonDiscriminator("Lutra lutra")]
+    public class EurasianOtter : Otter { }
 
     public class Employee
     {
+        [Key]
         public ObjectId Id { get; private set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -59,7 +74,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDb.SampleDomain
             : $"{LastName}, {FirstName}";
 
         public double Age { get; set; }
-        public List<Specialty> Specialties { get; set; }
+        public List<Specialty> Specialties { get; set; } = new List<Specialty>();
     }
 
     public enum ZooTask

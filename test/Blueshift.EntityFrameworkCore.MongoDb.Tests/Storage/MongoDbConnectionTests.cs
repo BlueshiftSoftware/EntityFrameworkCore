@@ -1,8 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Blueshift.EntityFrameworkCore.Metadata;
 using Blueshift.EntityFrameworkCore.Metadata.Internal;
-using Blueshift.EntityFrameworkCore.MongoDB.Tests.TestDomain;
+using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
 using Blueshift.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -16,7 +15,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
     {
         private readonly Mock<IMongoDatabase> _mockMongoDatabase;
         private readonly Mock<IMongoClient> _mockMongoClient;
-        private readonly Mock<IMongoCollection<SimpleRecord>> _mockSimpleRecords;
+        private readonly Mock<IMongoCollection<Employee>> _mockEmployee;
         private readonly IModel _model;
 
         public MongoDbConnectionTests()
@@ -24,7 +23,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
             _model = GetModel();
             _mockMongoClient = MockMongoClient();
             _mockMongoDatabase = MockMongoDatabase();
-            _mockSimpleRecords = MockSimpleRecords();
+            _mockEmployee = MockEmployee();
         }
 
         private IModel GetModel()
@@ -32,11 +31,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
             var model = new Model();
             model.Builder
                 .MongoDb(ConfigurationSource.Explicit)
-                .FromDatabase("testdb")
+                .FromDatabase("zooDb")
                 .InternalModelBuilder
-                .Entity(typeof(SimpleRecord), ConfigurationSource.Explicit)
+                .Entity(typeof(Employee), ConfigurationSource.Explicit)
                 .MongoDb(ConfigurationSource.Explicit)
-                .FromCollection("simpleRecords");
+                .FromCollection("employees");
             return model;
         }
 
@@ -44,11 +43,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
         {
             var mockMongoClient = new Mock<IMongoClient>();
             mockMongoClient
-                .Setup(mongoClient => mongoClient.GetDatabase("testdb", It.IsAny<MongoDatabaseSettings>()))
+                .Setup(mongoClient => mongoClient.GetDatabase("zooDb", It.IsAny<MongoDatabaseSettings>()))
                 .Returns(() => _mockMongoDatabase.Object)
                 .Verifiable();
             mockMongoClient
-                .Setup(mongoClient => mongoClient.DropDatabase("testdb", It.IsAny<CancellationToken>()))
+                .Setup(mongoClient => mongoClient.DropDatabase("zooDb", It.IsAny<CancellationToken>()))
                 .Verifiable();
             return mockMongoClient;
         }
@@ -57,14 +56,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
         {
             var mockMongoDatabase = new Mock<IMongoDatabase>();
             mockMongoDatabase
-                .Setup(mongoDatabase => mongoDatabase.GetCollection<SimpleRecord>("simpleRecords", It.IsAny<MongoCollectionSettings>()))
-                .Returns(() => _mockSimpleRecords.Object)
+                .Setup(mongoDatabase => mongoDatabase.GetCollection<Employee>("employees", It.IsAny<MongoCollectionSettings>()))
+                .Returns(() => _mockEmployee.Object)
                 .Verifiable();
             return mockMongoDatabase;
         }
 
-        private Mock<IMongoCollection<SimpleRecord>> MockSimpleRecords()
-            => new Mock<IMongoCollection<SimpleRecord>>();
+        private Mock<IMongoCollection<Employee>> MockEmployee()
+            => new Mock<IMongoCollection<Employee>>();
 
         [Fact]
         public void Get_database_calls_mongo_client_get_database()
@@ -72,7 +71,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
             IMongoDbConnection mongoDbConnection = new MongoDbConnection(_mockMongoClient.Object, _model);
             Assert.Equal(_mockMongoDatabase.Object, mongoDbConnection.GetDatabase());
             _mockMongoClient
-                .Verify(mongoClient => mongoClient.GetDatabase("testdb", It.IsAny<MongoDatabaseSettings>()), Times.Once);
+                .Verify(mongoClient => mongoClient.GetDatabase("zooDb", It.IsAny<MongoDatabaseSettings>()), Times.Once);
         }
 
         [Fact]
@@ -81,7 +80,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
             IMongoDbConnection mongoDbConnection = new MongoDbConnection(_mockMongoClient.Object, _model);
             Assert.Equal(_mockMongoDatabase.Object, await mongoDbConnection.GetDatabaseAsync());
             _mockMongoClient
-                .Verify(mongoClient => mongoClient.GetDatabase("testdb", It.IsAny<MongoDatabaseSettings>()), Times.Once);
+                .Verify(mongoClient => mongoClient.GetDatabase("zooDb", It.IsAny<MongoDatabaseSettings>()), Times.Once);
         }
 
         [Fact]
@@ -90,7 +89,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
             IMongoDbConnection mongoDbConnection = new MongoDbConnection(_mockMongoClient.Object, _model);
             mongoDbConnection.DropDatabase();
             _mockMongoClient
-                .Verify(mongoClient => mongoClient.DropDatabase("testdb", It.IsAny<CancellationToken>()), Times.Once);
+                .Verify(mongoClient => mongoClient.DropDatabase("zooDb", It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -99,16 +98,16 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
             IMongoDbConnection mongoDbConnection = new MongoDbConnection(_mockMongoClient.Object, _model);
             await mongoDbConnection.DropDatabaseAsync();
             _mockMongoClient
-                .Verify(mongoClient => mongoClient.DropDatabaseAsync("testdb", It.IsAny<CancellationToken>()), Times.Once);
+                .Verify(mongoClient => mongoClient.DropDatabaseAsync("zooDb", It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
         public void Get_collection_calls_mongo_database_get_collection()
         {
             IMongoDbConnection mongoDbConnection = new MongoDbConnection(_mockMongoClient.Object, _model);
-            Assert.Equal(_mockSimpleRecords.Object, mongoDbConnection.GetCollection<SimpleRecord>());
+            Assert.Equal(_mockEmployee.Object, mongoDbConnection.GetCollection<Employee>());
             _mockMongoDatabase
-                .Verify(mongoDatabase => mongoDatabase.GetCollection<SimpleRecord>("simpleRecords", It.IsAny<MongoCollectionSettings>()), Times.Once);
+                .Verify(mongoDatabase => mongoDatabase.GetCollection<Employee>("employees", It.IsAny<MongoCollectionSettings>()), Times.Once);
         }
     }
 }

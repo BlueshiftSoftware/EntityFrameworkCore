@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Blueshift.EntityFrameworkCore.Metadata.Internal;
-using Blueshift.EntityFrameworkCore.MongoDB.Tests.TestDomain;
+using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
 using Blueshift.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
@@ -14,6 +14,8 @@ using Microsoft.EntityFrameworkCore.Query;
 using MongoDB.Driver;
 using Moq;
 using Xunit;
+using Blueshift.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
 {
@@ -25,43 +27,45 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
             var queryCompilationContextFactory = Mock.Of<IQueryCompilationContextFactory>();
             var mockMongoDbConnection = new Mock<IMongoDbConnection>();
             var mockStateManager = new Mock<IStateManager>();
-            var mockMongoCollection = new Mock<IMongoCollection<SimpleRecord>>();
+            var mockMongoCollection = new Mock<IMongoCollection<Employee>>();
             var mockValueGenerationManager = new Mock<IValueGenerationManager>();
             var mockInternalEntityEntryNotifier = new Mock<IInternalEntityEntryNotifier>();
             mockStateManager.SetupGet(stateManager => stateManager.ValueGeneration)
                 .Returns(() => mockValueGenerationManager.Object);
             mockStateManager.SetupGet(stateManager => stateManager.Notify)
                 .Returns(() => mockInternalEntityEntryNotifier.Object);
-            mockMongoDbConnection.Setup(mockedMongoDbConnection => mockedMongoDbConnection.GetCollection<SimpleRecord>())
+            mockMongoDbConnection.Setup(mockedMongoDbConnection => mockedMongoDbConnection.GetCollection<Employee>())
                 .Returns(() => mockMongoCollection.Object);
             mockMongoCollection.Setup(mongoCollection => mongoCollection.BulkWrite(
-                    It.IsAny<IEnumerable<WriteModel<SimpleRecord>>>(),
+                    It.IsAny<IEnumerable<WriteModel<Employee>>>(),
                     It.IsAny<BulkWriteOptions>(),
                     It.IsAny<CancellationToken>()))
-                .Returns((IEnumerable<WriteModel<SimpleRecord>> list, BulkWriteOptions options, CancellationToken token)
-                    => new BulkWriteResult<SimpleRecord>.Acknowledged(
+                .Returns((IEnumerable<WriteModel<Employee>> list, BulkWriteOptions options, CancellationToken token)
+                    => new BulkWriteResult<Employee>.Acknowledged(
                         list.Count(),
                         matchedCount: 0,
-                        deletedCount: list.OfType<DeleteOneModel<SimpleRecord>>().Count(),
-                        insertedCount: list.OfType<InsertOneModel<SimpleRecord>>().Count(),
-                        modifiedCount: list.OfType<ReplaceOneModel<SimpleRecord>>().Count(),
+                        deletedCount: list.OfType<DeleteOneModel<Employee>>().Count(),
+                        insertedCount: list.OfType<InsertOneModel<Employee>>().Count(),
+                        modifiedCount: list.OfType<ReplaceOneModel<Employee>>().Count(),
                         processedRequests: list,
                         upserts: new List<BulkWriteUpsert>()));
             var databaseDepedencies = new DatabaseDependencies(queryCompilationContextFactory);
             var mongoDbDatabase = new MongoDbDatabase(databaseDepedencies, mockMongoDbConnection.Object);
 
-            var model = new Model(new CoreConventionSetBuilder().CreateConventionSet());
-            EntityType entityType = model.AddEntityType(typeof(SimpleRecord));
+            var model = new Model(
+                new MongoDbConventionSetBuilder(new CurrentDbContext(new ZooDbContext(new DbContextOptions<ZooDbContext>())))
+                    .AddConventions(new CoreConventionSetBuilder().CreateConventionSet()));
+            EntityType entityType = model.AddEntityType(typeof(Employee));
             entityType.Builder
-                .GetOrCreateProperties(typeof(SimpleRecord).GetTypeInfo().GetProperties(), ConfigurationSource.Convention);
+                .GetOrCreateProperties(typeof(Employee).GetTypeInfo().GetProperties(), ConfigurationSource.Convention);
             entityType.Builder
                 .MongoDb(ConfigurationSource.Convention)
-                .FromCollection(collectionName: "simpleRecords");
+                .FromCollection(collectionName: "employees");
 
             IReadOnlyList<InternalEntityEntry> entityEntries = new[] { EntityState.Added, EntityState.Deleted, EntityState.Modified }
                 .Select(entityState =>
                     {
-                        var entityEntry = new InternalClrEntityEntry(mockStateManager.Object, entityType, new SimpleRecord());
+                        var entityEntry = new InternalClrEntityEntry(mockStateManager.Object, entityType, new Employee());
                         entityEntry.SetEntityState(entityState, acceptChanges: true);
                         return entityEntry;
                     })
