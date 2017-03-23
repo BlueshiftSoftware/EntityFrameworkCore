@@ -15,7 +15,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         static MongoDbFixture()
         {
             IsCiBuild =
-                (Boolean.TryParse(Environment.ExpandEnvironmentVariables("%APPVEYOR%"), out bool isAppVeyor) && isAppVeyor);
+                (Boolean.TryParse(Environment.ExpandEnvironmentVariables("%APPVEYOR%"), out bool isAppVeyor) && isAppVeyor) ||
+                (Boolean.TryParse(Environment.ExpandEnvironmentVariables("%TRAVIS%"), out bool isTravisCI) && isTravisCI);
         }
 
         public MongoDbFixture()
