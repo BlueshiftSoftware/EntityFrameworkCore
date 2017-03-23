@@ -1,7 +1,7 @@
 # MongoDb for Entity Framework Core
 Welcome to the MongoDb Provider for EntityFrameworkCore!
 
-[![Develop Status](https://ci.appveyor.com/api/projects/status/iip86emc94ncp0ao/branch/develop?svg=true)](https://ci.appveyor.com/api/projects/status/iip86emc94ncp0ao/branch/develop?svg=true)
+[![Develop Status](https://ci.appveyor.com/api/projects/status/iip86emc94ncp0ao/branch/develop?svg=true)](https://ci.appveyor.com/api/projects/status/iip86emc94ncp0ao/branch/develop?svg=true) [![Build Status](https://travis-ci.org/crhairr/EntityFrameworkCore.MongoDb.svg?branch=develop)](https://travis-ci.org/crhairr/EntityFrameworkCore.MongoDb)
 
 MongoDb is a highly popular No-SQL database solution for storing structured, non-relational document data. This provider enables applications built with EntityFrameworkCore to use MongoDb instances as a backing data store.
 
