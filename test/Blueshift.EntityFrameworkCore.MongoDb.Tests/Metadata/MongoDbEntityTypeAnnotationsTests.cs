@@ -1,4 +1,4 @@
-﻿using Blueshift.EntityFrameworkCore.Metadata;
+﻿using Blueshift.EntityFrameworkCore.MongoDB.Metadata;
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Xunit;
@@ -13,7 +13,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Metadata
             var model = new Model();
             var entityType = new EntityType(typeof(Animal), model, ConfigurationSource.Explicit);
             var mongoDbEntityTypeAnnotations = new MongoDbEntityTypeAnnotations(entityType);
-            Assert.Equal(MongoDbUtilities.Pluralize(MongoDbUtilities.ToCamelCase(nameof(Animal))),
+            Assert.Equal(MongoDbUtilities.Pluralize(MongoDbUtilities.ToLowerCamelCase(nameof(Animal))),
                 mongoDbEntityTypeAnnotations.CollectionName);
         }
 

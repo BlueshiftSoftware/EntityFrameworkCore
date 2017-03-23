@@ -1,46 +1,47 @@
-using System;
 using Blueshift.EntityFrameworkCore.MongoDB.Adapter;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 
-namespace Blueshift.EntityFrameworkCore.Infrastructure
+// ReSharper disable once CheckNamespace
+namespace Microsoft.EntityFrameworkCore.Infrastructure
 {
+    /// <summary>
+    /// This API supports the Entity Framework Core infrastructure and is not intended to be used
+    /// directly from your code. This API may change or be removed in future releases.
+    /// </summary>
     public class MongoDbOptionsExtension : IDbContextOptionsExtension
     {
-        private string _connectionString;
-        private MongoClientSettings _mongoClientSettings;
-        private MongoUrl _mongoUrl;
         private IMongoClient _mongoClient;
 
+        /// <summary>
+        /// This API supports the Entity Framework Core infrastructure and is not intended to be used
+        /// directly from your code. This API may change or be removed in future releases.
+        /// </summary>
         public MongoDbOptionsExtension([CanBeNull]MongoDbOptionsExtension existing = null)
         {
-            if (existing != null)
-            {
-                CopyOptions(existing);
-            }
+            _mongoClient = existing?.MongoClient;
         }
 
-        private void CopyOptions(MongoDbOptionsExtension existing)
-        {
-            _connectionString = existing.ConnectionString;
-            _mongoClient = existing.MongoClient;
-            _mongoUrl = existing.MongoUrl;
-            _mongoClient = existing.MongoClient;
-        }
-
+        /// <summary>
+        /// This API supports the Entity Framework Core infrastructure and is not intended to be used
+        /// directly from your code. This API may change or be removed in future releases.
+        /// </summary>
         public virtual string ConnectionString
         {
-            get { return _connectionString; }
+            get { return MongoUrl?.ToString(); }
             [param: NotNull] set
             {
-                _connectionString = Check.NotEmpty(value, nameof(ConnectionString));
+                MongoUrl = MongoUrl.Create(Check.NotEmpty(value, nameof(ConnectionString)));
             }
         }
 
+        /// <summary>
+        /// This API supports the Entity Framework Core infrastructure and is not intended to be used
+        /// directly from your code. This API may change or be removed in future releases.
+        /// </summary>
         public virtual IMongoClient MongoClient
         {
             get { return _mongoClient; }
@@ -50,24 +51,36 @@ namespace Blueshift.EntityFrameworkCore.Infrastructure
             }
         }
 
+        /// <summary>
+        /// This API supports the Entity Framework Core infrastructure and is not intended to be used
+        /// directly from your code. This API may change or be removed in future releases.
+        /// </summary>
         public virtual MongoClientSettings MongoClientSettings
         {
-            get { return _mongoClientSettings; }
+            get { return MongoClient?.Settings; }
             [param: NotNull] set
             {
-                _mongoClientSettings = Check.NotNull(value, nameof(MongoClientSettings)).Clone();
+                MongoClient = new MongoClient(Check.NotNull(value, nameof(MongoClientSettings)).Clone());
             }
         }
 
+        /// <summary>
+        /// This API supports the Entity Framework Core infrastructure and is not intended to be used
+        /// directly from your code. This API may change or be removed in future releases.
+        /// </summary>
         public virtual MongoUrl MongoUrl
         {
-            get { return _mongoUrl; }
+            get { return MongoUrl.Create(MongoClientSettings.ToString()); }
             [param: NotNull] set
             {
-                _mongoUrl = Check.NotNull(value, nameof(MongoUrl));
+                MongoClientSettings = MongoClientSettings.FromUrl(Check.NotNull(value, nameof(MongoUrl)));
             }
         }
 
+        /// <summary>
+        /// This API supports the Entity Framework Core infrastructure and is not intended to be used
+        /// directly from your code. This API may change or be removed in future releases.
+        /// </summary>
         public virtual bool ApplyServices([NotNull] IServiceCollection services)
         {
             ConventionRegistry.Register(
@@ -78,8 +91,16 @@ namespace Blueshift.EntityFrameworkCore.Infrastructure
             return true;
         }
 
+        /// <summary>
+        /// This API supports the Entity Framework Core infrastructure and is not intended to be used
+        /// directly from your code. This API may change or be removed in future releases.
+        /// </summary>
         public virtual long GetServiceProviderHashCode() => 0;
 
+        /// <summary>
+        /// This API supports the Entity Framework Core infrastructure and is not intended to be used
+        /// directly from your code. This API may change or be removed in future releases.
+        /// </summary>
         public virtual void Validate(IDbContextOptions options)
         {
         }

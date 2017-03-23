@@ -1,65 +1,62 @@
-﻿namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata
+﻿using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Utilities;
+
+namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata
 {
     /// <summary>
     ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
     ///     directly from your code. This API may change or be removed in future releases.
     /// </summary>
-    public class MongoDbAnnotationNames
+    public class MongoDbAnnotations<TAnnotatable>
+        where TAnnotatable : IAnnotatable
     {
-        private const string Prefix = "MongoDb:";
+        /// <summary>
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
+        protected MongoDbAnnotations([NotNull] TAnnotatable metadata)
+        {
+            Annotatable = Check.Is<IMutableAnnotatable>(metadata, nameof(metadata));
+            Metadata = Check.NotNull(metadata, nameof(metadata));
+        }
 
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public const string CollectionName = Prefix + nameof(CollectionName);
+        public virtual TAnnotatable Metadata { get; }
 
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public const string CollectionSettings = Prefix + nameof(CollectionSettings);
+        protected virtual IMutableAnnotatable Annotatable { get; }
 
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public const string ComplexTypes = Prefix + nameof(ComplexTypes);
+        public virtual T GetAnnotation<T>([CanBeNull] string annotationName)
+            => (T)Metadata[annotationName];
 
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public const string Database = Prefix + nameof(Database);
+        public virtual bool SetAnnotation<T>([NotNull] string annotationName, [CanBeNull] T value)
+        {
+            Check.NotEmpty(annotationName, nameof(annotationName));
+            Annotatable[annotationName] = value;
+            return true;
+        }
 
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public const string DatabaseSettings = Prefix + nameof(DatabaseSettings);
-
-        /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        public const string Discriminator = Prefix + nameof(Discriminator);
-
-        /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        public const string DiscriminatorIsRequired = Prefix + nameof(DiscriminatorIsRequired);
-
-        /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        public const string IsRootType = Prefix + nameof(IsRootType);
-
-        /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        public const string Namespace = Prefix + nameof(Namespace);
+        public virtual bool CanSetAnnotation([NotNull] string annotationName, [CanBeNull] object value)
+            => true;
     }
 }

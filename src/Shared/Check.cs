@@ -28,6 +28,20 @@ namespace Microsoft.EntityFrameworkCore.Utilities
         }
 
         [ContractAnnotation("value:null => halt")]
+        public static T Is<T>([NoEnumeration] object value, [InvokerParameterName] [NotNull] string parameterName)
+            where T : class
+        {
+            T t = value as T;
+            if (ReferenceEquals(t, default(T)))
+            {
+                NotEmpty(parameterName, nameof(parameterName));
+                throw new ArgumentException($"Argument {parameterName} is not an instance of {typeof(T).FullName}.", parameterName);
+            }
+
+            return t;
+        }
+
+        [ContractAnnotation("value:null => halt")]
         public static T NotNull<T>(
             [NoEnumeration] T value,
             [InvokerParameterName] [NotNull] string parameterName,

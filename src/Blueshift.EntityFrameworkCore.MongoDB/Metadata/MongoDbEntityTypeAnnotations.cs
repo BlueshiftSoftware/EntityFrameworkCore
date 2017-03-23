@@ -1,100 +1,90 @@
 ﻿using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Utilities;
 using MongoDB.Driver;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore;
 
-namespace Blueshift.EntityFrameworkCore.Metadata
+namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata
 {
-    public class MongoDbEntityTypeAnnotations
+    /// <summary>
+    ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+    ///     directly from your code. This API may change or be removed in future releases.
+    /// </summary>
+    public class MongoDbEntityTypeAnnotations : MongoDbAnnotations<IEntityType>
     {
+        /// <summary>
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
         public MongoDbEntityTypeAnnotations([NotNull] IEntityType entityType)
+            : base(entityType)
         {
-            EntityType = Check.NotNull(entityType, nameof(entityType));
         }
 
-        public virtual IEntityType EntityType { get; }
-
-        protected virtual IEntityType RootEntityType =>
-            EntityType.BaseType == null
-                ? EntityType
-                : EntityType.RootType();
-
+        /// <summary>
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
         public virtual bool AssignIdOnInsert
         {
-            get
-            {
-                return CollectionSettings?.AssignIdOnInsert ?? false;
-            }
-            set
-            {
-                GetOrCreateCollectionSettings().AssignIdOnInsert = value;
-            }
+            get { return CollectionSettings?.AssignIdOnInsert ?? false; }
+            set { GetOrCreateCollectionSettings().AssignIdOnInsert = value; }
         }
 
+        /// <summary>
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
         public virtual string CollectionName
         {
             get
             {
-                return RootEntityType.GetAnnotation<string>(MongoDbAnnotationNames.CollectionName)
-                       ?? MongoDbUtilities.Pluralize(MongoDbUtilities.ToCamelCase(EntityType.ClrType.Name));
+                return GetAnnotation<string>(MongoDbAnnotationNames.CollectionName)
+                       ?? MongoDbUtilities.Pluralize(MongoDbUtilities.ToLowerCamelCase(Metadata.ClrType.Name));
             }
             [param: NotNull]
-            set
-            {
-                RootEntityType.SetAnnotation(MongoDbAnnotationNames.CollectionName, Check.NotEmpty(value, nameof(CollectionName)));
-            }
+            set { SetAnnotation(MongoDbAnnotationNames.CollectionName, Check.NotEmpty(value, nameof(CollectionName))); }
         }
 
+        /// <summary>
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
         public virtual MongoCollectionSettings CollectionSettings
         {
-            get
-            {
-                return RootEntityType.GetAnnotation<MongoCollectionSettings>(MongoDbAnnotationNames.CollectionSettings);
-            }
+            get { return GetAnnotation<MongoCollectionSettings>(MongoDbAnnotationNames.CollectionSettings); }
             [param: NotNull]
-            set
-            {
-                RootEntityType.SetAnnotation(MongoDbAnnotationNames.CollectionSettings, Check.NotNull(value, nameof(CollectionSettings)));
-            }
+            set { SetAnnotation(MongoDbAnnotationNames.CollectionSettings, Check.NotNull(value, nameof(CollectionSettings))); }
         }
 
+        /// <summary>
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
         public virtual string Discriminator
         {
-            get
-            {
-                return EntityType.GetAnnotation<string>(MongoDbAnnotationNames.Discriminator)
-                       ?? EntityType.ClrType.Name;
-            }
+            get { return GetAnnotation<string>(MongoDbAnnotationNames.Discriminator) ?? Metadata.ClrType.Name; }
             [param: NotNull]
-            set
-            {
-                EntityType.SetAnnotation(MongoDbAnnotationNames.Discriminator, Check.NotEmpty(value, nameof(Discriminator)));
-            }
+            set { SetAnnotation(MongoDbAnnotationNames.Discriminator, Check.NotEmpty(value, nameof(Discriminator))); }
         }
 
+        /// <summary>
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
         public virtual bool DiscriminatorIsRequired
         {
-            get
-            {
-                return EntityType.GetAnnotation<bool>(MongoDbAnnotationNames.DiscriminatorIsRequired);
-            }
-            set
-            {
-                EntityType.SetAnnotation(MongoDbAnnotationNames.DiscriminatorIsRequired, value);
-            }
+            get { return GetAnnotation<bool>(MongoDbAnnotationNames.DiscriminatorIsRequired); }
+            set { SetAnnotation(MongoDbAnnotationNames.DiscriminatorIsRequired, value); }
         }
 
+        /// <summary>
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
         public virtual bool IsRootType
         {
-            get
-            {
-                return EntityType.GetAnnotation<bool>(MongoDbAnnotationNames.IsRootType);
-            }
-            set
-            {
-                EntityType.SetAnnotation(MongoDbAnnotationNames.IsRootType, value);
-            }
+            get { return GetAnnotation<bool>(MongoDbAnnotationNames.IsRootType); }
+            set { SetAnnotation(MongoDbAnnotationNames.IsRootType, value); }
         }
 
         private MongoCollectionSettings GetOrCreateCollectionSettings()

@@ -1,16 +1,26 @@
 ﻿using System;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Utilities;
 using MongoDB.Driver;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Blueshift.EntityFrameworkCore.Infrastructure;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.EntityFrameworkCore
 {
+    /// <summary>
+    /// MongoDb-specific extension methods for <see cref="DbContextOptionsBuilder" />.
+    /// </summary>
     public static class MongoDbContextOptionsBuilderExtensions
     {
-        public static DbContextOptionsBuilder UseMongoDb([NotNull] this DbContextOptionsBuilder optionsBuilder,
+        /// <summary>
+        ///     Configures the context to connect to a MongoDb instance.
+        /// </summary>
+        /// <param name="optionsBuilder">The builder being used to configure the context.</param>
+        /// <param name="connectionString">The connection string of the MongoDb instance to connect to.</param>
+        /// <param name="mongoDbOptionsAction">An optional action to allow additional MongoDb-specific configuration.</param>
+        /// <returns> The options builder so that further configuration can be chained. </returns>
+        public static DbContextOptionsBuilder UseMongoDb(
+            [NotNull] this DbContextOptionsBuilder optionsBuilder,
             [NotNull] string connectionString,
             [CanBeNull] Action<MongoDbContextOptionsBuilder> mongoDbOptionsAction = null)
         {
@@ -20,7 +30,15 @@ namespace Microsoft.EntityFrameworkCore
                 mongoDbOptionsAction);
         }
 
-        public static DbContextOptionsBuilder UseMongoDb([NotNull] this DbContextOptionsBuilder optionsBuilder,
+        /// <summary>
+        ///     Configures the context to connect to a MongoDb instance.
+        /// </summary>
+        /// <param name="optionsBuilder">The builder being used to configure the context.</param>
+        /// <param name="mongoClient">The <see cref="IMongoClient"/> to use when connecting to MongoDb.</param>
+        /// <param name="mongoDbOptionsAction">An optional action to allow additional MongoDb-specific configuration.</param>
+        /// <returns> The options builder so that further configuration can be chained. </returns>
+        public static DbContextOptionsBuilder UseMongoDb(
+            [NotNull] this DbContextOptionsBuilder optionsBuilder,
             [NotNull] IMongoClient mongoClient,
             [CanBeNull] Action<MongoDbContextOptionsBuilder> mongoDbOptionsAction = null)
         {
@@ -30,7 +48,15 @@ namespace Microsoft.EntityFrameworkCore
                 mongoDbOptionsAction);
         }
 
-        public static DbContextOptionsBuilder UseMongoDb([NotNull] this DbContextOptionsBuilder optionsBuilder,
+        /// <summary>
+        ///     Configures the context to connect to a MongoDb instance.
+        /// </summary>
+        /// <param name="optionsBuilder">The builder being used to configure the context.</param>
+        /// <param name="mongoClientSettings">The <see cref="MongoClientSettings"/> to use when connecting to MongoDb.</param>
+        /// <param name="mongoDbOptionsAction">An optional action to allow additional MongoDb-specific configuration.</param>
+        /// <returns> The options builder so that further configuration can be chained. </returns>
+        public static DbContextOptionsBuilder UseMongoDb(
+            [NotNull] this DbContextOptionsBuilder optionsBuilder,
             [NotNull] MongoClientSettings mongoClientSettings,
             [CanBeNull] Action<MongoDbContextOptionsBuilder> mongoDbOptionsAction = null)
         {
@@ -40,7 +66,15 @@ namespace Microsoft.EntityFrameworkCore
                 mongoDbOptionsAction);
         }
 
-        public static DbContextOptionsBuilder UseMongoDb([NotNull] this DbContextOptionsBuilder optionsBuilder,
+        /// <summary>
+        ///     Configures the context to connect to a MongoDb instance.
+        /// </summary>
+        /// <param name="optionsBuilder">The builder being used to configure the context.</param>
+        /// <param name="mongoUrl">The <see cref="MongoUrl"/> to use to connect to MongoDb.</param>
+        /// <param name="mongoDbOptionsAction">An optional action to allow additional MongoDb-specific configuration.</param>
+        /// <returns> The options builder so that further configuration can be chained. </returns>
+        public static DbContextOptionsBuilder UseMongoDb(
+            [NotNull] this DbContextOptionsBuilder optionsBuilder,
             [NotNull] MongoUrl mongoUrl,
             [CanBeNull] Action<MongoDbContextOptionsBuilder> mongoDbOptionsAction = null)
         {
@@ -50,7 +84,8 @@ namespace Microsoft.EntityFrameworkCore
                 mongoDbOptionsAction);
         }
 
-        private static DbContextOptionsBuilder SetupMongoDb([NotNull] DbContextOptionsBuilder optionsBuilder,
+        private static DbContextOptionsBuilder SetupMongoDb(
+            [NotNull] DbContextOptionsBuilder optionsBuilder,
             [NotNull] Action<MongoDbOptionsExtension> mongoDbOptionsExtensionAction,
             [CanBeNull] Action<MongoDbContextOptionsBuilder> mongoDbOptionsAction)
         {

@@ -1,40 +1,58 @@
-﻿using Microsoft.EntityFrameworkCore.Infrastructure;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
-using Microsoft.Extensions.DependencyInjection;
-using Blueshift.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
-using Blueshift.EntityFrameworkCore.Storage;
-using Microsoft.EntityFrameworkCore.ValueGeneration;
-using Blueshift.EntityFrameworkCore.ValueGeneration;
-using Microsoft.EntityFrameworkCore.Query;
+using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders;
+using Blueshift.EntityFrameworkCore.MongoDB.Query;
+using Blueshift.EntityFrameworkCore.MongoDB.Storage;
+using Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration;
 using Blueshift.EntityFrameworkCore.Query;
-using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors;
+using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
-using Blueshift.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore.ValueGeneration;
+using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
 {
+    /// <summary>
+    ///     A builder API that populates an <see cref="IServiceCollection"/> with a set of EntityFrameworkCore
+    ///     provider dependencies for MongoDb.
+    /// </summary>
     public class EntityFrameworkMongoDbServicesBuilder : EntityFrameworkServicesBuilder
     {
         private static readonly IDictionary<Type, ServiceCharacteristics> _relationalServices
             = new Dictionary<Type, ServiceCharacteristics>
             {
                 { typeof(IMongoClient), new ServiceCharacteristics(ServiceLifetime.Singleton) },
-                { typeof(IMongoDbConnection), new ServiceCharacteristics(ServiceLifetime.Scoped) }
+                { typeof(IMongoDbConnection), new ServiceCharacteristics(ServiceLifetime.Scoped) },
+                { typeof(MongoDbConventionSetBuilderDependencies), new ServiceCharacteristics(ServiceLifetime.Scoped) }
             };
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityFrameworkMongoDbServicesBuilder"/> class.
+        /// </summary>
+        /// <param name="serviceCollection">The <see cref="IServiceCollection"/> instance to populate.</param>
         public EntityFrameworkMongoDbServicesBuilder([NotNull] IServiceCollection serviceCollection) : base(serviceCollection)
         {
         }
 
+        /// <summary>
+        /// This API supports the Entity Framework Core infrastructure and is not intended to be used directly from your code.
+        /// This API may change or be removed in future releases.
+        /// </summary>
         protected override ServiceCharacteristics GetServiceCharacteristics(Type serviceType)
             => _relationalServices.TryGetValue(serviceType, out ServiceCharacteristics characteristics)
                 ? characteristics
                 : base.GetServiceCharacteristics(serviceType);
 
+        /// <summary>
+        /// Registers default implementations of all services not already registered by the provider. Database providers must call
+        /// this method as the last step of service registration--that is, after all provider services have been registered.
+        /// </summary>
+        /// <returns>This builder, such that further calls can be chained.</returns>
         public override EntityFrameworkServicesBuilder TryAddCoreServices()
         {
             TryAdd<IDatabaseProvider, DatabaseProvider<MongoDbOptionsExtension>>();
@@ -54,30 +72,12 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
                 serviceCollectionMap.TryAddScoped(serviceProvider =>
                 {
                     var extension = serviceProvider.GetRequiredService<IDbContextOptions>().FindExtension<MongoDbOptionsExtension>();
-                    IMongoClient mongoClient;
-                    if (extension?.MongoClient != null)
-                    {
-                        mongoClient = extension.MongoClient;
-                    }
-                    else if (extension?.MongoClientSettings != null)
-                    {
-                        mongoClient = new MongoClient(extension.MongoClientSettings);
-                    }
-                    else if (extension?.MongoUrl != null)
-                    {
-                        mongoClient = new MongoClient(extension.MongoUrl);
-                    }
-                    else if (!string.IsNullOrWhiteSpace(extension.ConnectionString))
-                    {
-                        mongoClient = new MongoClient(extension.ConnectionString);
-                    }
-                    else
-                    {
-                        mongoClient = new MongoClient();
-                    }
-                    return mongoClient;
+                    return extension?.MongoClient ?? new MongoClient();
                 });
             });
+
+            ServiceCollectionMap.GetInfrastructure()
+                .AddDependencyScoped<MongoDbConventionSetBuilderDependencies>();
 
             return base.TryAddCoreServices();
         }

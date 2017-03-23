@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -10,10 +9,18 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Utilities;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Blueshift.EntityFrameworkCore.Metadata.Conventions
+namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
 {
+    /// <summary>
+    ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+    ///     directly from your code. This API may change or be removed in future releases.
+    /// </summary>
     public class MongoDbRegisterKnownTypesConvention : IModelConvention
     {
+        /// <summary>
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
         public virtual InternalModelBuilder Apply(InternalModelBuilder modelBuilder)
         {
             IModel model = Check.NotNull(modelBuilder, nameof(modelBuilder)).Metadata;

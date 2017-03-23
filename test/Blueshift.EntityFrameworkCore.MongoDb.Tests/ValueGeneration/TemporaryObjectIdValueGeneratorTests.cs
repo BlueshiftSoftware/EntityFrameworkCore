@@ -1,4 +1,4 @@
-﻿using Blueshift.EntityFrameworkCore.ValueGeneration;
+﻿using Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration;
 using MongoDB.Bson;
 using Xunit;
 

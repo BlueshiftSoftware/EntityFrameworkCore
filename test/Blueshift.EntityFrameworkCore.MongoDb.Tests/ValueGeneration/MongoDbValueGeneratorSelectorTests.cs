@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
-using Blueshift.EntityFrameworkCore.ValueGeneration;
+using Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
 using Xunit;

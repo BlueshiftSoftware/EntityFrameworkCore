@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore.Utilities;
 
 namespace Blueshift.EntityFrameworkCore
 {
+    /// <summary>
+    /// A set of utilities to assist with MongoDb values.
+    /// </summary>
     public static class MongoDbUtilities
     {
         private static readonly Regex _leadingUppercaseRegex
@@ -12,10 +15,20 @@ namespace Blueshift.EntityFrameworkCore
         private static readonly Regex _singularRegex
             = new Regex(pattern: "(ey|.)(?<!s)$", options: RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        public static string ToCamelCase([NotNull] string value)
+        /// <summary>
+        /// Converts the first character or group of capital characters of a string to lower camel case.
+        /// </summary>
+        /// <param name="value">The string to convert to lower camel case.</param>
+        /// <returns>A string containing a lower camel case version of the original <paramref name="value"/>.</returns>
+        public static string ToLowerCamelCase([NotNull] string value)
             => _leadingUppercaseRegex.Replace(
                 Check.NotNull(value, nameof(value)), match => match.Value.ToLower());
 
+        /// <summary>
+        /// Pluralizes a string by replacing any trailing 'y' with 'ies'.
+        /// </summary>
+        /// <param name="value">The string to pluralize.</param>
+        /// <returns>A pluralized version of the original <paramref name="value"/>.</returns>
         public static string Pluralize([NotNull] string value)
             => _singularRegex.Replace(
                 Check.NotNull(value, nameof(value)),

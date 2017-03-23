@@ -2,20 +2,20 @@
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using Blueshift.EntityFrameworkCore.Metadata.Internal;
+using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders;
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
-using Blueshift.EntityFrameworkCore.Storage;
+using Blueshift.EntityFrameworkCore.MongoDB.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.EntityFrameworkCore.Storage;
 using MongoDB.Driver;
 using Moq;
 using Xunit;
-using Blueshift.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
 {
@@ -53,14 +53,17 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
             var mongoDbDatabase = new MongoDbDatabase(databaseDepedencies, mockMongoDbConnection.Object);
 
             var model = new Model(
-                new MongoDbConventionSetBuilder(new CurrentDbContext(new ZooDbContext(new DbContextOptions<ZooDbContext>())))
+                new MongoDbConventionSetBuilder(
+                    new MongoDbConventionSetBuilderDependencies(
+                        new CurrentDbContext(
+                            new ZooDbContext(
+                                new DbContextOptions<ZooDbContext>()))))
                     .AddConventions(new CoreConventionSetBuilder().CreateConventionSet()));
             EntityType entityType = model.AddEntityType(typeof(Employee));
             entityType.Builder
                 .GetOrCreateProperties(typeof(Employee).GetTypeInfo().GetProperties(), ConfigurationSource.Convention);
-            entityType.Builder
-                .MongoDb(ConfigurationSource.Convention)
-                .FromCollection(collectionName: "employees");
+            new EntityTypeBuilder(entityType.Builder)
+                .ForMongoDbFromCollection(collectionName: "employees");
 
             IReadOnlyList<InternalEntityEntry> entityEntries = new[] { EntityState.Added, EntityState.Deleted, EntityState.Modified }
                 .Select(entityState =>

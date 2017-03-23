@@ -1,13 +1,21 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
-using Blueshift.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
-namespace Blueshift.EntityFrameworkCore.Metadata.Conventions
+namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
 {
+    /// <summary>
+    ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+    ///     directly from your code. This API may change or be removed in future releases.
+    /// </summary>
     public class MongoDbDatabaseGeneratedAttributeConvention : DatabaseGeneratedAttributeConvention
     {
+        /// <summary>
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
         public override InternalPropertyBuilder Apply(
             InternalPropertyBuilder propertyBuilder,
             DatabaseGeneratedAttribute attribute,
@@ -17,9 +25,8 @@ namespace Blueshift.EntityFrameworkCore.Metadata.Conventions
             {
                 propertyBuilder.Metadata
                     .DeclaringEntityType
-                    .Builder
-                    .MongoDb(ConfigurationSource.Convention)
-                    .AssignIdOnInsert(assignIdOnInsert: true);
+                    .MongoDb()
+                    .AssignIdOnInsert = true;
             }
             return base.Apply(propertyBuilder, attribute, clrMember);
         }

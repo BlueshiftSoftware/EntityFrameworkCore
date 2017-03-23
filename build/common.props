@@ -12,6 +12,7 @@
     <Copyright>© Blueshift Software, LLC @ 2017. All rights reserved.</Copyright>
     <Authors>Blueshift Software, LLC</Authors>
     <Company>Blueshift Software, LLC</Company>
+    <PackageTags>Entity Framework Core;entity-framework-core;EF;Data;O/RM</PackageTags>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="**\*.rd.xml" />

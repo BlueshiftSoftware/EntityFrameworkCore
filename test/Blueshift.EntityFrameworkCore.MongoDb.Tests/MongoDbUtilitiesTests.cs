@@ -26,7 +26,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         [InlineData("EPA", "epa")]
         [InlineData("TLA", "tla")]
         public void Camel_case_uppercase_strings(string value, string expected)
-            => Assert.Equal(expected, MongoDbUtilities.ToCamelCase(value));
+            => Assert.Equal(expected, MongoDbUtilities.ToLowerCamelCase(value));
 
         [Theory]
         [InlineData("EFTests", "efTests")]
@@ -34,6 +34,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         [InlineData("TLAcronym", "tlAcronym")]
         [InlineData("ThreeLetterAcronym", "threeLetterAcronym")]
         public void Camel_case_doesnt_change_trailing_words(string value, string expected)
-            => Assert.Equal(expected, MongoDbUtilities.ToCamelCase(value));
+            => Assert.Equal(expected, MongoDbUtilities.ToLowerCamelCase(value));
     }
 }

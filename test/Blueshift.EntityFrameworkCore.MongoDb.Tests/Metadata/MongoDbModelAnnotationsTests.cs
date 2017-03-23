@@ -1,4 +1,4 @@
-﻿using Blueshift.EntityFrameworkCore.Metadata;
+﻿using Blueshift.EntityFrameworkCore.MongoDB.Metadata;
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Xunit;

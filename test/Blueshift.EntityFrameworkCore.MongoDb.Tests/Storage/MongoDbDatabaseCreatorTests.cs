@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Blueshift.EntityFrameworkCore.Storage;
+using Blueshift.EntityFrameworkCore.MongoDB.Storage;
 using MongoDB.Driver;
 using Moq;
 using Xunit;
@@ -10,7 +10,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
     public class MongoDbDatabaseCreatorTests
     {
         [Fact]
-        public void Ensure_created_succeeds()
+        public void Ensure_created_returns_false()
         {
             var mockMongoDbConnection = new Mock<IMongoDbConnection>();
             mockMongoDbConnection
@@ -18,14 +18,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
                 .Returns(new Mock<IMongoDatabase>().Object)
                 .Verifiable();
             var mongoDbDatabaseCreator = new MongoDbDatabaseCreator(mockMongoDbConnection.Object);
-            Assert.True(mongoDbDatabaseCreator.EnsureCreated());
+            Assert.False(mongoDbDatabaseCreator.EnsureCreated());
             mockMongoDbConnection.Verify(
                 mongoDbConnection => mongoDbConnection.GetDatabase(),
                 Times.Exactly(callCount: 1));
         }
 
         [Fact]
-        public async Task Ensure_created_async_succeeds()
+        public async Task Ensure_created_async_returns_false()
         {
             var mockMongoDbConnection = new Mock<IMongoDbConnection>();
             mockMongoDbConnection
@@ -33,7 +33,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
                 .Returns(Task.FromResult(new Mock<IMongoDatabase>().Object))
                 .Verifiable();
             var mongoDbDatabaseCreator = new MongoDbDatabaseCreator(mockMongoDbConnection.Object);
-            Assert.True(await mongoDbDatabaseCreator.EnsureCreatedAsync());
+            Assert.False(await mongoDbDatabaseCreator.EnsureCreatedAsync());
             mockMongoDbConnection.Verify(
                 mongoDbConnection => mongoDbConnection.GetDatabaseAsync(It.IsAny<CancellationToken>()),
                 Times.Exactly(callCount: 1));

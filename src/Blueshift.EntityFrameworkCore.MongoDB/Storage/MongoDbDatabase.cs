@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Blueshift.EntityFrameworkCore.Update;
+using Blueshift.EntityFrameworkCore.MongoDB.Update;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -12,8 +12,13 @@ using Microsoft.EntityFrameworkCore.Update;
 using Microsoft.EntityFrameworkCore.Utilities;
 using MongoDB.Driver;
 
-namespace Blueshift.EntityFrameworkCore.Storage
+namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
 {
+    /// <summary>
+    ///     The main interaction point between a context and MongoDB.
+    ///     This type is typically used by database providers (and other extensions). It
+    ///     is generally not used in application code.
+    /// </summary>
     public class MongoDbDatabase : Database
     {
         private static readonly MethodInfo _genericSaveChanges = typeof(MongoDbDatabase).GetTypeInfo()
@@ -26,14 +31,24 @@ namespace Blueshift.EntityFrameworkCore.Storage
 
         private readonly IMongoDbConnection _mongoDbConnection;
 
+        /// <summary>
+        /// Initializes a new instance of hte <see cref="MongoDbDatabase"/> class.
+        /// </summary>
+        /// <param name="databaseDependencies">Parameter object containing dependencies for this service.</param>
+        /// <param name="mongoDbConnection">A <see cref="IMongoDbConnection"/> used to communicate with the MongoDB instance.</param>
         public MongoDbDatabase(
             [NotNull] DatabaseDependencies databaseDependencies,
             [NotNull] IMongoDbConnection mongoDbConnection)
-            : base( Check.NotNull(databaseDependencies, nameof(databaseDependencies)))
+            : base(Check.NotNull(databaseDependencies, nameof(databaseDependencies)))
         {
             _mongoDbConnection = Check.NotNull(mongoDbConnection, nameof(mongoDbConnection));
         }
 
+        /// <summary>
+        ///     Persists changes from the supplied entries to the database.
+        /// </summary>
+        /// <param name="entries">A list of entries to be persisted.</param>
+        /// <returns>The number of entries that were persisted.</returns>
         public override int SaveChanges([NotNull] IReadOnlyList<IUpdateEntry> entries)
             => Check.NotNull(entries, nameof(entries))
                 .ToLookup(entry => GetCollectionEntityType(entry.EntityType))
@@ -54,6 +69,15 @@ namespace Blueshift.EntityFrameworkCore.Storage
             return (int)(result.DeletedCount + result.InsertedCount + result.ModifiedCount);
         }
 
+        /// <summary>
+        ///     Asynchronously persists changes from the supplied entries to the database.
+        /// </summary>
+        /// <param name="entries">A list of entries to be persisted.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken "/> to observe while waiting for the task to complete.</param>
+        /// <returns>
+        ///     A <see cref="Task{TResult}"/> representing the state of the operation. The result contains the number
+        ///     of entries that were persisted to the database.
+        /// </returns>
         public override async Task<int> SaveChangesAsync([NotNull] IReadOnlyList<IUpdateEntry> entries,
             CancellationToken cancellationToken = new CancellationToken())
         {

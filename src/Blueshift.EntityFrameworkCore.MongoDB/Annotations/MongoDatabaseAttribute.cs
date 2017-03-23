@@ -1,14 +1,22 @@
 ﻿using System;
-using Blueshift.EntityFrameworkCore.Metadata.Internal;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Utilities;
 
-namespace Blueshift.EntityFrameworkCore.Annotations
+namespace Blueshift.EntityFrameworkCore.MongoDB.Annotations
 {
+    /// <summary>
+    /// When applied to a <see cref="DbContext"/>, sets the database name to use with the context's <see cref="Model"/>.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
-    public class MongoDatabaseAttribute : Attribute, IModelAttribute
+    public class MongoDatabaseAttribute : Attribute, IModelConvention
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MongoDatabaseAttribute"/> class.
+        /// </summary>
+        /// <param name="database">The MongoDb database name to use with the <see cref="Model"/>.</param>
         public MongoDatabaseAttribute([NotNull] string database)
         {
             if (string.IsNullOrWhiteSpace(database))
@@ -18,11 +26,21 @@ namespace Blueshift.EntityFrameworkCore.Annotations
             Database = database;
         }
 
+        /// <summary>
+        /// The MongoDb database name to use with the <see cref="Model"/>.
+        /// </summary>
         public virtual string Database { get; }
 
-        public virtual void Apply([NotNull] InternalModelBuilder modelBuilder)
-            => Check.NotNull(modelBuilder, nameof(modelBuilder))
-                .MongoDb(ConfigurationSource.Convention)
-                .FromDatabase(Database);
+        /// <summary>
+        /// This API supports the Entity Framework Core infrastructure and is not intended to be used directly from
+        /// your code. This API may change or be removed in future releases.
+        /// </summary>
+        public InternalModelBuilder Apply(InternalModelBuilder modelBuilder)
+        {
+            Check.NotNull(modelBuilder, nameof(modelBuilder))
+                .MongoDb()
+                .Database = Database;
+            return modelBuilder;
+        }
     }
 }

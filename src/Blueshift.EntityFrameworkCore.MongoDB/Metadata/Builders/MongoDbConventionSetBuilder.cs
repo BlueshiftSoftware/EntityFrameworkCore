@@ -1,26 +1,39 @@
-﻿using Blueshift.EntityFrameworkCore.Metadata.Conventions;
+﻿using System.Collections.Generic;
+using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Utilities;
 
-namespace Blueshift.EntityFrameworkCore.Metadata.Builders
+namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
 {
+    /// <summary>
+    ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+    ///     directly from your code. This API may change or be removed in future releases.
+    /// </summary>
     public class MongoDbConventionSetBuilder : IConventionSetBuilder
     {
-        private readonly ICurrentDbContext _currentDbContext;
+        private readonly MongoDbConventionSetBuilderDependencies _mongoDbConventionSetBuilderDependencies;
 
-        public MongoDbConventionSetBuilder([NotNull] ICurrentDbContext currentDbContext)
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="MongoDbConventionSetBuilder" /> class.
+        /// </summary>
+        /// <param name="mongoDbConventionSetBuilderDependencies">Parameter object containing dependencies for this service.</param>
+        public MongoDbConventionSetBuilder([NotNull] MongoDbConventionSetBuilderDependencies mongoDbConventionSetBuilderDependencies)
         {
-            _currentDbContext = Check.NotNull(currentDbContext, nameof(currentDbContext));
+            _mongoDbConventionSetBuilderDependencies
+                = Check.NotNull(mongoDbConventionSetBuilderDependencies, nameof(mongoDbConventionSetBuilderDependencies));
         }
 
+        /// <summary>
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
         public virtual ConventionSet AddConventions([NotNull] ConventionSet conventionSet)
         {
             Check.NotNull(conventionSet, nameof(conventionSet));
 
-            var mongoDatabaseAttributeConvention = new MongoDatabaseAttributeConvention(_currentDbContext.Context);
+            var mongoDatabaseAttributeConvention = new MongoDatabaseAttributeConvention(_mongoDbConventionSetBuilderDependencies.CurrentDbContext.Context);
             PropertyDiscoveryConvention mongoDbPropertyDiscoveryConvention = new MongoDbPropertyDiscoveryConvention();
             RelationshipDiscoveryConvention mongoDbRelationshipDiscoveryConvention = new MongoDbRelationshipDiscoveryConvention();
             PropertyMappingValidationConvention mongoDbPropertyMappingValidationConvention

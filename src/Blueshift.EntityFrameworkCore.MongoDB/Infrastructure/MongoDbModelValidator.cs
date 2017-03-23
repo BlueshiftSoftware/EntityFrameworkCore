@@ -1,36 +1,50 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using Blueshift.EntityFrameworkCore.MongoDB.Metadata;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Utilities;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Blueshift.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore;
-using System.Reflection;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Blueshift.EntityFrameworkCore.Infrastructure
+namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
 {
+    /// <summary>
+    ///     A validator that enforces rules for all MongoDb provider.
+    /// </summary>
     public class MongoDbModelValidator : ModelValidator
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MongoDbModelValidator"/> class.
+        /// </summary>
+        /// <param name="modelValidatorDependencies">Parameter object containing dependencies for this service.</param>
         public MongoDbModelValidator(
             [NotNull] ModelValidatorDependencies modelValidatorDependencies)
             : base(Check.NotNull(modelValidatorDependencies, nameof(modelValidatorDependencies)))
         {
         }
 
+        /// <summary>
+        ///     Validates a model, throwing an exception if any errors are found.
+        /// </summary>
+        /// <param name="model">The <see cref="Model"/> to validate.</param>
         public override void Validate([NotNull] IModel model)
         {
-            Check.NotNull(model, nameof(model));
-            base.Validate(model);
+            base.Validate(Check.NotNull(model, nameof(model)));
 
-            EnsureDistinctCollectionNames(model);
             EnsureKnownTypes(model);
+            EnsureDistinctCollectionNames(model);
             ValidateDerivedTypes(model);
         }
 
+        /// <summary>
+        /// Ensures that each <see cref="EntityType"/> in the given <paramref name="model"/> has a unique collection name.
+        /// </summary>
+        /// <param name="model">The <see cref="Model"/> to validate.</param>
         protected virtual void EnsureDistinctCollectionNames([NotNull] IModel model)
         {
             Check.NotNull(model, nameof(model));
@@ -50,6 +64,11 @@ namespace Blueshift.EntityFrameworkCore.Infrastructure
             }
         }
 
+        /// <summary>
+        /// Ensures that derived entity types declared in <see cref="BsonKnownTypesAttribute"/> are registered for each
+        /// <see cref="EntityType"/> in the given <see cref="Model"/>.
+        /// </summary>
+        /// <param name="model">The <see cref="Model"/> to be ensured.</param>
         protected virtual void EnsureKnownTypes([NotNull] IModel model)
         {
             Check.NotNull(model, nameof(model));
@@ -75,6 +94,10 @@ namespace Blueshift.EntityFrameworkCore.Infrastructure
             }
         }
 
+        /// <summary>
+        /// Ensures that all entities in the given <paramref name="model"/> have unique discriminators.
+        /// </summary>
+        /// <param name="model">The <see cref="Model"/> to validate.</param>
         protected virtual void ValidateDerivedTypes([NotNull] IModel model)
         {
             Check.NotNull(model, nameof(model));

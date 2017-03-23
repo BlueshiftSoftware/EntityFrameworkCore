@@ -12,10 +12,19 @@ using Microsoft.EntityFrameworkCore.Utilities;
 using MongoDB.Driver;
 
 // ReSharper disable once CheckNamespace
-namespace Blueshift.EntityFrameworkCore.Update
+namespace Blueshift.EntityFrameworkCore.MongoDB.Update
 {
+    /// <summary>
+    ///     Provides extension methods for instances of <see cref="IUpdateEntry"/>.
+    /// </summary>
     public static class MongoDbUpdateEntryExtensions
     {
+        /// <summary>
+        ///     Converts an <see cref="IUpdateEntry"/> instance to a <see cref="WriteModel{TEntity}"/>.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of entity being updated</typeparam>
+        /// <param name="updateEntry">The <see cref="IUpdateEntry"/> entry to convert.</param>
+        /// <returns>A new <see cref="WriteModel{TEntity}"/> that contains the updates in <see cref="IUpdateEntry"/>.</returns>
         public static WriteModel<TEntity> ToMongoDbWriteModel<TEntity>([NotNull] this IUpdateEntry updateEntry)
         {
             Check.NotNull(updateEntry, nameof(updateEntry));

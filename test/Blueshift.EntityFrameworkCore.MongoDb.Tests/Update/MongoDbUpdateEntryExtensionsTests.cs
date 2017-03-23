@@ -1,12 +1,12 @@
 ﻿using System.Reflection;
-using Blueshift.EntityFrameworkCore.Metadata.Builders;
-using Blueshift.EntityFrameworkCore.Metadata.Internal;
+using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders;
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
-using Blueshift.EntityFrameworkCore.Update;
-using Blueshift.EntityFrameworkCore.ValueGeneration;
+using Blueshift.EntityFrameworkCore.MongoDB.Update;
+using Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MongoDB.Bson;
@@ -29,14 +29,17 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Update
                 .Returns(() => mockInternalEntityEntryNotifier.Object);
 
             var model = new Model(
-                new MongoDbConventionSetBuilder(new CurrentDbContext(new ZooDbContext(new DbContextOptions<ZooDbContext>())))
+                new MongoDbConventionSetBuilder(
+                    new MongoDbConventionSetBuilderDependencies(
+                        new CurrentDbContext(
+                            new ZooDbContext(
+                                new DbContextOptions<ZooDbContext>()))))
                     .AddConventions(new CoreConventionSetBuilder().CreateConventionSet()));
             EntityType entityType = model.AddEntityType(typeof(Employee));
             entityType.Builder
                 .GetOrCreateProperties(typeof(Employee).GetTypeInfo().GetProperties(), ConfigurationSource.Convention);
-            entityType.Builder
-                .MongoDb(ConfigurationSource.Convention)
-                .FromCollection(collectionName: "employees");
+            new EntityTypeBuilder(entityType.Builder)
+                .ForMongoDbFromCollection(collectionName: "employees");
 
             var entityEntry = new InternalClrEntityEntry(mockStateManager.Object, entityType, employee);
             if (setId)

@@ -1,9 +1,13 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Blueshift.EntityFrameworkCore.Metadata.Internal;
+using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders;
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
-using Blueshift.EntityFrameworkCore.Storage;
+using Blueshift.EntityFrameworkCore.MongoDB.Storage;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MongoDB.Driver;
 using Moq;
@@ -28,14 +32,19 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
 
         private IModel GetModel()
         {
-            var model = new Model();
-            model.Builder
-                .MongoDb(ConfigurationSource.Explicit)
-                .FromDatabase("zooDb")
-                .InternalModelBuilder
-                .Entity(typeof(Employee), ConfigurationSource.Explicit)
-                .MongoDb(ConfigurationSource.Explicit)
-                .FromCollection("employees");
+            var model = new ModelBuilder(
+                new MongoDbConventionSetBuilder(
+                    new MongoDbConventionSetBuilderDependencies(
+                        new CurrentDbContext(
+                            new ZooDbContext(
+                                new DbContextOptions<ZooDbContext>()))))
+                    .AddConventions(new CoreConventionSetBuilder().CreateConventionSet()))
+                .ForMongoDbFromDatabase("zooDb")
+                .Model
+                .AsModel();
+            new EntityTypeBuilder(model.Builder
+                .Entity(typeof(Employee), ConfigurationSource.Explicit))
+                .ForMongoDbFromCollection("employees");
             return model;
         }
 
