@@ -4,9 +4,6 @@ build_script:
   - ps: .\build.ps1
 clone_depth: 1
 test: off
-deploy:
-  provider: Environment
-  name: MyGet
 services:
   - mongodb
 branches:
@@ -22,6 +19,6 @@ environment:
 matrix:
   fast_finish: true
 artifacts:
-  - path: 'artifacts\build\Blueshift.EntityFrameworkCore.MongoDb-preview*.nupkg'
+  - path: 'artifacts\build\*.nupkg'
     name: MyGet
 os: Visual Studio 2017
