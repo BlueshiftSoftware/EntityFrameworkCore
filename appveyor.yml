@@ -7,7 +7,6 @@ test: off
 deploy:
   provider: Environment
   name: MyGet
-  artifact: 'artifacts\build\Blueshift.EntityFrameworkCore.MongoDb(-preview*).nupkg'
 services:
   - mongodb
 branches:
@@ -24,4 +23,5 @@ matrix:
   fast_finish: true
 artifacts:
   - path: 'artifacts\build\Blueshift.EntityFrameworkCore.MongoDb(-preview*).nupkg'
+    name: MyGet
 os: Visual Studio 2017
