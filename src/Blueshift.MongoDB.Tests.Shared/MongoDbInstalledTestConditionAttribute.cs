@@ -3,7 +3,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.EntityFrameworkCore.Specification.Tests.TestUtilities.Xunit;
 
-namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
+namespace Blueshift.MongoDB.Tests.Shared
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
     public class MongoDbInstalledTestConditionAttribute : Attribute, ITestCondition

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
+namespace Blueshift.MongoDB.Tests.Shared
 {
     public class MongoDbConstants
     {

@@ -3,7 +3,7 @@
   <Import Project="..\..\build\common.props" />
   
   <PropertyGroup>
-    <TargetFrameworks>net452;netstandard1.5</TargetFrameworks>
+    <TargetFrameworks>net46;netstandard1.5</TargetFrameworks>
     <Product>Blueshift MongoDb Provider for EntityFrameworkCore</Product>
     <Description>Blueshift Software MongoDb Provider for Microsoft EntityFramework Core</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

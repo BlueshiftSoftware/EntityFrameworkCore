@@ -8,7 +8,7 @@ namespace Microsoft.Extensions.DependencyInjection
     /// <summary>
     /// Extends <see cref="IServiceCollection"/> with methods for use with the MongoDb EntityFrameworkCore provider.
     /// </summary>
-    public static class MongoDbServiceCollectionExtensions
+    public static class MongoDbEFServiceCollectionExtensions
     {
         /// <summary>
         /// Populates the given <paramref name="serviceCollection"/> instance with the service dependencies for

@@ -1,5 +1,6 @@
 <Project>
   <ItemGroup>
     <ExcludeFromPack Include="$(RepositoryRoot)src\*Sample*\*.csproj" />
+    <ExcludeFromPack Include="$(RepositoryRoot)src\*Tests*\*.csproj" />
   </ItemGroup>
 </Project>
