@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.9
+VisualStudioVersion = 15.0.26228.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{FAF9C31C-A1AF-42A9-9306-EC190DCACCC7}"
 	ProjectSection(SolutionItems) = preProject
@@ -11,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{FAF9C31C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Globals", "Globals", "{6841D576-C833-4614-89D8-4CF4DECD1CFA}"
 	ProjectSection(SolutionItems) = preProject
+		.travis.yml = .travis.yml
 		appveyor.yml = appveyor.yml
 		build.ps1 = build.ps1
 		NuGet.config = NuGet.config
