@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Blueshift.EntityFrameworkCore.MongoDB.Storage;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors;
 using Microsoft.EntityFrameworkCore.Utilities;
@@ -9,32 +10,36 @@ using Remotion.Linq.Clauses;
 namespace Blueshift.EntityFrameworkCore.MongoDB.Query
 {
     /// <summary>
-    ///     A factory for creating instances of <see cref="MongoDbEntityQueryableExpressionVisitor" />.
+    ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+    ///     directly from your code. This API may change or be removed in future releases.
     /// </summary>
     public class MongoDbEntityQueryableExpressionVisitorFactory : IEntityQueryableExpressionVisitorFactory
     {
+        private readonly IModel _model;
         private readonly IMongoDbConnection _mongoDbConnection;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="MongoDbEntityQueryableExpressionVisitorFactory"/> class.
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        /// <param name="mongoDbConnection">The <see cref="MongoDbConnection"/> used to process the query.</param>
-        public MongoDbEntityQueryableExpressionVisitorFactory([NotNull] IMongoDbConnection mongoDbConnection)
+        public MongoDbEntityQueryableExpressionVisitorFactory(
+            [NotNull] IModel model,
+            [NotNull] IMongoDbConnection mongoDbConnection)
         {
+            _model = Check.NotNull(model, nameof(model));
             _mongoDbConnection = Check.NotNull(mongoDbConnection, nameof(mongoDbConnection));
         }
 
         /// <summary>
-        ///     Creates a new <see cref="MongoDbEntityQueryableExpressionVisitor"/>.
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        /// <param name="entityQueryModelVisitor">The query model visitor.</param>
-        /// <param name="querySource">The query source.</param>
-        /// <returns>A new instance of <see cref="MongoDbEntityQueryableExpressionVisitor"/>.</returns>
         public virtual ExpressionVisitor Create(
             [NotNull] EntityQueryModelVisitor entityQueryModelVisitor,
             [CanBeNull] IQuerySource querySource)
             =>  new MongoDbEntityQueryableExpressionVisitor(
                     Check.NotNull(entityQueryModelVisitor, nameof(entityQueryModelVisitor)),
+                    _model,
                     _mongoDbConnection);
     }
 }

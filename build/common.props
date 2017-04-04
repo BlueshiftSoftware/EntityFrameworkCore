@@ -1,6 +1,7 @@
 <Project>
   <!--<Import Project="dependencies.props" />-->
   <Import Project="..\version.props" />
+
   <PropertyGroup>
     <!--<AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Key.snk</AssemblyOriginatorKeyFile>-->
     <!--<PublicSign Condition="'$(OS)' != 'Windows_NT'">True</PublicSign>-->
@@ -14,7 +15,9 @@
     <Company>Blueshift Software, LLC</Company>
     <PackageTags>Entity Framework Core;entity-framework-core;EF;Data;O/RM</PackageTags>
   </PropertyGroup>
+
   <ItemGroup>
     <EmbeddedResource Include="**\*.rd.xml" />
   </ItemGroup>
+
 </Project>

@@ -25,4 +25,8 @@
     <PackageReference Include="MongoDB.Driver" Version="2.4.3" />
   </ItemGroup>
 
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
+    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
+  </ItemGroup>
+
 </Project>

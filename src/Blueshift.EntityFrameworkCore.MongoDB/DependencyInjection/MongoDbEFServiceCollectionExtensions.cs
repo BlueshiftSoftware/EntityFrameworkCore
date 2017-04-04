@@ -1,6 +1,10 @@
-﻿using Blueshift.EntityFrameworkCore.MongoDB.Infrastructure;
+﻿using System.ComponentModel;
+using System.Reflection;
+using Blueshift.EntityFrameworkCore.MongoDB;
+using Blueshift.EntityFrameworkCore.MongoDB.Infrastructure;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Utilities;
+using MongoDB.Bson;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection
@@ -10,6 +14,14 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static class MongoDbEFServiceCollectionExtensions
     {
+        static MongoDbEFServiceCollectionExtensions()
+        {
+            if (!typeof(ObjectId).GetTypeInfo().IsDefined(typeof(TypeConverterAttribute)))
+            {
+                TypeDescriptor.AddAttributes(typeof(ObjectId), new TypeConverterAttribute(typeof(ObjectIdTypeConverter)));
+            }
+        }
+
         /// <summary>
         /// Populates the given <paramref name="serviceCollection"/> instance with the service dependencies for
         /// the MongoDb provider for EntityFrameworkCore.

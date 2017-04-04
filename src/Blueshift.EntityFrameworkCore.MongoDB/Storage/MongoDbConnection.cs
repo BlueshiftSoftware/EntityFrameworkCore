@@ -72,10 +72,13 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
         /// <returns>The <see cref="IMongoCollection{TEntity}"/> instance that can store <typeparamref name="TEntity"/>.</returns>
         public virtual IMongoCollection<TEntity> GetCollection<TEntity>()
         {
-            var entityType = _model.FindEntityType(typeof(TEntity));
-            if (entityType.BaseType != null)
-                entityType = entityType.RootType();
-            var annotations = new MongoDbEntityTypeAnnotations(entityType);
+            IEntityType entityType = _model.FindEntityType(typeof(TEntity));
+            MongoDbEntityTypeAnnotations annotations = entityType.MongoDb();
+            while (annotations.IsDerivedType && entityType.BaseType != null)
+            {
+                entityType = entityType.BaseType;
+                annotations = entityType.MongoDb();
+            }
             return _mongoDatabase.GetCollection<TEntity>(annotations.CollectionName, annotations.CollectionSettings);
         }
 
@@ -85,6 +88,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
         /// <typeparam name="TEntity">The type of entity to query.</typeparam>
         /// <returns>An <see cref="IQueryable{TEntity}"/> that can query <typeparamref name="TEntity"/> values from the MongoDB instance.</returns>
         public virtual IQueryable<TEntity> Query<TEntity>()
-            => GetCollection<TEntity>().AsQueryable().OfType<TEntity>();
+            => GetCollection<TEntity>().AsQueryable();
     }
 }

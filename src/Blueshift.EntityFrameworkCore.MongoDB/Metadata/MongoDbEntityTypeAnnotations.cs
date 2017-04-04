@@ -73,8 +73,18 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata
         /// </summary>
         public virtual bool DiscriminatorIsRequired
         {
-            get { return GetAnnotation<bool>(MongoDbAnnotationNames.DiscriminatorIsRequired); }
+            get { return GetAnnotation<bool?>(MongoDbAnnotationNames.DiscriminatorIsRequired) ?? false; }
             set { SetAnnotation(MongoDbAnnotationNames.DiscriminatorIsRequired, value); }
+        }
+
+        /// <summary>
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
+        public virtual bool IsDerivedType
+        {
+            get { return GetAnnotation<bool?>(MongoDbAnnotationNames.IsDerivedType) ?? false; }
+            set { SetAnnotation(MongoDbAnnotationNames.IsDerivedType, value); }
         }
 
         /// <summary>
@@ -83,7 +93,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata
         /// </summary>
         public virtual bool IsRootType
         {
-            get { return GetAnnotation<bool>(MongoDbAnnotationNames.IsRootType); }
+            get { return GetAnnotation<bool?>(MongoDbAnnotationNames.IsRootType) ?? false; }
             set { SetAnnotation(MongoDbAnnotationNames.IsRootType, value); }
         }
 

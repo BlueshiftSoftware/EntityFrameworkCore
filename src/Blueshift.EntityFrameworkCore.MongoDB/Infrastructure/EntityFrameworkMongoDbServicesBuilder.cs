@@ -4,7 +4,6 @@ using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders;
 using Blueshift.EntityFrameworkCore.MongoDB.Query;
 using Blueshift.EntityFrameworkCore.MongoDB.Storage;
 using Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration;
-using Blueshift.EntityFrameworkCore.Query;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
@@ -65,7 +64,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
             TryAdd<IQueryContextFactory, MongoDbQueryContextFactory>();
             TryAdd<IEntityQueryableExpressionVisitorFactory, MongoDbEntityQueryableExpressionVisitorFactory>();
             TryAdd<IEntityQueryModelVisitorFactory, MongoDbEntityQueryModelVisitorFactory>();
-            TryAdd<IValueGeneratorCache, MongoDbValueGeneratorCache>();
             TryAddProviderSpecificServices(serviceCollectionMap =>
             {
                 serviceCollectionMap.TryAddScoped<IMongoDbConnection, MongoDbConnection>();

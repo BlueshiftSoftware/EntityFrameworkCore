@@ -1,30 +1,36 @@
-﻿using JetBrains.Annotations;
+﻿using Blueshift.EntityFrameworkCore.MongoDB.Storage;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.EntityFrameworkCore.Utilities;
 
-namespace Blueshift.EntityFrameworkCore.Query
+namespace Blueshift.EntityFrameworkCore.MongoDB.Query
 {
     /// <summary>
     ///     A factory for <see cref="MongoDbQueryContext"/> instances.
     /// </summary>
     public class MongoDbQueryContextFactory : QueryContextFactory
     {
+        private readonly IMongoDbConnection _mongoDbConnection;
+
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended
         ///     to be used directly from your code. This API may change or be removed in future
         ///     releases.
         /// </summary>
-        /// <param name="queryContextDependencies">Parameter object containing dependencies for this service</param>
         public MongoDbQueryContextFactory(
-            [NotNull] QueryContextDependencies queryContextDependencies)
-            : base(queryContextDependencies)
+            [NotNull] QueryContextDependencies queryContextDependencies,
+            [NotNull] IMongoDbConnection mongoDbConnection)
+            : base(Check.NotNull(queryContextDependencies, nameof(queryContextDependencies)))
         {
+            _mongoDbConnection = Check.NotNull(mongoDbConnection, nameof(mongoDbConnection));
         }
 
         /// <summary>
-        ///     Creates a new <see cref="MongoDbQueryContext"/>.
+        ///     This API supports the Entity Framework Core infrastructure and is not intended
+        ///     to be used directly from your code. This API may change or be removed in future
+        ///     releases.
         /// </summary>
-        /// <returns>The newly created <see cref="MongoDbQueryContext"/>.</returns>
         public override QueryContext Create()
-            => new MongoDbQueryContext(Dependencies, CreateQueryBuffer);
+            => new MongoDbQueryContext(Dependencies, CreateQueryBuffer, _mongoDbConnection);
     }
 }

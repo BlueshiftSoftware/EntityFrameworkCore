@@ -46,7 +46,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
     }
 
     [BsonKnownTypes(typeof(Tiger), typeof(PolarBear), typeof(Otter))]
-    [BsonDiscriminator(Required = true, RootClass = true)]
+    [BsonDiscriminator(RootClass = true)]
     public abstract class Animal
     {
         [BsonId]
@@ -75,7 +75,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
 
     public class Employee
     {
-        [Key]
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public ObjectId Id { get; private set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }

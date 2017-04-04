@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
-using MongoDB.Bson;
+using Blueshift.MongoDB.Tests.Shared;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
@@ -17,55 +18,22 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
             _zooDbContext.Database.EnsureCreated();
         }
 
-        [Fact]
-        public void Can_query_from_mongodb()
-        {
-            Assert.Empty(_zooDbContext.Animals.ToList());
-            Assert.Empty(_zooDbContext.Employees.ToList());
-        }
-
-        private class FuncEqualityComparer<T> : IEqualityComparer<T>
-        {
-            private Func<T, T, bool> _comparer;
-            public FuncEqualityComparer(Func<T, T, bool> comparer)
-            {
-                _comparer = comparer;
-            }
-
-            public bool Equals(T x, T y) => _comparer(x, y);
-
-            public int GetHashCode(T obj) => obj.GetHashCode();
-        }
-
-        private bool AreEqual(Specialty specialtiy1, Specialty specialty2)
-            => (specialtiy1 == null && specialty2 == null)
-                || (specialtiy1 != null
-                    && specialty2 != null
-                    && string.Equals(specialtiy1.AnimalType, specialty2.AnimalType, StringComparison.Ordinal)
+        private static IEqualityComparer<Specialty> SpecialtyComparer
+            => new FuncEqualityComparer<Specialty>((specialtiy1, specialty2)
+                => string.Equals(specialtiy1.AnimalType, specialty2.AnimalType, StringComparison.Ordinal)
                     && specialtiy1.Task == specialty2.Task);
 
-        private bool AreEqual(IList<Specialty> specialites1, IList<Specialty> specialties2)
-            => (specialites1 == null && specialties2 == null)
-                || (specialites1 != null
-                    && specialties2 != null
-                    && specialites1.Count == specialties2.Count
-                    && !specialites1.Where((specialty1, index) => !AreEqual(specialty1, specialties2[index])).Any());
-
-        private bool AreEqual(Employee employee1, Employee employee2)
-            => (employee1 == null && employee2 == null)
-                || (employee1 != null
-                    && employee2 != null
-                    && Equals(employee1.Id, employee2.Id)
+        private static IEqualityComparer<Employee> EmployeeComparer
+            => new FuncEqualityComparer<Employee>((employee1, employee2)
+                => Equals(employee1.Id, employee2.Id)
                     && string.Equals(employee1.FirstName, employee2.FirstName, StringComparison.Ordinal)
                     && string.Equals(employee1.LastName, employee2.LastName, StringComparison.Ordinal)
                     && employee1.Age == employee2.Age
-                    && AreEqual(employee1.Specialties, employee2.Specialties));
+                    && EnumerableEqualityComparer<Specialty>.Equals(employee1.Specialties, employee2.Specialties, SpecialtyComparer));
 
-        private bool AreEqual(Animal animal1, Animal animal2)
-            => (animal1 == null && animal2 == null)
-                || (animal1 != null
-                    && animal2 != null
-                    && Equals(animal1.Id, animal2.Id)
+        private static IEqualityComparer<Animal> AnimalComparer
+            => new FuncEqualityComparer<Animal>((animal1, animal2)
+                => Equals(animal1.Id, animal2.Id)
                     && animal1.GetType() == animal2.GetType()
                     && string.Equals(animal1.Name, animal2.Name, StringComparison.Ordinal)
                     && animal1.Age == animal2.Age
@@ -73,12 +41,19 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                     && animal1.Weight == animal2.Weight);
 
         [Fact]
+        public void Can_query_from_mongodb()
+        {
+            Assert.Empty(_zooDbContext.Animals.ToList());
+            Assert.Empty(_zooDbContext.Employees.ToList());
+        }
+
+        [Fact]
         public void Can_write_simple_record()
         {
             var employee = new Employee { FirstName = "Taiga", LastName = "Masuta", Age = 31.7 };
             _zooDbContext.Add(employee);
             _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
-            Assert.Equal(employee, _zooDbContext.Employees.Single(), new FuncEqualityComparer<Employee>(AreEqual));
+            Assert.Equal(employee, _zooDbContext.Employees.Single(), EmployeeComparer);
         }
 
         [Fact]
@@ -99,7 +74,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
             };
             _zooDbContext.Add(employee);
             _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
-            Assert.Equal(employee, _zooDbContext.Employees.Single(), new FuncEqualityComparer<Employee>(AreEqual));
+            Assert.Equal(employee, _zooDbContext.Employees
+                .Single(searchedEmployee => searchedEmployee.Specialties
+                    .Any(speciality => speciality.Task == ZooTask.Feeding)), EmployeeComparer);
         }
 
         [Fact]
@@ -122,7 +99,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
             Assert.Equal(insertedEntities.Count, queriedEntities.Count);
             for (var i = 0; i < insertedEntities.Count; i++)
             {
-                Assert.Equal(insertedEntities[i], queriedEntities[i], new FuncEqualityComparer<Animal>(AreEqual));
+                Assert.Equal(insertedEntities[i], queriedEntities[i], AnimalComparer);
             }
         }
 
@@ -140,22 +117,23 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                 .ToList();
             _zooDbContext.Animals.AddRange(insertedEntities);
             _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
+
             Assert.Equal(
                 insertedEntities.OfType<Tiger>().Single(),
                 _zooDbContext.Animals.OfType<Tiger>().Single(),
-                new FuncEqualityComparer<Tiger>(AreEqual));
+                AnimalComparer);
             Assert.Equal(
                 insertedEntities.OfType<PolarBear>().Single(),
                 _zooDbContext.Animals.OfType<PolarBear>().Single(),
-                new FuncEqualityComparer<PolarBear>(AreEqual));
+                AnimalComparer);
             Assert.Equal(
                 insertedEntities.OfType<SeaOtter>().Single(),
                 _zooDbContext.Animals.OfType<SeaOtter>().Single(),
-                new FuncEqualityComparer<SeaOtter>(AreEqual));
+                AnimalComparer);
             Assert.Equal(
                 insertedEntities.OfType<EurasianOtter>().Single(),
                 _zooDbContext.Animals.OfType<EurasianOtter>().Single(),
-                new FuncEqualityComparer<EurasianOtter>(AreEqual));
+                AnimalComparer);
             IList<Otter> insertedOtters = insertedEntities
                 .OfType<Otter>()
                 .OrderBy(otter => otter.Name)
@@ -164,7 +142,27 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                 .OfType<Otter>()
                 .OrderBy(otter => otter.Name)
                 .ToList();
-            Assert.Equal(insertedOtters, queriedOtters, new FuncEqualityComparer<Otter>(AreEqual));
+            Assert.Equal(insertedOtters, queriedOtters, AnimalComparer);
+        }
+
+        [Fact]
+        public async void Can_query_first_or_default_async()
+        {
+            IList<Animal> insertedEntities = new Animal[]
+                {
+                    new Tiger { Name = "Tigger", Age = 6.4, Weight = 270, Height = .98 },
+                    new PolarBear { Name = "Ursus", Age = 4.9, Weight = 612, Height = 2.7 },
+                    new SeaOtter { Name = "Hydron", Age = 1.8, Weight = 19, Height = .3 },
+                    new EurasianOtter { Name = "Yuri", Age = 1.8, Weight = 19, Height = .3 }
+                }
+                .OrderBy(animal => animal.Name)
+                .ToList();
+            _zooDbContext.Animals.AddRange(insertedEntities);
+            _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
+            Assert.Equal(
+                insertedEntities.OfType<Tiger>().Single(),
+                await _zooDbContext.Animals.OfType<Tiger>().FirstOrDefaultAsync(),
+                AnimalComparer);
         }
 
         public void Dispose()

@@ -8,35 +8,35 @@ using Microsoft.EntityFrameworkCore.Utilities;
 namespace Blueshift.EntityFrameworkCore.MongoDB.Annotations
 {
     /// <summary>
-    /// When applied to a <see cref="DbContext"/>, sets the database name to use with the context's <see cref="Model"/>.
+    /// When applied to an entity class, sets the name of MongoDB collection name used to store instances of the entity.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
-    public class MongoDatabaseAttribute : Attribute, IModelConvention
+    public class MongoCollectionAttribute : Attribute, IEntityTypeConvention
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MongoDatabaseAttribute"/> class.
+        /// Initializes a new instance of the <see cref="MongoCollectionAttribute"/> class.
         /// </summary>
-        /// <param name="database">The MongoDb database name to use with the <see cref="Model"/>.</param>
-        public MongoDatabaseAttribute([NotNull] string database)
+        /// <param name="collectionName">The MongoDb database name to use with the <see cref="Model"/>.</param>
+        public MongoCollectionAttribute([NotNull] string collectionName)
         {
-            Database = Check.NotEmpty(database, nameof(database));
+            CollectionName = Check.NotEmpty(collectionName, nameof(collectionName));
         }
 
         /// <summary>
         /// The MongoDb database name to use with the <see cref="Model"/>.
         /// </summary>
-        public virtual string Database { get; }
+        public virtual string CollectionName { get; }
 
         /// <summary>
         /// This API supports the Entity Framework Core infrastructure and is not intended to be used directly from
         /// your code. This API may change or be removed in future releases.
         /// </summary>
-        public InternalModelBuilder Apply(InternalModelBuilder modelBuilder)
+        public InternalEntityTypeBuilder Apply(InternalEntityTypeBuilder entityTypeBuilder)
         {
-            Check.NotNull(modelBuilder, nameof(modelBuilder))
+            Check.NotNull(entityTypeBuilder, nameof(entityTypeBuilder))
                 .MongoDb()
-                .Database = Database;
-            return modelBuilder;
+                .CollectionName = CollectionName;
+            return entityTypeBuilder;
         }
     }
 }

@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\build\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.5</TargetFramework>
+    <Product>Blueshift MongoDB EntityFrameworkCore Identity Provider for Microsoft ASP.NET Core</Product>
+    <Description>Blueshift Software MongoDB EntityFrameworkCore Identity Provider for Microsoft ASP.NET Core</Description>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageTags>$(PackageTags);MongoDb</PackageTags>
+    <RootNamespace>Blueshift.Identity.MongoDB</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\Check.cs" Link="Shared\Check.cs" />
+    <Compile Include="..\Shared\CodeAnnotations.cs" Link="Shared\CodeAnnotations.cs" />
+    <Compile Include="..\Shared\MemberInfoExtensions.cs" Link="Shared\MemberInfoExtensions.cs" />
+    <Compile Include="..\Shared\PropertyInfoExtensions.cs" Link="Shared\PropertyInfoExtensions.cs" />
+    <Compile Include="..\Shared\SharedTypeExtensions.cs" Link="Shared\SharedTypeExtensions.cs" />
+    <Compile Include="..\Shared\StringBuilderExtensions.cs" Link="Shared\StringBuilderExtensions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Blueshift.EntityFrameworkCore.MongoDB\Blueshift.EntityFrameworkCore.MongoDB.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Shared\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="1.2.0-preview1*" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="1.2.0-preview1*" />
+  </ItemGroup>
+
+</Project>

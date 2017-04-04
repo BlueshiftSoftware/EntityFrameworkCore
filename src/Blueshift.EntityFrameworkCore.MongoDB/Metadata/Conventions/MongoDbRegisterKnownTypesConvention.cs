@@ -26,23 +26,31 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
             IModel model = Check.NotNull(modelBuilder, nameof(modelBuilder)).Metadata;
             var unregisteredKnownTypes = model
                 .GetEntityTypes()
-                .Where(entityType => entityType.HasClrType()
-                    && entityType.ClrType.GetTypeInfo().IsDefined(typeof(BsonKnownTypesAttribute), false))
-                .SelectMany(entityType => GetAllKnownTypes(entityType.ClrType))
-                .Distinct()
-                .Where(knownType => model.FindEntityType(knownType) == null)
+                .Where(entityType => entityType.HasClrType())
+                .Select(entityType => entityType.ClrType)
                 .ToList();
             foreach (var type in unregisteredKnownTypes)
             {
-                modelBuilder.Entity(type, ConfigurationSource.DataAnnotation);
+                RegisterKnownTypes(modelBuilder, type);
             }
             return modelBuilder;
         }
 
-        private IEnumerable<Type> GetAllKnownTypes(Type type)
-            => type.GetTypeInfo()
+        private void RegisterKnownTypes(InternalModelBuilder modelBuilder, Type baseType)
+        {
+            IEnumerable<Type> knownTypes = baseType.GetTypeInfo()
                 .GetCustomAttributes<BsonKnownTypesAttribute>(false)
                 .SelectMany(bsonKnownTypeAttribute => bsonKnownTypeAttribute.KnownTypes)
-                .SelectMany(knownType => new[] { knownType }.Concat(GetAllKnownTypes(knownType)));
+                .ToList();
+            foreach (var derivedType in knownTypes)
+            {
+                modelBuilder
+                    .Entity(derivedType, ConfigurationSource.Convention)
+                    .HasBaseType(baseType, ConfigurationSource.Convention)
+                    .MongoDb()
+                    .IsDerivedType = true;
+                RegisterKnownTypes(modelBuilder, derivedType);
+            }
+        }
     }
 }

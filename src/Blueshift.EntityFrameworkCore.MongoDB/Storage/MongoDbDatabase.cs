@@ -1,16 +1,20 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Blueshift.EntityFrameworkCore.MongoDB.Metadata;
 using Blueshift.EntityFrameworkCore.MongoDB.Update;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Update;
 using Microsoft.EntityFrameworkCore.Utilities;
 using MongoDB.Driver;
+using Remotion.Linq;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
 {
@@ -56,9 +60,15 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
                     .Invoke(this, new object[] { grouping }));
 
         private IEntityType GetCollectionEntityType(IEntityType entityType)
-            => entityType.BaseType != null
-                ? entityType.RootType()
-                : entityType;
+        {
+            MongoDbEntityTypeAnnotations annotations = entityType.MongoDb();
+            while (annotations.IsDerivedType && entityType.BaseType != null)
+            {
+                entityType = entityType.BaseType;
+                annotations = entityType.MongoDb();
+            }
+            return entityType;
+        }
 
         private int SaveChanges<TEntity>(IEnumerable<IUpdateEntry> entries)
         {
@@ -97,6 +107,19 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
             IEnumerable<WriteModel<TEntity>> writeModels = entries.Select(entry => entry.ToMongoDbWriteModel<TEntity>());
             BulkWriteResult result = await _mongoDbConnection.GetCollection<TEntity>().BulkWriteAsync(writeModels, options: null, cancellationToken: cancellationToken);
             return (int)(result.DeletedCount + result.InsertedCount + result.ModifiedCount);
+        }
+
+        /// <summary>
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
+        public override Func<QueryContext, IAsyncEnumerable<TResult>> CompileAsyncQuery<TResult>(QueryModel queryModel)
+        {
+            Check.NotNull(queryModel, nameof(queryModel));
+
+            var syncQueryExecutor = CompileQuery<TResult>(queryModel);
+
+            return qc => syncQueryExecutor(qc).ToAsyncEnumerable();
         }
     }
 }

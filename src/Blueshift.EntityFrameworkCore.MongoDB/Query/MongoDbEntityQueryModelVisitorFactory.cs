@@ -2,31 +2,28 @@
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Utilities;
 
-namespace Blueshift.EntityFrameworkCore.Query
+namespace Blueshift.EntityFrameworkCore.MongoDB.Query
 {
-
     /// <summary>
-    ///     Creates instances of <see cref="MongoDbEntityQueryModelVisitor"/>.
-    ///     This type is typically used by database providers (and other extensions). It
-    ///     is generally not used in application code.
+    ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+    ///     directly from your code. This API may change or be removed in future releases.
     /// </summary>
     public class MongoDbEntityQueryModelVisitorFactory : EntityQueryModelVisitorFactory
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MongoDbEntityQueryModelVisitorFactory"/> class.
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        /// <param name="entityQueryModelVisitorDependencies">Parameter object that contains dependencies for this service.</param>
-        public MongoDbEntityQueryModelVisitorFactory([NotNull] EntityQueryModelVisitorDependencies entityQueryModelVisitorDependencies)
+        public MongoDbEntityQueryModelVisitorFactory(
+            [NotNull] EntityQueryModelVisitorDependencies entityQueryModelVisitorDependencies)
             : base(Check.NotNull(entityQueryModelVisitorDependencies, nameof(entityQueryModelVisitorDependencies)))
         {
         }
 
         /// <summary>
-        ///     Creates a new <see cref="MongoDbEntityQueryModelVisitor"/>.
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        /// <param name="queryCompilationContext">Compilation context for the query.</param>
-        /// <param name="parentEntityQueryModelVisitor">The visitor for the outer query.</param>
-        /// <returns>The newly created <see cref="MongoDbEntityQueryModelVisitor"/>.</returns>
         public override EntityQueryModelVisitor Create(QueryCompilationContext queryCompilationContext,
                 EntityQueryModelVisitor parentEntityQueryModelVisitor)
             => new MongoDbEntityQueryModelVisitor(Dependencies, queryCompilationContext);

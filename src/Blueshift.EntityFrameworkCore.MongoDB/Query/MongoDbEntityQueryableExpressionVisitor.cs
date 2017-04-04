@@ -1,8 +1,9 @@
 using System;
 using System.Linq.Expressions;
-using System.Reflection;
 using Blueshift.EntityFrameworkCore.MongoDB.Storage;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors;
 using Microsoft.EntityFrameworkCore.Utilities;
@@ -10,37 +11,49 @@ using Microsoft.EntityFrameworkCore.Utilities;
 namespace Blueshift.EntityFrameworkCore.MongoDB.Query
 {
     /// <summary>
-    /// A visitor for processing MongoDB entity type roots.
+    ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+    ///     directly from your code. This API may change or be removed in future releases.
     /// </summary>
     public class MongoDbEntityQueryableExpressionVisitor : EntityQueryableExpressionVisitor
     {
+        private readonly IModel _model;
         private readonly IMongoDbConnection _mongoDbConnection;
 
-        private static readonly MethodInfo _queryMethod = typeof(IMongoDbConnection).GetTypeInfo()
-            .GetMethod(nameof(IMongoDbConnection.Query))
-            .GetGenericMethodDefinition();
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="MongoDbEntityQueryableExpressionVisitor"/> class.
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        /// <param name="entityQueryModelVisitor">The visitor for the query.</param>
-        /// <param name="mongoDbConnection">The <see cref="MongoDbConnection"/> used to process the query.</param>
         public MongoDbEntityQueryableExpressionVisitor(
             [NotNull] EntityQueryModelVisitor entityQueryModelVisitor,
+            [NotNull] IModel model,
             [NotNull] IMongoDbConnection mongoDbConnection)
             : base(entityQueryModelVisitor)
         {
+            _model = Check.NotNull(model, nameof(model));
             _mongoDbConnection = Check.NotNull(mongoDbConnection, nameof(mongoDbConnection));
         }
 
         /// <summary>
-        /// Visits entity type roots.
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        /// <param name="elementType">The entity type of the root.</param>
-        /// <returns>A new <see cref="Expression"/> to use in place of the original expression element.</returns>
         protected override Expression VisitEntityQueryable(Type elementType)
-            => Expression.Call(
-                Expression.Constant(_mongoDbConnection),
-                _queryMethod.MakeGenericMethod(elementType));
+        {
+            var entityType = _model.FindEntityType(Check.NotNull(elementType, nameof(elementType)));
+            var annotations = entityType.MongoDb();
+            while (annotations.IsDerivedType && entityType.BaseType != null)
+            {
+                entityType = entityType.BaseType;
+                annotations = entityType.MongoDb();
+            }
+
+            return (entityType.ClrType == elementType)
+                ? Expression.Call(
+                    MongoDbEntityQueryModelVisitor.EntityQueryMethodInfo.MakeGenericMethod(elementType),
+                    EntityQueryModelVisitor.QueryContextParameter)
+                : Expression.Call(
+                    MongoDbEntityQueryModelVisitor.SubEntityQueryMethodInfo.MakeGenericMethod(entityType.ClrType, elementType),
+                    EntityQueryModelVisitor.QueryContextParameter);
+        }
     }
 }
