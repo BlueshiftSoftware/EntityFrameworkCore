@@ -60,50 +60,5 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
             where TEntity : class, TBaseEntity
             => EntityQuery<TBaseEntity>(queryContext)
                 .OfType<TEntity>();
-
-        /// <summary>
-        ///     Creates an action to asynchronously execute this query.
-        /// </summary>
-        /// <typeparam name="TResult"> The type of results that the query returns. </typeparam>
-        /// <param name="queryModel"> The query. </param>
-        /// <returns> An action that asynchronously returns the results of the query. </returns>
-        public override Func<QueryContext, IAsyncEnumerable<TResult>> CreateAsyncQueryExecutor<TResult>(
-            [NotNull] QueryModel queryModel)
-        {
-            Check.NotNull(queryModel, nameof(queryModel));
-
-            using (QueryCompilationContext.Logger.BeginScope(this))
-            {
-                ExtractQueryAnnotations(queryModel);
-
-                var includeResultOperators
-                    = QueryCompilationContext.QueryAnnotations
-                        .OfType<IncludeResultOperator>()
-                        .ToList();
-
-                OptimizeQueryModel(queryModel, includeResultOperators, asyncQuery: true);
-
-                QueryCompilationContext.FindQuerySourcesRequiringMaterialization(this, queryModel);
-                QueryCompilationContext.DetermineQueryBufferRequirement(queryModel);
-
-                VisitQueryModel(queryModel);
-
-                Console.WriteLine($"\r\n\r\n==========\r\n\r\nLinqOperaorProvider: {LinqOperatorProvider}\r\n\r\n");
-
-                Console.WriteLine($"Expression.Type Single: {Expression.Type}\r\n\r\n");
-
-                SingleResultToSequence(queryModel, Expression.Type.GetTypeInfo().GenericTypeArguments.FirstOrDefault());
-
-                Console.WriteLine($"Expression.Type ToSequence: {Expression.Type}\r\n\r\n==========\r\n\r\n");
-
-                IncludeNavigations(queryModel, includeResultOperators);
-
-                TrackEntitiesInResults<TResult>(queryModel);
-
-                InterceptExceptions();
-
-                return CreateExecutorLambda<IAsyncEnumerable<TResult>>();
-            }
-        }
     }
 }
