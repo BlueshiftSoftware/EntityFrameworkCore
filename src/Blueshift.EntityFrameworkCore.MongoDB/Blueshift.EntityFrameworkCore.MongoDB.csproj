@@ -7,8 +7,6 @@
     <Product>Blueshift MongoDb Provider for EntityFrameworkCore</Product>
     <Description>Blueshift Software MongoDb Provider for Microsoft EntityFramework Core</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageTags>$(PackageTags);MongoDb</PackageTags>
-    <RootNamespace>Blueshift.EntityFrameworkCore.MongoDB</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

@@ -3,17 +3,18 @@
   <Import Project="..\version.props" />
 
   <PropertyGroup>
-    <!--<AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Key.snk</AssemblyOriginatorKeyFile>-->
-    <!--<PublicSign Condition="'$(OS)' != 'Windows_NT'">True</PublicSign>-->
+    <BuildYear>$([System.DateTime]::Now.ToString('yyyy'))</BuildYear>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/crhairr/EntityFrameworkCore.MongoDb.git</RepositoryUrl>
-    <!--<SignAssembly>True</SignAssembly>-->
+    <!--<AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Key.snk</AssemblyOriginatorKeyFile>
+    <PublicSign Condition="'$(OS)' != 'Windows_NT'">True</PublicSign>
+    <SignAssembly>True</SignAssembly>-->
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <VersionSuffix Condition="'$(VersionSuffix)' != '' And '$(BuildNumber)' != ''">$(VersionSuffix)-$(BuildNumber)</VersionSuffix>
-    <Copyright>© Blueshift Software, LLC @ 2017. All rights reserved.</Copyright>
-    <Authors>Blueshift Software, LLC</Authors>
     <Company>Blueshift Software, LLC</Company>
-    <PackageTags>Blueshift;Entity Framework Core;entity-framework-core;EF;Data;O/RM</PackageTags>
+    <Authors>$(Company)</Authors>
+    <Copyright>© $(Company) @ $(BuildYear) - all rights reserved.</Copyright>
+    <PackageTags>Blueshift;MongoDB;Entity Framework Core;entity-framework-core;EF;Data;O/RM</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

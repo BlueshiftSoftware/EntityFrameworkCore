@@ -4,11 +4,6 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
-    <Company>Blueshift Software, LLC</Company>
-    <Description></Description>
-    <Product></Product>
-    <Copyright>© Blueshift Software, LLC @ 2017. All rights reserved.</Copyright>
-    <Authors>Blueshift Software, LLC</Authors>
   </PropertyGroup>
 
   <ItemGroup>
