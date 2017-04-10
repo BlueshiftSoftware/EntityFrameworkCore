@@ -21,12 +21,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="1.2.0-preview1-*" />
-    <PackageReference Include="MongoDB.Driver" Version="2.4.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(AspNetCoreVersion)" />
+    <PackageReference Include="MongoDB.Driver" Version="$(MongoDbVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
-    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
+    <PackageReference Include="System.ComponentModel.TypeConverter" Version="$(CoreFxVersion)" />
   </ItemGroup>
 
 </Project>

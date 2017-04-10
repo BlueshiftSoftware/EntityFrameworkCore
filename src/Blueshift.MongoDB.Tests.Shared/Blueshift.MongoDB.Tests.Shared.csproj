@@ -1,13 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="..\..\build\common.props"/>
+
   <PropertyGroup>    
     <TargetFrameworks>net46;netstandard1.5</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Specification.Tests" Version="1.1.1" />
-    <PackageReference Include="MongoDB.Driver" Version="2.4.3" />
-    <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Specification.Tests" Version="$(AspNetCoreVersion)" />
+    <PackageReference Include="MongoDB.Driver" Version="$(MongoDbVersion)" />
+    <PackageReference Include="xunit" Version="$(XunitVersion)" />
   </ItemGroup>
 
 </Project>

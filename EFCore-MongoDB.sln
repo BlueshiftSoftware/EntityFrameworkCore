@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{FAF9C31C-A1AF-42A9-9306-EC190DCACCC7}"
 	ProjectSection(SolutionItems) = preProject
 		build\common.props = build\common.props
+		build\dependencies.props = build\dependencies.props
 		build\repo.props = build\repo.props
 	EndProjectSection
 EndProject
@@ -14,6 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Globals", "Globals", "{6841
 		.travis.yml = .travis.yml
 		appveyor.yml = appveyor.yml
 		build.ps1 = build.ps1
+		build.sh = build.sh
 		NuGet.config = NuGet.config
 		README.md = README.md
 		version.props = version.props

@@ -8,7 +8,6 @@
     <Description>Blueshift Software MongoDB EntityFrameworkCore Identity Provider for Microsoft ASP.NET Core</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>$(PackageTags);MongoDb</PackageTags>
-    <RootNamespace>Blueshift.Identity.MongoDB</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,8 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="1.2.0-preview1*" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="1.2.0-preview1*" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="$(AspNetCoreVersion)" />
   </ItemGroup>
 
 </Project>
