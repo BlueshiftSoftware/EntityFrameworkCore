@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using Blueshift.MongoDB.Tests.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -13,10 +14,10 @@ namespace Blueshift.Identity.MongoDB.Tests
 
         private IUserEmailStore<MongoDbIdentityUser> _mongoDbUserEmailStore;
 
-        public MongoDbUserEmailStoreTests(MongoDbIdentityFixture mongoDbIdentityFixture)
-            : base(mongoDbIdentityFixture)
+        public MongoDbUserEmailStoreTests(MongoDbFixture mongoDbFixture)
+            : base(mongoDbFixture)
         {
-            _mongoDbUserEmailStore = Services.GetRequiredService<IUserEmailStore<MongoDbIdentityUser>>();
+            _mongoDbUserEmailStore = _serviceProvider.GetRequiredService<IUserEmailStore<MongoDbIdentityUser>>();
         }
 
         protected override MongoDbIdentityUser CreateUser()

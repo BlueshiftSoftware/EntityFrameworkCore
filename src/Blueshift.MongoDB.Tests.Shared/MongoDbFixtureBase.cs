@@ -4,19 +4,19 @@ using System.IO;
 
 namespace Blueshift.MongoDB.Tests.Shared
 {
-    public abstract class MongoDbFixtureBase : IDisposable
+    public class MongoDbFixture : IDisposable
     {
         private static readonly bool IsCiBuild;
         private Process _mongodProcess;
 
-        static MongoDbFixtureBase()
+        static MongoDbFixture()
         {
             IsCiBuild =
                 (Boolean.TryParse(Environment.ExpandEnvironmentVariables("%APPVEYOR%"), out bool isAppVeyor) && isAppVeyor) ||
                 (Boolean.TryParse(Environment.ExpandEnvironmentVariables("%TRAVIS%"), out bool isTravisCI) && isTravisCI);
         }
 
-        public MongoDbFixtureBase()
+        public MongoDbFixture()
         {
             if (!IsCiBuild)
             {

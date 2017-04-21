@@ -25,10 +25,10 @@ namespace Blueshift.Identity.MongoDB.Tests
 
         private IUserClaimStore<MongoDbIdentityUser> _mongoDbUserClaimStore;
 
-        public MongoDbUserClaimStoreTests(MongoDbIdentityFixture mongoDbIdentityFixture)
-            : base(mongoDbIdentityFixture)
+        public MongoDbUserClaimStoreTests(MongoDbFixture mongoDbFixture)
+            : base(mongoDbFixture)
         {
-            _mongoDbUserClaimStore = Services.GetRequiredService<IUserClaimStore<MongoDbIdentityUser>>();
+            _mongoDbUserClaimStore = _serviceProvider.GetRequiredService<IUserClaimStore<MongoDbIdentityUser>>();
         }
 
         protected static IEqualityComparer<Claim> ClaimComparer

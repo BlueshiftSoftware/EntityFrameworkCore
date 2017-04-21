@@ -16,10 +16,10 @@ namespace Blueshift.Identity.MongoDB.Tests
         private static readonly string ProviderKey = new Guid().ToString();
         private const string ProviderDisplayName = nameof(ProviderDisplayName);
 
-        public MongoDbUserLoginStoreTests(MongoDbIdentityFixture mongoDbIdentityFixture)
-            : base(mongoDbIdentityFixture)
+        public MongoDbUserLoginStoreTests(MongoDbFixture mongoDbFixture)
+            : base(mongoDbFixture)
         {
-            _mongoDbUserLoginStore = Services.GetRequiredService<IUserLoginStore<MongoDbIdentityUser>>();
+            _mongoDbUserLoginStore = _serviceProvider.GetRequiredService<IUserLoginStore<MongoDbIdentityUser>>();
         }
 
         protected override MongoDbIdentityUser CreateUser()

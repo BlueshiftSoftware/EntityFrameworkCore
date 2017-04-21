@@ -10,9 +10,6 @@ namespace Blueshift.MongoDB.Tests.Shared
     {
         public bool IsMet => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && File.Exists(MongoDbConstants.MongodExe);
 
-        public string SkipReason =>
-            $"RuntimeInformation.IsOSPlatform(OSPlatform.Windows): {RuntimeInformation.IsOSPlatform(OSPlatform.Windows)}\r\n" +
-            $"File.Exists({MongoDbConstants.MongodExe}): {File.Exists(MongoDbConstants.MongodExe)}\r\n" +
-            "MongoDB is not installed on the local system or its location is unknown.";
+        public string SkipReason => "MongoDB is not installed on the local system or its location is unknown.";
     }
 }

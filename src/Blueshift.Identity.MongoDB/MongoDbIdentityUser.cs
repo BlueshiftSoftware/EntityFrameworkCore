@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -75,7 +76,7 @@ namespace Blueshift.Identity.MongoDB
         /// <summary>
         /// Gets or sets the primary key for this user.
         /// </summary>
-        [BsonId]
+        [BsonId, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public virtual TKey Id { get; private set; }
 
         /// <summary>

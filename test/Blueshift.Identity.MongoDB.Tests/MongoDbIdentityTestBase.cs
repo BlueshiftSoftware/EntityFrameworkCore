@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Blueshift.MongoDB.Tests.Shared;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -50,20 +51,26 @@ namespace Blueshift.Identity.MongoDB.Tests
                 => string.Equals(claim1.ClaimType, claim2.ClaimType, StringComparison.Ordinal)
                     && string.Equals(claim1.ClaimValue, claim2.ClaimValue, StringComparison.Ordinal));
 
+        protected IServiceProvider _serviceProvider;
         private IdentityMongoDbContext _identityDbContext;
         private IUserStore<MongoDbIdentityUser> _userStore;
         private IRoleStore<MongoDbIdentityRole> _roleStore;
 
-        protected MongoDbIdentityStoreTestBase(MongoDbIdentityFixture mongoDbUserStoreFixture)
+        protected MongoDbIdentityStoreTestBase(MongoDbFixture mongoDbFixture)
         {
-            Services = mongoDbUserStoreFixture.Services;
-            _roleStore = Services.GetRequiredService<IRoleStore<MongoDbIdentityRole>>();
-            _userStore = Services.GetRequiredService<IUserStore<MongoDbIdentityUser>>();
-            _identityDbContext = Services.GetRequiredService<IdentityMongoDbContext>();
+            _serviceProvider = new ServiceCollection()
+                .AddDbContext<IdentityMongoDbContext>(options => options
+                    .UseMongoDb(connectionString: MongoDbConstants.MongoUrl)
+                    .EnableSensitiveDataLogging(true))
+                .AddIdentity<MongoDbIdentityUser, MongoDbIdentityRole>()
+                .AddEntityFrameworkMongoDbStores<IdentityMongoDbContext>()
+                .Services
+                .BuildServiceProvider();
+            _identityDbContext = _serviceProvider.GetService<IdentityMongoDbContext>();
+            _userStore = _serviceProvider.GetRequiredService<IUserStore<MongoDbIdentityUser>>();
+            _roleStore = _serviceProvider.GetRequiredService<IRoleStore<MongoDbIdentityRole>>();
             _identityDbContext.Database.EnsureCreated();
         }
-
-        protected IServiceProvider Services { get; }
 
         public virtual void Dispose()
         {

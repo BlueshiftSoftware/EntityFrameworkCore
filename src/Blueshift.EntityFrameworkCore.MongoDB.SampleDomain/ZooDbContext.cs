@@ -49,7 +49,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
     [BsonDiscriminator(RootClass = true)]
     public abstract class Animal
     {
-        [BsonId]
+        [BsonId, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public ObjectId Id { get; private set; }
         public string Name { get; set; }
         public double Age { get; set; }

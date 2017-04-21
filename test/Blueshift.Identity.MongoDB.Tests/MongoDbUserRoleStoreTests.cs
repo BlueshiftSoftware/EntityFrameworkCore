@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
+using Blueshift.MongoDB.Tests.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -16,11 +17,11 @@ namespace Blueshift.Identity.MongoDB.Tests
 
         private IUserRoleStore<MongoDbIdentityUser> _mongoDbUserRoleStore;
 
-        public MongoDbUserRoleStoreTests(MongoDbIdentityFixture mongoDbIdentityFixture)
-            : base(mongoDbIdentityFixture)
+        public MongoDbUserRoleStoreTests(MongoDbFixture mongoDbFixture)
+            : base(mongoDbFixture)
         {
-            _mongoDbUserRoleStore = Services.GetRequiredService<IUserRoleStore<MongoDbIdentityUser>>();
-            var roleStore = Services
+            _mongoDbUserRoleStore = _serviceProvider.GetRequiredService<IUserRoleStore<MongoDbIdentityUser>>();
+            var roleStore = _serviceProvider
                 .GetRequiredService<IRoleStore<MongoDbIdentityRole>>();
             if (roleStore.FindByNameAsync(NormalizedRoleName1, new CancellationToken()).Result == null)
             {

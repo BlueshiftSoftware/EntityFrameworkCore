@@ -8,14 +8,11 @@ using Xunit;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
 {
-    public class MongoDbContextTests : IClassFixture<MongoDbFixture>, IDisposable
+    public class MongoDbContextTests : MongoDbContextTestBase
     {
-        private ZooDbContext _zooDbContext;
-
         public MongoDbContextTests(MongoDbFixture mongoDbFixture)
+            : base(mongoDbFixture)
         {
-            _zooDbContext = mongoDbFixture.ZooDbContext;
-            _zooDbContext.Database.EnsureCreated();
         }
 
         private static IEqualityComparer<Specialty> SpecialtyComparer
@@ -163,16 +160,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                 insertedEntities.OfType<Tiger>().Single(),
                 await _zooDbContext.Animals.OfType<Tiger>().FirstOrDefaultAsync(),
                 AnimalComparer);
-        }
-
-        public void Dispose()
-        {
-            if (_zooDbContext != null)
-            {
-                _zooDbContext.Database.EnsureDeleted();
-                _zooDbContext.Dispose();
-                _zooDbContext = null;
-            }
         }
     }
 }

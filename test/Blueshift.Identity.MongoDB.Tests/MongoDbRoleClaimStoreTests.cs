@@ -25,10 +25,10 @@ namespace Blueshift.Identity.MongoDB.Tests
 
         private IRoleClaimStore<MongoDbIdentityRole> _mongoDbRoleClaimStore;
 
-        public MongoDbRoleClaimStoreTests(MongoDbIdentityFixture mongoDbIdentityFixture)
-            : base(mongoDbIdentityFixture)
+        public MongoDbRoleClaimStoreTests(MongoDbFixture mongoDbFixture)
+            : base(mongoDbFixture)
         {
-            _mongoDbRoleClaimStore = Services.GetRequiredService<IRoleClaimStore<MongoDbIdentityRole>>();
+            _mongoDbRoleClaimStore = _serviceProvider.GetRequiredService<IRoleClaimStore<MongoDbIdentityRole>>();
         }
 
         protected static IEqualityComparer<Claim> ClaimComparer
