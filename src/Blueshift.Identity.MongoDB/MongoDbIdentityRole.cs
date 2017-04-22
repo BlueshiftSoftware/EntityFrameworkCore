@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using Blueshift.EntityFrameworkCore.MongoDB.Annotations;
 using Microsoft.EntityFrameworkCore.Utilities;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -30,6 +31,7 @@ namespace Blueshift.Identity.MongoDB
     /// </summary>
     /// <typeparam name="TKey">The type of the role's identifier.</typeparam>
     /// <typeparam name="TClaim">The type of authorization claims assigned to this role.</typeparam>
+    [MongoCollection("roles")]
     public class MongoDbIdentityRole<TKey, TClaim>
         where TKey : IEquatable<TKey>
         where TClaim : MongoDbIdentityClaim

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using Blueshift.EntityFrameworkCore.MongoDB.Annotations;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -51,6 +52,7 @@ namespace Blueshift.Identity.MongoDB
     /// <typeparam name="TUserRole">The type security roles assigned to this user.</typeparam>
     /// <typeparam name="TUserLogin">The type of external login provider information assigned to this user.</typeparam>
     /// <typeparam name="TUserToken">The type of external login provider tokens assigned to this user.</typeparam>
+    [MongoCollection("users")]
     public class MongoDbIdentityUser<TKey, TClaim, TUserRole, TUserLogin, TUserToken>
         where TKey : IEquatable<TKey>
         where TClaim : MongoDbIdentityClaim

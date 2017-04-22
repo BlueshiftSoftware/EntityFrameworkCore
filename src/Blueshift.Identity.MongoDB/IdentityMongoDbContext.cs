@@ -1,4 +1,5 @@
 ﻿using System;
+using Blueshift.EntityFrameworkCore.MongoDB.Annotations;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 
@@ -98,6 +99,7 @@ namespace Blueshift.Identity.MongoDB
     /// <typeparam name="TUserRole">The type of the user role object.</typeparam>
     /// <typeparam name="TUserLogin">The type of the user login object.</typeparam>
     /// <typeparam name="TUserToken">The type of the user token object.</typeparam>
+    [MongoDatabase("__identities")]
     public class IdentityMongoDbContext<TUser, TRole, TKey, TClaim, TUserRole, TUserLogin, TUserToken> : DbContext
         where TUser : MongoDbIdentityUser<TKey, TClaim, TUserRole, TUserLogin, TUserToken>
         where TRole : MongoDbIdentityRole<TKey, TClaim>
