@@ -15,7 +15,16 @@ namespace Blueshift.Identity.MongoDB
         /// Initializes a new instance of <see cref="IdentityMongoDbContext"/>.
         /// </summary>
         /// <param name="options">The options to be used by a <see cref="DbContext"/>.</param>
-        public IdentityMongoDbContext(DbContextOptions options) : base(options) { }
+        public IdentityMongoDbContext(DbContextOptions<IdentityMongoDbContext> options)
+            : base(options)
+        { }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="IdentityMongoDbContext{TUser, TRole, TKey, TClaim, TUserRole, TUserLogin, TUserToken}"/>.
+        /// </summary>
+        /// <param name="options">The options to be used by a <see cref="DbContext"/>.</param>
+        protected IdentityMongoDbContext(DbContextOptions options)
+            : base(options) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IdentityMongoDbContext" /> class.
@@ -35,7 +44,16 @@ namespace Blueshift.Identity.MongoDB
         /// Initializes a new instance of <see cref="IdentityMongoDbContext{TKey}"/>.
         /// </summary>
         /// <param name="options">The options to be used by a <see cref="DbContext"/>.</param>
-        public IdentityMongoDbContext(DbContextOptions options) : base(options) { }
+        public IdentityMongoDbContext(DbContextOptions<IdentityMongoDbContext<TKey>> options)
+            : base(options)
+        { }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="IdentityMongoDbContext{TUser, TRole, TKey, TClaim, TUserRole, TUserLogin, TUserToken}"/>.
+        /// </summary>
+        /// <param name="options">The options to be used by a <see cref="DbContext"/>.</param>
+        protected IdentityMongoDbContext(DbContextOptions options)
+            : base(options) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IdentityMongoDbContext{TKey}" /> class.
@@ -57,7 +75,16 @@ namespace Blueshift.Identity.MongoDB
         /// Initializes a new instance of <see cref="IdentityMongoDbContext{TUser, TRole}"/>.
         /// </summary>
         /// <param name="options">The options to be used by a <see cref="DbContext"/>.</param>
-        public IdentityMongoDbContext(DbContextOptions options) : base(options) { }
+        public IdentityMongoDbContext(DbContextOptions<IdentityMongoDbContext<TUser, TRole>> options) 
+            : base(options)
+        { }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="IdentityMongoDbContext{TUser, TRole, TKey, TClaim, TUserRole, TUserLogin, TUserToken}"/>.
+        /// </summary>
+        /// <param name="options">The options to be used by a <see cref="DbContext"/>.</param>
+        protected IdentityMongoDbContext(DbContextOptions options)
+            : base(options) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IdentityMongoDbContext{TUser, TRole}" /> class.
@@ -81,7 +108,16 @@ namespace Blueshift.Identity.MongoDB
         /// Initializes a new instance of <see cref="IdentityMongoDbContext{TUser, TRole, TKey}"/>.
         /// </summary>
         /// <param name="options">The options to be used by a <see cref="DbContext"/>.</param>
-        public IdentityMongoDbContext(DbContextOptions options) : base(options) { }
+        public IdentityMongoDbContext(DbContextOptions<IdentityMongoDbContext<TUser, TRole, TKey>> options)
+            : base(options)
+        { }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="IdentityMongoDbContext{TUser, TRole, TKey, TClaim, TUserRole, TUserLogin, TUserToken}"/>.
+        /// </summary>
+        /// <param name="options">The options to be used by a <see cref="DbContext"/>.</param>
+        protected IdentityMongoDbContext(DbContextOptions options)
+            : base(options) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IdentityMongoDbContext{TUser, TRole, TKey}" /> class.
@@ -113,7 +149,15 @@ namespace Blueshift.Identity.MongoDB
         /// Initializes a new instance of <see cref="IdentityMongoDbContext{TUser, TRole, TKey, TClaim, TUserRole, TUserLogin, TUserToken}"/>.
         /// </summary>
         /// <param name="options">The options to be used by a <see cref="DbContext"/>.</param>
-        public IdentityMongoDbContext(DbContextOptions options) : base(options) { }
+        public IdentityMongoDbContext(DbContextOptions<IdentityMongoDbContext<TUser, TRole, TKey, TClaim, TUserRole, TUserLogin, TUserToken>> options)
+            : base(options) { }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="IdentityMongoDbContext{TUser, TRole, TKey, TClaim, TUserRole, TUserLogin, TUserToken}"/>.
+        /// </summary>
+        /// <param name="options">The options to be used by a <see cref="DbContext"/>.</param>
+        protected IdentityMongoDbContext(DbContextOptions options)
+            : base(options) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IdentityMongoDbContext{TUser, TRole, TKey, TClaim, TUserRole, TUserLogin, TUserToken}" /> class.
