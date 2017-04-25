@@ -8,6 +8,7 @@ namespace Blueshift.Identity.MongoDB
     /// <summary>
     /// Base class for the Entity Framework MongoDB database context used for identity.
     /// </summary>
+    [MongoDatabase("__identities")]
     public class IdentityMongoDbContext
         : IdentityMongoDbContext<MongoDbIdentityUser, MongoDbIdentityRole>
     {
@@ -36,6 +37,7 @@ namespace Blueshift.Identity.MongoDB
     /// Base class for the Entity Framework MongoDB database context used for identity.
     /// </summary>
     /// <typeparam name="TKey">The type of the primary key for users and roles.</typeparam>
+    [MongoDatabase("__identities")]
     public class IdentityMongoDbContext<TKey>
         : IdentityMongoDbContext<MongoDbIdentityUser<TKey>, MongoDbIdentityRole<TKey>, TKey, MongoDbIdentityClaim, MongoDbIdentityUserRole, MongoDbIdentityUserLogin, MongoDbIdentityUserToken>
         where TKey : IEquatable<TKey>
@@ -66,6 +68,7 @@ namespace Blueshift.Identity.MongoDB
     /// </summary>
     /// <typeparam name="TUser">The type of user objects.</typeparam>
     /// <typeparam name="TRole">The type of role objects.</typeparam>
+    [MongoDatabase("__identities")]
     public class IdentityMongoDbContext<TUser, TRole>
         : IdentityMongoDbContext<TUser, TRole, ObjectId, MongoDbIdentityClaim, MongoDbIdentityUserRole, MongoDbIdentityUserLogin, MongoDbIdentityUserToken>
         where TUser : MongoDbIdentityUser<ObjectId>
@@ -98,6 +101,7 @@ namespace Blueshift.Identity.MongoDB
     /// <typeparam name="TUser">The type of user objects.</typeparam>
     /// <typeparam name="TRole">The type of role objects.</typeparam>
     /// <typeparam name="TKey">The type of the primary key for users and roles.</typeparam>
+    [MongoDatabase("__identities")]
     public class IdentityMongoDbContext<TUser, TRole, TKey>
         : IdentityMongoDbContext<TUser, TRole, TKey, MongoDbIdentityClaim, MongoDbIdentityUserRole, MongoDbIdentityUserLogin, MongoDbIdentityUserToken>
         where TUser : MongoDbIdentityUser<TKey>

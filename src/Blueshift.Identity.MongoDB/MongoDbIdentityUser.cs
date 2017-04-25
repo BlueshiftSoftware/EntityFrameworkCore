@@ -10,6 +10,7 @@ namespace Blueshift.Identity.MongoDB
     /// <summary>
     /// A representation of a user security principal for use with a MongoDB EntityFramework provider.
     /// </summary>
+    [MongoCollection("users")]
     public class MongoDbIdentityUser : MongoDbIdentityUser<ObjectId>
     {
         /// <summary>
@@ -28,6 +29,7 @@ namespace Blueshift.Identity.MongoDB
     /// A representation of a user security principal for use with a MongoDB EntityFramework provider.
     /// </summary>
     /// <typeparam name="TKey">The type of the primary key for this object.</typeparam>
+    [MongoCollection("users")]
     public class MongoDbIdentityUser<TKey>
         : MongoDbIdentityUser<TKey, MongoDbIdentityClaim, MongoDbIdentityUserRole, MongoDbIdentityUserLogin, MongoDbIdentityUserToken>
         where TKey : IEquatable<TKey>

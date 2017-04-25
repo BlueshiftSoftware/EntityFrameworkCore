@@ -11,6 +11,7 @@ namespace Blueshift.Identity.MongoDB
     /// <summary>
     /// A representation of an authorization role for use with a MongoDB EntityFramework provider.
     /// </summary>
+    [MongoCollection("roles")]
     public class MongoDbIdentityRole
         : MongoDbIdentityRole<ObjectId>
     {
@@ -20,6 +21,7 @@ namespace Blueshift.Identity.MongoDB
     /// A representation of an authorization role for use with a MongoDB EntityFramework provider.
     /// </summary>
     /// <typeparam name="TKey">The type of the role's identifier.</typeparam>
+    [MongoCollection("roles")]
     public class MongoDbIdentityRole<TKey>
         : MongoDbIdentityRole<TKey, MongoDbIdentityClaim>
         where TKey : IEquatable<TKey>
