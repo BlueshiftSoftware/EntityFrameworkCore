@@ -11,8 +11,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.MongoDB.Adapter
         [Theory]
         [InlineData(typeof(AbstractClassConvention))]
         [InlineData(typeof(KeyAttributeConvention))]
-        [InlineData(typeof(IgnoreEmptyEnumerablesConvention))]
-        [InlineData(typeof(IgnoreNullOrEmptyStringsConvention))]
+        [InlineData(typeof(NotMappedAttributeConvention))]
         public void Singleton_contains_default_convention_set(Type conventionType)
         {
             ConventionPack conventionPack = EntityFrameworkConventionPack.Instance;

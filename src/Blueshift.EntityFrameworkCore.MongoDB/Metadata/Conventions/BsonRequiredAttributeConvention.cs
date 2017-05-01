@@ -11,22 +11,21 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
     ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
     ///     directly from your code. This API may change or be removed in future releases.
     /// </summary>
-    public class BsonIgnoreAttributeConvention : PropertyAttributeConvention<BsonIgnoreAttribute>
+    public class BsonRequiredAttributeConvention : PropertyAttributeConvention<BsonRequiredAttribute>
     {
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         public override InternalPropertyBuilder Apply([NotNull] InternalPropertyBuilder propertyBuilder,
-            [NotNull] BsonIgnoreAttribute attribute,
+            [NotNull] BsonRequiredAttribute attribute,
             [NotNull] MemberInfo clrMember)
         {
             Check.NotNull(propertyBuilder, nameof(propertyBuilder));
             Check.NotNull(attribute, nameof(attribute));
             Check.NotNull(clrMember, nameof(clrMember));
 
-            var entityTypeBuilder = propertyBuilder.Metadata.DeclaringEntityType.Builder;
-            entityTypeBuilder.Ignore(propertyBuilder.Metadata.Name, ConfigurationSource.DataAnnotation);
+            propertyBuilder.IsRequired(true, ConfigurationSource.DataAnnotation);
 
             return propertyBuilder;
         }

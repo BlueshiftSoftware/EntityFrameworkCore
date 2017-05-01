@@ -17,9 +17,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter
             AddRange(new IConvention[]
             {
                 new AbstractClassConvention(),
-                new IgnoreEmptyEnumerablesConvention(),
-                new IgnoreNullOrEmptyStringsConvention(),
-                new KeyAttributeConvention()
+                new KeyAttributeConvention(),
+                new NotMappedAttributeConvention()
             });
         }
     }

@@ -24,7 +24,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
             Check.NotNull(attribute, nameof(attribute));
             MongoDbEntityTypeAnnotations annotations = entityTypeBuilder.MongoDb();
             if (!string.IsNullOrWhiteSpace(attribute.Discriminator))
+            {
                 annotations.Discriminator = attribute.Discriminator;
+            }
             annotations.DiscriminatorIsRequired = attribute.Required;
             annotations.IsRootType = attribute.RootClass;
             return entityTypeBuilder;
