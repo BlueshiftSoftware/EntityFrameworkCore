@@ -16,16 +16,19 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
     public abstract class MongoDbModelAttributeConvention<TModelAttribute> : IModelConvention
         where TModelAttribute : Attribute, IModelConvention
     {
-        private readonly DbContext _dbContext;
-
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         protected MongoDbModelAttributeConvention([NotNull] DbContext dbContext)
         {
-            _dbContext = Check.NotNull(dbContext, nameof(dbContext));
+            DbContext = Check.NotNull(dbContext, nameof(dbContext));
         }
+
+        /// <summary>
+        /// Gets the <see cref="DbContext"/> whose model is being configured.
+        /// </summary>
+        protected DbContext DbContext { get; }
 
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
@@ -34,7 +37,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
         public virtual InternalModelBuilder Apply([NotNull] InternalModelBuilder modelBuilder)
         {
             Check.NotNull(modelBuilder, nameof(modelBuilder));
-            foreach (TModelAttribute modelAttribute in GetAttributes(_dbContext.GetType()))
+            foreach (TModelAttribute modelAttribute in GetAttributes(DbContext.GetType()))
             {
                 if (!Apply(modelBuilder, modelAttribute))
                 {

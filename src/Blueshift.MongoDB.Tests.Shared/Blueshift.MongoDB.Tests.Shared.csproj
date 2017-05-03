@@ -1,15 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\..\build\common.props"/>
+  <Import Project="..\..\build\common.props" />
 
-  <PropertyGroup>    
-    <TargetFrameworks>net46;netstandard1.5</TargetFrameworks>
+  <PropertyGroup>
+    <TargetFrameworks>net46;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="$(CoreFxVersion)" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Specification.Tests" Version="$(AspNetCoreVersion)" />
     <PackageReference Include="MongoDB.Driver" Version="$(MongoDbVersion)" />
     <PackageReference Include="xunit" Version="$(XunitVersion)" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  </ItemGroup>
+  
 </Project>

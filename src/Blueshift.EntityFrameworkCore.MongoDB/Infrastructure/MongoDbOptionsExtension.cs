@@ -15,6 +15,7 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
     public class MongoDbOptionsExtension : IDbContextOptionsExtension
     {
         private IMongoClient _mongoClient;
+        private string _databaseName;
 
         /// <summary>
         /// This API supports the Entity Framework Core infrastructure and is not intended to be used
@@ -74,6 +75,18 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
             [param: NotNull] set
             {
                 MongoClientSettings = MongoClientSettings.FromUrl(Check.NotNull(value, nameof(MongoUrl)));
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the name of the database that the <see cref="DbContext"/> being configured should use.
+        /// </summary>
+        public string DatabaseName
+        {
+            get { return _databaseName; }
+            [param: NotNull] set
+            {
+                _databaseName = Check.NotEmpty(value, nameof(value));
             }
         }
 

@@ -60,7 +60,9 @@ namespace Blueshift.Identity.MongoDB.Tests
         {
             _serviceProvider = new ServiceCollection()
                 .AddDbContext<IdentityMongoDbContext>(options => options
-                    .UseMongoDb(connectionString: MongoDbConstants.MongoUrl)
+                    .UseMongoDb(
+                        connectionString: MongoDbConstants.MongoUrl,
+                        mongoDbOptionsAction: optionsBuilder => optionsBuilder.UseDatabase("__test_identities"))
                     .EnableSensitiveDataLogging(true))
                 .AddIdentity<MongoDbIdentityUser, MongoDbIdentityRole>()
                 .AddEntityFrameworkMongoDbStores<IdentityMongoDbContext>()

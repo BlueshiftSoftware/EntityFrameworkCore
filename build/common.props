@@ -21,4 +21,8 @@
     <EmbeddedResource Include="**\*.rd.xml" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' And '$(OutputType)' == 'library' And '$(DisableImplicitFrameworkReferences)' != 'true'">
+    <PackageReference Include="NETStandard.Library" Version="$(BundledNETStandardPackageVersion)" />
+  </ItemGroup>
+
 </Project>

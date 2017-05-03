@@ -5,6 +5,9 @@ using System.Text.RegularExpressions;
 using Blueshift.EntityFrameworkCore.MongoDB.Annotations;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
 {
@@ -21,6 +24,27 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
         public MongoDatabaseAttributeConvention([NotNull] DbContext dbContext)
             : base(dbContext)
         {
+        }
+
+        /// <summary>
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
+        public override InternalModelBuilder Apply([NotNull] InternalModelBuilder modelBuilder)
+        {
+            MongoDbOptionsExtension extension = ((IInfrastructure<IServiceProvider>)DbContext)
+                .GetService<IDbContextServices>()
+                ?.ContextOptions
+                ?.FindExtension<MongoDbOptionsExtension>();
+            if (!string.IsNullOrEmpty(extension?.DatabaseName))
+            {
+                modelBuilder.MongoDb().Database = extension.DatabaseName;
+            }
+            else
+            {
+                base.Apply(modelBuilder);
+            }
+            return modelBuilder;
         }
 
         /// <summary>

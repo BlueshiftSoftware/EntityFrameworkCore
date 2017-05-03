@@ -32,6 +32,18 @@ namespace Microsoft.EntityFrameworkCore
         protected virtual DbContextOptionsBuilder OptionsBuilder { get; }
 
         /// <summary>
+        /// Sets the name of the MongoDB database to use with the <see cref="DbContext"/> being configured.
+        /// </summary>
+        /// <param name="databaseName">The name of the MongoDB database instance to use with the current <see cref="DbContext"/>.</param>
+        /// <returns>This <see cref="MongoDbOptionsExtension"/>, so that calls can be chained.</returns>
+        public MongoDbContextOptionsBuilder UseDatabase([NotNull] string databaseName)
+        {
+            Check.NotEmpty(databaseName, nameof(databaseName));
+            OptionsBuilder.Options.FindExtension<MongoDbOptionsExtension>().DatabaseName = databaseName;
+            return this;
+        }
+
+        /// <summary>
         ///     Clones the <see cref="MongoDbOptionsExtension"/> used to configure this builder.
         /// </summary>
         /// <returns>A cloned instance of this builder's <see cref="MongoDbOptionsExtension"/>.</returns>
