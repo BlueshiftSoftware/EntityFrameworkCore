@@ -3,7 +3,7 @@
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.5</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <Product>Blueshift MongoDB EntityFrameworkCore Identity Provider for Microsoft ASP.NET Core</Product>
     <Description>Blueshift Software MongoDB EntityFrameworkCore Identity Provider for Microsoft ASP.NET Core</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

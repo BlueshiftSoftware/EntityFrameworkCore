@@ -17,7 +17,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         protected override bool IsCandidatePrimitiveProperty(PropertyInfo propertyInfo)
-            => propertyInfo.PropertyType == typeof(ObjectId) ||
+            => (propertyInfo.PropertyType.TryGetSequenceType() ?? propertyInfo.PropertyType) == typeof(ObjectId) ||
                 (propertyInfo.PropertyType.TryGetSequenceType() ?? propertyInfo.PropertyType).GetTypeInfo().IsDefined(typeof(ComplexTypeAttribute)) ||
                 base.IsCandidatePrimitiveProperty(propertyInfo);
     }

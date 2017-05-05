@@ -27,7 +27,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         public override bool IsMappedPrimitiveProperty(Type clrType)
-            => clrType == typeof(ObjectId) ||
+            => (clrType.TryGetSequenceType() ?? clrType) == typeof(ObjectId) ||
                 (clrType.TryGetSequenceType() ?? clrType).GetTypeInfo().IsDefined(typeof(ComplexTypeAttribute)) ||
                 base.IsMappedPrimitiveProperty(clrType);
     }
