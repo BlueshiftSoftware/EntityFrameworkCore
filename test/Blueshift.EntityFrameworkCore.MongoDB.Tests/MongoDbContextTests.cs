@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
 using Blueshift.MongoDB.Tests.Shared;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Xunit;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
@@ -160,6 +162,42 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                 insertedEntities.OfType<Tiger>().Single(),
                 await _zooDbContext.Animals.OfType<Tiger>().FirstOrDefaultAsync(),
                 AnimalComparer);
+        }
+
+        [Fact]
+        public void Can_update_existing_entity()
+        {
+            Animal animal = new Tiger { Name = "Tigger", Age = 6.4, Weight = 270, Height = .98 };
+            EntityEntry entityEntry = _zooDbContext.Add(animal);
+            Assert.Equal(EntityState.Added, entityEntry.State);
+            Assert.Null(animal.ConcurrencyField);
+            Assert.Equal(1, _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true));
+            Assert.Equal(EntityState.Unchanged, entityEntry.State);
+            Assert.NotNull(animal.ConcurrencyField);
+
+            Assert.NotNull(entityEntry.OriginalValues[nameof(animal.ConcurrencyField)]);
+
+            animal.Name = "Tigra";
+            _zooDbContext.ChangeTracker.DetectChanges();
+            Assert.Equal(EntityState.Modified, entityEntry.State);
+            Assert.Equal(1, _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true));
+        }
+
+        [Fact]
+        public void Concurrency_field_prevents_updates()
+        {
+            Animal animal = new Tiger { Name = "Tigger", Age = 6.4, Weight = 270, Height = .98 };
+            EntityEntry entityEntry = _zooDbContext.Add(animal);
+            Assert.Equal(1, _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true));
+            Assert.False(string.IsNullOrWhiteSpace(animal.ConcurrencyField));
+
+            string newConcurrencyToken = Guid.NewGuid().ToString();
+            entityEntry.Property(nameof(Animal.ConcurrencyField)).OriginalValue = newConcurrencyToken;
+            typeof(Animal)
+                .GetTypeInfo()
+                .GetProperty(nameof(Animal.ConcurrencyField))
+                .SetValue(animal, newConcurrencyToken);
+            Assert.Equal(0, _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true));
         }
     }
 }

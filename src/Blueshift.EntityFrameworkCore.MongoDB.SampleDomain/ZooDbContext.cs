@@ -55,6 +55,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
         public double Age { get; set; }
         public double Height { get; set; }
         public double Weight { get; set; }
+
+        [ConcurrencyCheck, DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public string ConcurrencyField { get; private set; }
     }
 
     [BsonDiscriminator("panthera tigris")]

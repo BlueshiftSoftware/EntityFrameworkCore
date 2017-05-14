@@ -34,18 +34,23 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
             .GetGenericMethodDefinition();
 
         private readonly IMongoDbConnection _mongoDbConnection;
+        private readonly IMongoDbWriteModelFactorySelector _mongoDbWriteModelFactorySelector;
 
         /// <summary>
         /// Initializes a new instance of hte <see cref="MongoDbDatabase"/> class.
         /// </summary>
         /// <param name="databaseDependencies">Parameter object containing dependencies for this service.</param>
         /// <param name="mongoDbConnection">A <see cref="IMongoDbConnection"/> used to communicate with the MongoDB instance.</param>
+        /// <param name="mongoDbWriteModelFactorySelector">The <see cref="IMongoDbWriteModelFactorySelector"/> to use to create
+        /// <see cref="IMongoDbWriteModelFactory{TEntity}"/> instances.</param>
         public MongoDbDatabase(
             [NotNull] DatabaseDependencies databaseDependencies,
-            [NotNull] IMongoDbConnection mongoDbConnection)
+            [NotNull] IMongoDbConnection mongoDbConnection,
+            [NotNull] IMongoDbWriteModelFactorySelector mongoDbWriteModelFactorySelector)
             : base(Check.NotNull(databaseDependencies, nameof(databaseDependencies)))
         {
             _mongoDbConnection = Check.NotNull(mongoDbConnection, nameof(mongoDbConnection));
+            _mongoDbWriteModelFactorySelector = Check.NotNull(mongoDbWriteModelFactorySelector, nameof(mongoDbWriteModelFactorySelector));
         }
 
         /// <summary>
@@ -70,12 +75,15 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
             return entityType;
         }
 
-        private int SaveChanges<TEntity>(IEnumerable<IUpdateEntry> entries)
+        private int SaveChanges<TEntity>(IGrouping<IEntityType, IUpdateEntry> entries)
         {
+            IMongoDbWriteModelFactory<TEntity> writeModelFactory = _mongoDbWriteModelFactorySelector
+                .CreateFactory<TEntity>(entries.Key);
             IEnumerable<WriteModel<TEntity>> writeModels = entries
-                .Select(entry => entry.ToMongoDbWriteModel<TEntity>())
+                .Select(writeModelFactory.CreateWriteModel)
                 .ToList();
-            BulkWriteResult result = _mongoDbConnection.GetCollection<TEntity>().BulkWrite(writeModels);
+            BulkWriteResult result = _mongoDbConnection.GetCollection<TEntity>()
+                .BulkWrite(writeModels);
             return (int)(result.DeletedCount + result.InsertedCount + result.ModifiedCount);
         }
 
@@ -102,10 +110,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
             => await (Task<int>)_genericSaveChangesAsync.MakeGenericMethod(entryGrouping.Key.ClrType)
                 .Invoke(this, new object[] {entryGrouping, cancellationToken});
 
-        private async Task<int> SaveChangesAsync<TEntity>(IEnumerable<IUpdateEntry> entries, CancellationToken cancellationToken)
+        private async Task<int> SaveChangesAsync<TEntity>(IGrouping<IEntityType, IUpdateEntry> entries, CancellationToken cancellationToken)
         {
-            IEnumerable<WriteModel<TEntity>> writeModels = entries.Select(entry => entry.ToMongoDbWriteModel<TEntity>());
-            BulkWriteResult result = await _mongoDbConnection.GetCollection<TEntity>().BulkWriteAsync(writeModels, options: null, cancellationToken: cancellationToken);
+            IMongoDbWriteModelFactory<TEntity> writeModelFactory = _mongoDbWriteModelFactorySelector
+                .CreateFactory<TEntity>(entries.Key);
+            IEnumerable<WriteModel<TEntity>> writeModels = entries
+                .Select(writeModelFactory.CreateWriteModel);
+            BulkWriteResult result = await _mongoDbConnection.GetCollection<TEntity>()
+                .BulkWriteAsync(writeModels, options: null, cancellationToken: cancellationToken);
             return (int)(result.DeletedCount + result.InsertedCount + result.ModifiedCount);
         }
 

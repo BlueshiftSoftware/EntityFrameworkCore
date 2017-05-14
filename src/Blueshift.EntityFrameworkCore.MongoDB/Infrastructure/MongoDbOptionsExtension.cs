@@ -23,7 +23,11 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
         /// </summary>
         public MongoDbOptionsExtension([CanBeNull]MongoDbOptionsExtension existing = null)
         {
-            _mongoClient = existing?.MongoClient;
+            if (existing != null)
+            {
+                _mongoClient = existing.MongoClient;
+                _databaseName = existing.DatabaseName;
+            }
         }
 
         /// <summary>

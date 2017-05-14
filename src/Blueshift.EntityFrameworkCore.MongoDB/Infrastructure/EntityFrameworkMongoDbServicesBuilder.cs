@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders;
 using Blueshift.EntityFrameworkCore.MongoDB.Query;
 using Blueshift.EntityFrameworkCore.MongoDB.Storage;
+using Blueshift.EntityFrameworkCore.MongoDB.Update;
 using Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -27,6 +28,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
             {
                 { typeof(IMongoClient), new ServiceCharacteristics(ServiceLifetime.Singleton) },
                 { typeof(IMongoDbConnection), new ServiceCharacteristics(ServiceLifetime.Scoped) },
+                { typeof(IMongoDbWriteModelFactorySelector), new ServiceCharacteristics(ServiceLifetime.Singleton) },
                 { typeof(MongoDbConventionSetBuilderDependencies), new ServiceCharacteristics(ServiceLifetime.Scoped) }
             };
 
@@ -64,6 +66,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
             TryAdd<IQueryContextFactory, MongoDbQueryContextFactory>();
             TryAdd<IEntityQueryableExpressionVisitorFactory, MongoDbEntityQueryableExpressionVisitorFactory>();
             TryAdd<IEntityQueryModelVisitorFactory, MongoDbEntityQueryModelVisitorFactory>();
+            TryAdd<IMongoDbWriteModelFactorySelector, MongoDbWriteModelFactorySelector>();
             TryAddProviderSpecificServices(serviceCollectionMap =>
             {
                 serviceCollectionMap.TryAddScoped<IMongoDbConnection, MongoDbConnection>();

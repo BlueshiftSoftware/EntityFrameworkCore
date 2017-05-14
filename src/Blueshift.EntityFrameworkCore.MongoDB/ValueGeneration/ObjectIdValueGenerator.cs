@@ -12,13 +12,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration
         /// <summary>
         /// Initializes a new instance of <see cref="ObjectIdValueGenerator"/> class.
         /// </summary>
-        /// <param name="generatesTemporaryValue">
-        ///     <code>true</code> if this <see cref="ObjectIdValueGenerator"/> generates temporary values;
-        ///     otherwise <code>false</code>.
-        /// </param>
-        public ObjectIdValueGenerator(bool generatesTemporaryValue = false)
+        public ObjectIdValueGenerator()
         {
-            GeneratesTemporaryValues = generatesTemporaryValue;
         }
 
         /// <summary>
@@ -33,6 +28,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration
         ///     <code>true</code> if this <see cref="ObjectIdValueGenerator"/> generates temporary values;
         ///     otherwise <code>false</code>.
         /// </summary>
-        public override bool GeneratesTemporaryValues { get; }
+        /// <remarks>Always returns <c>false</c>.</remarks>
+        public override bool GeneratesTemporaryValues => false;
     }
 }

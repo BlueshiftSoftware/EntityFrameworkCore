@@ -5,14 +5,17 @@ using System.Threading;
 using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders;
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
 using Blueshift.EntityFrameworkCore.MongoDB.Storage;
+using Blueshift.EntityFrameworkCore.MongoDB.Update;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore.ValueGeneration;
 using MongoDB.Driver;
 using Moq;
 using Xunit;
@@ -30,6 +33,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
             var mockMongoCollection = new Mock<IMongoCollection<Employee>>();
             var mockValueGenerationManager = new Mock<IValueGenerationManager>();
             var mockInternalEntityEntryNotifier = new Mock<IInternalEntityEntryNotifier>();
+            var mockWriteModelFactorySelector = new Mock<IMongoDbWriteModelFactorySelector>();
             mockStateManager.SetupGet(stateManager => stateManager.ValueGeneration)
                 .Returns(() => mockValueGenerationManager.Object);
             mockStateManager.SetupGet(stateManager => stateManager.Notify)
@@ -46,11 +50,19 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
                         matchedCount: 0,
                         deletedCount: list.OfType<DeleteOneModel<Employee>>().Count(),
                         insertedCount: list.OfType<InsertOneModel<Employee>>().Count(),
-                        modifiedCount: list.OfType<ReplaceOneModel<Employee>>().Count(),
+                        modifiedCount: list.OfType<UpdateOneModel<Employee>>().Count(),
                         processedRequests: list,
                         upserts: new List<BulkWriteUpsert>()));
             var databaseDepedencies = new DatabaseDependencies(queryCompilationContextFactory);
-            var mongoDbDatabase = new MongoDbDatabase(databaseDepedencies, mockMongoDbConnection.Object);
+            mockWriteModelFactorySelector
+                .Setup(selector => selector.CreateFactory<Employee>(It.IsAny<IEntityType>()))
+                .Returns((IEntityType wmfentityType) => new MongoDbWriteModelFactory<Employee>(
+                    Mock.Of<IValueGeneratorSelector>(),
+                    wmfentityType));
+            var mongoDbDatabase = new MongoDbDatabase(
+                databaseDepedencies,
+                mockMongoDbConnection.Object,
+                mockWriteModelFactorySelector.Object);
 
             var model = new Model(
                 new MongoDbConventionSetBuilder(

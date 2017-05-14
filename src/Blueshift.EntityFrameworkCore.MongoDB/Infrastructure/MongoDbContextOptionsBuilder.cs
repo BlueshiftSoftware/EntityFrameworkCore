@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Utilities;
+using Microsoft.Extensions.Configuration;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.EntityFrameworkCore
@@ -39,7 +40,7 @@ namespace Microsoft.EntityFrameworkCore
         public MongoDbContextOptionsBuilder UseDatabase([NotNull] string databaseName)
         {
             Check.NotEmpty(databaseName, nameof(databaseName));
-            OptionsBuilder.Options.FindExtension<MongoDbOptionsExtension>().DatabaseName = databaseName;
+            CloneExtension().DatabaseName = databaseName;
             return this;
         }
 

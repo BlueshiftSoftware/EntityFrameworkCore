@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Blueshift.EntityFrameworkCore.MongoDB.Annotations;
 using MongoDB.Bson;
@@ -122,7 +123,8 @@ namespace Blueshift.Identity.MongoDB
         /// <summary>
         /// A random value that must change whenever a user is persisted to the store
         /// </summary>
-        public virtual string ConcurrencyStamp { get; set; } = Guid.NewGuid().ToString();
+        [ConcurrencyCheck]
+        public virtual string ConcurrencyStamp { get; set; }
 
         /// <summary>
         /// Gets or sets a telephone number for the user.

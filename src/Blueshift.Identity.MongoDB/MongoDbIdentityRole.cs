@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Blueshift.EntityFrameworkCore.MongoDB.Annotations;
 using Microsoft.EntityFrameworkCore.Utilities;
@@ -76,6 +77,7 @@ namespace Blueshift.Identity.MongoDB
         /// <summary>
         /// A random value that should change whenever a role is persisted to the store.
         /// </summary>
+        [ConcurrencyCheck]
         public virtual string ConcurrencyStamp { get; set; }
 
         /// <summary>
