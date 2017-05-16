@@ -2,13 +2,13 @@
   <PropertyGroup>
     <AspNetCoreVersion>2.0.0-*</AspNetCoreVersion>
     <CoreFxVersion>4.3.0</CoreFxVersion>
-    <MongoDbVersion>2.4.3</MongoDbVersion>
+    <MongoDbVersion>2.4.3-*</MongoDbVersion>
     <MoqVersion>4.7.8</MoqVersion>
     <ConfigurationAbstractionsVersion>1.1.0</ConfigurationAbstractionsVersion>
     <NETStandardImplicitPackageVersion>$(BundledNETStandardPackageVersion)</NETStandardImplicitPackageVersion>
     <RoslynVersion>1.3.0</RoslynVersion>
     <SystemInteractiveAsyncVersion>3.1.1</SystemInteractiveAsyncVersion>
-    <TestSdkVersion>15.0.0</TestSdkVersion>
-    <XunitVersion>2.2.0</XunitVersion>
+    <TestSdkVersion>15.3.0-*</TestSdkVersion>
+    <XunitVersion>2.3.0-beta2-*</XunitVersion>
   </PropertyGroup>
 </Project>
