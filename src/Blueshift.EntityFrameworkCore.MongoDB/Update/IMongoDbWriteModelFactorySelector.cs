@@ -1,5 +1,5 @@
 ﻿using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Update;
 using MongoDB.Driver;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Update
@@ -10,12 +10,12 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
     public interface IMongoDbWriteModelFactorySelector
     {
         /// <summary>
-        /// Creates an <see cref="IMongoDbWriteModelFactory{TEntity}"/> instance for the given <paramref name="entityType"/>.
+        /// Select an <see cref="IMongoDbWriteModelFactory{TEntity}"/> instance for the given <paramref name="updateEntry"/>.
         /// </summary>
-        /// <param name="entityType">The <see cref="IEntityType"/> that the write model factory will be used for.</param>
+        /// <param name="updateEntry">The <see cref="IUpdateEntry"/> that the write model factory will be used to translate.</param>
         /// <typeparam name="TEntity">The type of entity for which to create a <see cref="IMongoDbWriteModelFactory{TEntity}"/> instance.</typeparam>
-        /// <returns>An instance of <see cref="IMongoDbWriteModelFactory{TEntity}"/> that can be used to convert <see cref="IEntityType"/>
-        /// update entries to <see cref="WriteModel{TDocument}"/> instances.</returns>
-        IMongoDbWriteModelFactory<TEntity> CreateFactory<TEntity>([NotNull] IEntityType entityType);
+        /// <returns>An instance of <see cref="IMongoDbWriteModelFactory{TEntity}"/> that can be used to convert <see cref="IUpdateEntry"/>
+        /// instances to <see cref="WriteModel{TDocument}"/> instances.</returns>
+        IMongoDbWriteModelFactory<TEntity> Select<TEntity>([NotNull] IUpdateEntry updateEntry);
     }
 }

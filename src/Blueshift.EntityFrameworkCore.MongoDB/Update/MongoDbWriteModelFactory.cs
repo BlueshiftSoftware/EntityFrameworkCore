@@ -1,9 +1,12 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Update;
 using Microsoft.EntityFrameworkCore.Utilities;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
@@ -12,16 +15,24 @@ using MongoDB.Driver;
 namespace Blueshift.EntityFrameworkCore.MongoDB.Update
 {
     /// <summary>
-    /// Generates <see cref="WriteModel{TEntity}"/> instances from <see cref="IUpdateEntry"/> instances.
+    /// Base class for generating <see cref="WriteModel{TEntity}"/> instances.
     /// </summary>
-    /// <typeparam name="TEntity">The type of entity being updated</typeparam>
-    public class MongoDbWriteModelFactory<TEntity> : IMongoDbWriteModelFactory<TEntity>
+    /// <typeparam name="TEntity">The type of entity to write.</typeparam>
+    public abstract class MongoDbWriteModelFactory<TEntity> : IMongoDbWriteModelFactory<TEntity>
     {
-        private readonly ConcurrentDictionary<EntityState, IWriteModelGenerator<TEntity>> _cache
-            = new ConcurrentDictionary<EntityState, IWriteModelGenerator<TEntity>>();
+        private readonly static MethodInfo _genericEqMethodInfo =
+            typeof(FilterDefinitionBuilder<TEntity>)
+            .GetTypeInfo()
+            .GetDeclaredMethods(nameof(FilterDefinitionBuilder<TEntity>.Eq))
+            .First(methodInfo => methodInfo.GetParameters().Length == 2 &&
+                methodInfo.GetParameters()[0].ParameterType.GetTypeInfo().IsGenericType &&
+                methodInfo.GetParameters()[0].ParameterType.GetTypeInfo().GetGenericTypeDefinition() == typeof(Expression<>))
+            .GetGenericMethodDefinition();
 
         private readonly IValueGeneratorSelector _valueGeneratorSelector;
-        private readonly IEntityType _entityType;
+        private readonly IEnumerable<IProperty> _keyProperties;
+        private readonly IEnumerable<IProperty> _dbGeneratedProperties;
+        private readonly IEnumerable<IProperty> _concurrencyProperties;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbWriteModelFactory{TEntity}"/> class.
@@ -33,7 +44,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
             [NotNull] IEntityType entityType)
         {
             _valueGeneratorSelector = Check.NotNull(valueGeneratorSelector, nameof(valueGeneratorSelector));
-            _entityType = Check.NotNull(entityType, nameof(entityType));
+            _keyProperties = Check.NotNull(entityType, nameof(entityType)).FindPrimaryKey().Properties;
+            _dbGeneratedProperties = entityType
+                .GetProperties()
+                .Where(property => property.ValueGenerated == ValueGenerated.OnAddOrUpdate)
+                .ToList();
+            _concurrencyProperties = _dbGeneratedProperties
+                .Where(property => property.IsConcurrencyToken)
+                .ToList();
         }
 
         /// <summary>
@@ -41,42 +59,59 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
         /// </summary>
         /// <param name="updateEntry">The <see cref="IUpdateEntry"/> entry to convert.</param>
         /// <returns>A new <see cref="WriteModel{TEntity}"/> that contains the updates in <see cref="IUpdateEntry"/>.</returns>
-        public WriteModel<TEntity> CreateWriteModel([NotNull] IUpdateEntry updateEntry)
-        {
-            Check.NotNull(updateEntry, nameof(updateEntry));
-            if (!typeof(TEntity).GetTypeInfo().IsAssignableFrom(updateEntry.EntityType.ClrType))
-            {
-                throw new InvalidOperationException($"Entity must derive from {nameof(TEntity)}.");
-            }
-            if (updateEntry.EntityState != EntityState.Added &&
-                updateEntry.EntityState != EntityState.Modified &&
-                updateEntry.EntityState != EntityState.Deleted)
-            {
-                throw new InvalidOperationException($"Entity state must be Added, Modified, or Deleted.");
-            }
+        public abstract WriteModel<TEntity> CreateWriteModel([NotNull] IUpdateEntry updateEntry);
 
-            IWriteModelGenerator<TEntity> writeModelGenerator = _cache.GetOrAdd(
-                updateEntry.EntityState,
-                CreateWriteModelGenerator);
-            return writeModelGenerator.GenerateWriteModel(updateEntry);
+        /// <summary>
+        /// Generates a <see cref="FilterDefinition{TEntity}"/> for <paramref name="updateEntry"/>.
+        /// </summary>
+        /// <param name="updateEntry">The <see cref="IUpdateEntry"/> for the document being updated.</param>
+        /// <returns>A new <see cref="FilterDefinition{TEntity}"/> that can matches the document in <paramref name="updateEntry"/>.</returns>
+        protected FilterDefinition<TEntity> GetLookupFilter([NotNull] IUpdateEntry updateEntry)
+        {
+            IEnumerable<IProperty> lookupProperties =
+                Check.NotNull(updateEntry, nameof(updateEntry)).EntityState == EntityState.Added
+                    ? _keyProperties
+                    : _keyProperties.Concat(_concurrencyProperties);
+            IList<FilterDefinition<TEntity>> filterDefinitions = lookupProperties
+                .Select(property => GetPropertyFilterDefinition(
+                    property,
+                    property.IsConcurrencyToken
+                        ? updateEntry.GetOriginalValue(property)
+                        : updateEntry.GetCurrentValue(property)))
+                .DefaultIfEmpty(Builders<TEntity>.Filter.Empty)
+                .ToList();
+            return filterDefinitions.Count > 1
+                ? Builders<TEntity>.Filter.And(filterDefinitions)
+                : filterDefinitions[0];
         }
 
-        private IWriteModelGenerator<TEntity> CreateWriteModelGenerator(EntityState entityState)
+        /// <summary>
+        /// Updates the database-generated properties for <paramref name="internalEntityEntry"/>.
+        /// </summary>
+        /// <param name="internalEntityEntry">The <see cref="IUpdateEntry"/> the <see cref="IUpdateEntry"/> representing the document being updated.</param>
+        protected void UpdateDbGeneratedProperties(InternalEntityEntry internalEntityEntry)
         {
-            IWriteModelGenerator<TEntity> writeModelGenerator;
-            switch (entityState)
+            var entityEntry = internalEntityEntry.ToEntityEntry();
+            foreach (IProperty property in _dbGeneratedProperties)
             {
-                case EntityState.Added:
-                    writeModelGenerator = new InsertOneWriteModelGenerator<TEntity>(_valueGeneratorSelector, _entityType);
-                    break;
-                case EntityState.Modified:
-                    writeModelGenerator = new UpdateOneWriteModelGenerator<TEntity>(_valueGeneratorSelector, _entityType);
-                    break;
-                default:
-                    writeModelGenerator = new DeleteOneWriteModelGenerator<TEntity>(_valueGeneratorSelector, _entityType);
-                    break;
+                ValueGenerator valueGenerator = _valueGeneratorSelector.Select(property, internalEntityEntry.EntityType);
+                object dbGeneratedValue = valueGenerator.Next(entityEntry);
+                internalEntityEntry.SetProperty(property, dbGeneratedValue, true);
+                property.GetSetter().SetClrValue(internalEntityEntry.Entity, dbGeneratedValue);
             }
-            return writeModelGenerator;
+        }
+
+        private FilterDefinition<TEntity> GetPropertyFilterDefinition(
+            IPropertyBase property,
+            object propertyValue)
+        {
+            ParameterExpression parameterExpression = Expression.Parameter(typeof(TEntity), name: "entity");
+            LambdaExpression lambdaExpression = Expression.Lambda(
+                Expression.MakeMemberAccess(parameterExpression, property.PropertyInfo),
+                parameterExpression);
+            return (FilterDefinition<TEntity>)_genericEqMethodInfo
+                .MakeGenericMethod(property.ClrType)
+                .Invoke(Builders<TEntity>.Filter, new[] { lambdaExpression, propertyValue });
         }
     }
 }

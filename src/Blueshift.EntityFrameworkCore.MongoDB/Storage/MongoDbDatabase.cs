@@ -75,12 +75,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
             return entityType;
         }
 
-        private int SaveChanges<TEntity>(IGrouping<IEntityType, IUpdateEntry> entries)
+        private int SaveChanges<TEntity>(IEnumerable<IUpdateEntry> entries)
         {
-            IMongoDbWriteModelFactory<TEntity> writeModelFactory = _mongoDbWriteModelFactorySelector
-                .CreateFactory<TEntity>(entries.Key);
             IEnumerable<WriteModel<TEntity>> writeModels = entries
-                .Select(writeModelFactory.CreateWriteModel)
+                .Select(entry => _mongoDbWriteModelFactorySelector.Select<TEntity>(entry).CreateWriteModel(entry))
                 .ToList();
             BulkWriteResult result = _mongoDbConnection.GetCollection<TEntity>()
                 .BulkWrite(writeModels);
@@ -110,12 +108,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
             => await (Task<int>)_genericSaveChangesAsync.MakeGenericMethod(entryGrouping.Key.ClrType)
                 .Invoke(this, new object[] {entryGrouping, cancellationToken});
 
-        private async Task<int> SaveChangesAsync<TEntity>(IGrouping<IEntityType, IUpdateEntry> entries, CancellationToken cancellationToken)
+        private async Task<int> SaveChangesAsync<TEntity>(IEnumerable<IUpdateEntry> entries, CancellationToken cancellationToken)
         {
-            IMongoDbWriteModelFactory<TEntity> writeModelFactory = _mongoDbWriteModelFactorySelector
-                .CreateFactory<TEntity>(entries.Key);
             IEnumerable<WriteModel<TEntity>> writeModels = entries
-                .Select(writeModelFactory.CreateWriteModel);
+                .Select(entry => _mongoDbWriteModelFactorySelector.Select<TEntity>(entry).CreateWriteModel(entry))
+                .ToList();
             BulkWriteResult result = await _mongoDbConnection.GetCollection<TEntity>()
                 .BulkWriteAsync(writeModels, options: null, cancellationToken: cancellationToken);
             return (int)(result.DeletedCount + result.InsertedCount + result.ModifiedCount);

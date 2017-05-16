@@ -11,14 +11,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
     /// Creates <see cref="DeleteOneModel{TEntity}"/> from a given <see cref="IUpdateEntry"/>.
     /// </summary>
     /// <typeparam name="TEntity">The type of entity being added.</typeparam>
-    public class DeleteOneWriteModelGenerator<TEntity> : BaseWriteModelGenerator<TEntity>
+    public class DeleteOneModelFactory<TEntity> : MongoDbWriteModelFactory<TEntity>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="BaseWriteModelGenerator{TEntity}"/> class.
+        /// Initializes a new instance of the <see cref="MongoDbWriteModelFactory{TEntity}"/> class.
         /// </summary>
         /// <param name="valueGeneratorSelector">The <see cref="IValueGeneratorSelector"/> to use for populating concurrency tokens.</param>
-        /// <param name="entityType">The <see cref="IEntityType"/> for which this <see cref="BaseWriteModelGenerator{TDocument}"/> will be used.</param>
-        public DeleteOneWriteModelGenerator(
+        /// <param name="entityType">The <see cref="IEntityType"/> for which this <see cref="MongoDbWriteModelFactory{TDocument}"/> will be used.</param>
+        public DeleteOneModelFactory(
             [NotNull] IValueGeneratorSelector valueGeneratorSelector,
             [NotNull] IEntityType entityType)
             : base(
@@ -33,9 +33,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
         /// <param name="updateEntry">The <see cref="IUpdateEntry"/> to map.</param>
         /// <returns>A new <see cref="DeleteOneModel{TEntity}"/> containing the inserted values represented
         /// by <paramref name="updateEntry"/>.</returns>
-        public override WriteModel<TEntity> GenerateWriteModel([NotNull] IUpdateEntry updateEntry)
-        {
-            return new DeleteOneModel<TEntity>(GetLookupFilter(updateEntry));
-        }
+        public override WriteModel<TEntity> CreateWriteModel([NotNull] IUpdateEntry updateEntry)
+            => new DeleteOneModel<TEntity>(GetLookupFilter(updateEntry));
     }
 }

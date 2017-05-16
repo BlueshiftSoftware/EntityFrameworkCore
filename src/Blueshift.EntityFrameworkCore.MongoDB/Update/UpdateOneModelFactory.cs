@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -17,7 +16,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
     /// Creates <see cref="UpdateOneModel{TEntity}"/> from a given <see cref="IUpdateEntry"/>.
     /// </summary>
     /// <typeparam name="TEntity">The type of entity being added.</typeparam>
-    public class UpdateOneWriteModelGenerator<TEntity> : BaseWriteModelGenerator<TEntity>
+    public class UpdateOneModelFactory<TEntity> : MongoDbWriteModelFactory<TEntity>
     {
         private static readonly MethodInfo _setMethodInfo = typeof(UpdateDefinitionBuilder<TEntity>)
             .GetTypeInfo()
@@ -28,11 +27,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
             .GetGenericMethodDefinition();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BaseWriteModelGenerator{TEntity}"/> class.
+        /// Initializes a new instance of the <see cref="MongoDbWriteModelFactory{TEntity}"/> class.
         /// </summary>
         /// <param name="valueGeneratorSelector">The <see cref="IValueGeneratorSelector"/> to use for populating concurrency tokens.</param>
-        /// <param name="entityType">The <see cref="IEntityType"/> for which this <see cref="BaseWriteModelGenerator{TDocument}"/> will be used.</param>
-        public UpdateOneWriteModelGenerator(
+        /// <param name="entityType">The <see cref="IEntityType"/> for which this <see cref="MongoDbWriteModelFactory{TDocument}"/> will be used.</param>
+        public UpdateOneModelFactory(
             [NotNull] IValueGeneratorSelector valueGeneratorSelector,
             [NotNull] IEntityType entityType)
             : base(
@@ -47,7 +46,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
         /// <param name="updateEntry">The <see cref="IUpdateEntry"/> to map.</param>
         /// <returns>A new <see cref="UpdateOneModel{TEntity}"/> containing the inserted values represented
         /// by <paramref name="updateEntry"/>.</returns>
-        public override WriteModel<TEntity> GenerateWriteModel([NotNull] IUpdateEntry updateEntry)
+        public override WriteModel<TEntity> CreateWriteModel([NotNull] IUpdateEntry updateEntry)
         {
             InternalEntityEntry internalEntityEntry = Check.Is<InternalEntityEntry>(updateEntry, nameof(updateEntry));
             UpdateDbGeneratedProperties(internalEntityEntry);

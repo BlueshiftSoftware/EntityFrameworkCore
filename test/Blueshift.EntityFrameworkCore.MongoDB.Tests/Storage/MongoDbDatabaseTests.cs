@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore.Update;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
 using MongoDB.Driver;
 using Moq;
@@ -33,7 +34,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
             var mockMongoCollection = new Mock<IMongoCollection<Employee>>();
             var mockValueGenerationManager = new Mock<IValueGenerationManager>();
             var mockInternalEntityEntryNotifier = new Mock<IInternalEntityEntryNotifier>();
-            var mockWriteModelFactorySelector = new Mock<IMongoDbWriteModelFactorySelector>();
             mockStateManager.SetupGet(stateManager => stateManager.ValueGeneration)
                 .Returns(() => mockValueGenerationManager.Object);
             mockStateManager.SetupGet(stateManager => stateManager.Notify)
@@ -54,15 +54,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
                         processedRequests: list,
                         upserts: new List<BulkWriteUpsert>()));
             var databaseDepedencies = new DatabaseDependencies(queryCompilationContextFactory);
-            mockWriteModelFactorySelector
-                .Setup(selector => selector.CreateFactory<Employee>(It.IsAny<IEntityType>()))
-                .Returns((IEntityType wmfentityType) => new MongoDbWriteModelFactory<Employee>(
+            IMongoDbWriteModelFactorySelector writeModelFactorySelector =
+                new MongoDbWriteModelFactorySelector(
                     Mock.Of<IValueGeneratorSelector>(),
-                    wmfentityType));
+                    new MongoDbWriteModelFactoryCache());
             var mongoDbDatabase = new MongoDbDatabase(
                 databaseDepedencies,
                 mockMongoDbConnection.Object,
-                mockWriteModelFactorySelector.Object);
+                writeModelFactorySelector);
 
             var model = new Model(
                 new MongoDbConventionSetBuilder(
