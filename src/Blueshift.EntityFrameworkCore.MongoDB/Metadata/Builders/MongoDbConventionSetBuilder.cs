@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions;
+﻿using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Utilities;
+using System.Collections.Generic;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
 {
@@ -19,7 +19,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
         ///     Initializes a new instance of the <see cref="MongoDbConventionSetBuilder" /> class.
         /// </summary>
         /// <param name="mongoDbConventionSetBuilderDependencies">Parameter object containing dependencies for this service.</param>
-        public MongoDbConventionSetBuilder([NotNull] MongoDbConventionSetBuilderDependencies mongoDbConventionSetBuilderDependencies)
+        public MongoDbConventionSetBuilder(
+            [NotNull] MongoDbConventionSetBuilderDependencies mongoDbConventionSetBuilderDependencies)
         {
             _mongoDbConventionSetBuilderDependencies
                 = Check.NotNull(mongoDbConventionSetBuilderDependencies, nameof(mongoDbConventionSetBuilderDependencies));
@@ -33,11 +34,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
         {
             Check.NotNull(conventionSet, nameof(conventionSet));
 
-            var mongoDatabaseAttributeConvention = new MongoDatabaseAttributeConvention(_mongoDbConventionSetBuilderDependencies.CurrentDbContext.Context);
-            PropertyDiscoveryConvention mongoDbPropertyDiscoveryConvention = new MongoDbPropertyDiscoveryConvention();
-            RelationshipDiscoveryConvention mongoDbRelationshipDiscoveryConvention = new MongoDbRelationshipDiscoveryConvention();
+            var mongoDatabaseAttributeConvention
+                = new MongoDatabaseAttributeConvention(_mongoDbConventionSetBuilderDependencies.CurrentDbContext.Context);
+            PropertyDiscoveryConvention mongoDbPropertyDiscoveryConvention
+                = new MongoDbPropertyDiscoveryConvention(_mongoDbConventionSetBuilderDependencies.TypeMapper);
+            RelationshipDiscoveryConvention mongoDbRelationshipDiscoveryConvention
+                = new MongoDbRelationshipDiscoveryConvention(_mongoDbConventionSetBuilderDependencies.TypeMapper);
             PropertyMappingValidationConvention mongoDbPropertyMappingValidationConvention
-                = new MongoDbPropertyMappingValidationConvention();
+                = new MongoDbPropertyMappingValidationConvention(_mongoDbConventionSetBuilderDependencies.TypeMapper);
             DatabaseGeneratedAttributeConvention mongoDbDatabaseGeneratedAttributeConvention
                 = new MongoDbDatabaseGeneratedAttributeConvention();
 
@@ -47,11 +51,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
             conventionSet.EntityTypeAddedConventions
                 .Replace(mongoDbPropertyDiscoveryConvention)
                 .Replace(mongoDbRelationshipDiscoveryConvention)
-                .With(new BsonDiscriminatorAttributeConvention());
-
-            conventionSet.BaseEntityTypeSetConventions
                 .Replace(mongoDbPropertyDiscoveryConvention)
-                .Replace(mongoDbRelationshipDiscoveryConvention);
+                .Replace(mongoDbRelationshipDiscoveryConvention)
+                .With(new BsonDiscriminatorAttributeConvention());
 
             conventionSet.EntityTypeMemberIgnoredConventions
                 .Replace(mongoDbRelationshipDiscoveryConvention);

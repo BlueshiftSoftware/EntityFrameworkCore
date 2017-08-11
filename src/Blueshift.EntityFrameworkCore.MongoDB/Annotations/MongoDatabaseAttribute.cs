@@ -11,7 +11,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Annotations
     /// When applied to a <see cref="DbContext"/>, sets the database name to use with the context's <see cref="Model"/>.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
-    public class MongoDatabaseAttribute : Attribute, IModelConvention
+    public class MongoDatabaseAttribute : Attribute, IModelBuiltConvention
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDatabaseAttribute"/> class.

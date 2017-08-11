@@ -11,7 +11,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Annotations
     /// When applied to an entity class, sets the name of MongoDB collection name used to store instances of the entity.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
-    public class MongoCollectionAttribute : Attribute, IEntityTypeConvention
+    public class MongoCollectionAttribute : Attribute, IEntityTypeAddedConvention
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoCollectionAttribute"/> class.

@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.EntityFrameworkCore.Storage;
 using MongoDB.Driver;
 using Moq;
 using Xunit;
@@ -20,10 +21,12 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
         private readonly Mock<IMongoDatabase> _mockMongoDatabase;
         private readonly Mock<IMongoClient> _mockMongoClient;
         private readonly Mock<IMongoCollection<Employee>> _mockEmployee;
+        private readonly Mock<ITypeMapper> _mockTypeMapper;
         private readonly IModel _model;
 
         public MongoDbConnectionTests()
         {
+            _mockTypeMapper = MockTypeMapper();
             _model = GetModel();
             _mockMongoClient = MockMongoClient();
             _mockMongoDatabase = MockMongoDatabase();
@@ -37,8 +40,13 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
                     new MongoDbConventionSetBuilderDependencies(
                         new CurrentDbContext(
                             new ZooDbContext(
-                                new DbContextOptions<ZooDbContext>()))))
-                    .AddConventions(new CoreConventionSetBuilder().CreateConventionSet()))
+                                new DbContextOptions<ZooDbContext>())),
+                        _mockTypeMapper.Object))
+                    .AddConventions(
+                        new CoreConventionSetBuilder(
+                            new CoreConventionSetBuilderDependencies(
+                                _mockTypeMapper.Object))
+                            .CreateConventionSet()))
                 .ForMongoDbFromDatabase("zooDb")
                 .Model
                 .AsModel();
@@ -73,6 +81,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
 
         private Mock<IMongoCollection<Employee>> MockEmployee()
             => new Mock<IMongoCollection<Employee>>();
+
+        private Mock<ITypeMapper> MockTypeMapper()
+            => new Mock<ITypeMapper>();
 
         [Fact]
         public void Get_database_calls_mongo_client_get_database()

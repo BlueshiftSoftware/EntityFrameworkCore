@@ -2,6 +2,9 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore.Utilities;
+using JetBrains.Annotations;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
 {
@@ -11,6 +14,15 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
     /// </summary>
     public class MongoDbRelationshipDiscoveryConvention : RelationshipDiscoveryConvention
     {
+        /// <summary>
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
+        public MongoDbRelationshipDiscoveryConvention([NotNull]ITypeMapper typeMapper)
+            : base(Check.NotNull(typeMapper, nameof(typeMapper)))
+        {
+        }
+
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.

@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
+using System;
+using System.Text;
+using System.Linq;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.EntityFrameworkCore.Infrastructure
@@ -16,6 +19,7 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
     {
         private IMongoClient _mongoClient;
         private string _databaseName;
+        private string _logFragment;
 
         /// <summary>
         /// This API supports the Entity Framework Core infrastructure and is not intended to be used
@@ -36,7 +40,7 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
         /// </summary>
         public virtual string ConnectionString
         {
-            get { return MongoUrl?.ToString(); }
+            get => MongoUrl?.ToString();
             [param: NotNull] set
             {
                 MongoUrl = MongoUrl.Create(Check.NotEmpty(value, nameof(ConnectionString)));
@@ -49,7 +53,7 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
         /// </summary>
         public virtual IMongoClient MongoClient
         {
-            get { return _mongoClient; }
+            get => _mongoClient;
             [param: NotNull] set
             {
                 _mongoClient = Check.NotNull(value, nameof(MongoClient));
@@ -62,7 +66,7 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
         /// </summary>
         public virtual MongoClientSettings MongoClientSettings
         {
-            get { return MongoClient?.Settings; }
+            get => MongoClient?.Settings;
             [param: NotNull] set
             {
                 MongoClient = new MongoClient(Check.NotNull(value, nameof(MongoClientSettings)).Clone());
@@ -75,7 +79,9 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
         /// </summary>
         public virtual MongoUrl MongoUrl
         {
-            get { return MongoUrl.Create(MongoClientSettings.ToString()); }
+            get => _mongoClient == null
+                ? null
+                : MongoUrl.Create($"mongodb://{String.Join(",", _mongoClient.Settings.Servers.Select(server => $"{server.Host}:{server.Port}"))}");
             [param: NotNull] set
             {
                 MongoClientSettings = MongoClientSettings.FromUrl(Check.NotNull(value, nameof(MongoUrl)));
@@ -87,10 +93,35 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
         /// </summary>
         public string DatabaseName
         {
-            get { return _databaseName; }
+            get => _databaseName;
             [param: NotNull] set
             {
                 _databaseName = Check.NotEmpty(value, nameof(value));
+            }
+        }
+
+        /// <inheritdoc/>
+        public string LogFragment
+        {
+            get
+            {
+                if (_logFragment == null)
+                {
+                    var logBuilder = new StringBuilder();
+
+                    if (_mongoClient?.Settings != null)
+                    {
+                        logBuilder.Append("MongoClient.Settings=").Append(_mongoClient.Settings.ToString());
+                    }
+
+                    if (!string.IsNullOrEmpty(DatabaseName))
+                    {
+                        logBuilder.Append("DatabaseName=").Append(DatabaseName);
+                    }
+
+                    _logFragment = logBuilder.ToString();
+                }
+                return _logFragment;
             }
         }
 

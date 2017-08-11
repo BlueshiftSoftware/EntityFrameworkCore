@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Utilities;
@@ -1217,6 +1218,23 @@ namespace Blueshift.Identity.MongoDB
         /// <returns>The <see cref="Task"/> that represents the asynchronous operation, containing the security stamp for the specified <paramref name="user"/>.</returns>
         public virtual Task<string> GetAuthenticatorKeyAsync(TUser user, CancellationToken cancellationToken)
             => GetTokenAsync(user, InternalLoginProvider, AuthenticatorKeyTokenName, cancellationToken);
+
+        /// <summary>
+        /// Returns the number of remaining valid recovery codes for the specified <paramref name="user"/>.
+        /// </summary>
+        /// <param name="user">The user who owns the recovery code.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
+        /// <returns>The number of remaining valid recovery codes for the specified <paramref name="user"/>.</returns>
+        public virtual Task<int> CountCodesAsync(TUser user, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            Check.NotNull(user, nameof(user));
+            int count = user.Logins
+                .SelectMany(userLogin => userLogin.UserTokens)
+                    .Sum(userToken => 1);
+            return Task.FromResult(count);
+        }
 
         /// <summary>
         /// Updates the recovery codes for the user while invalidating any previous recovery codes.

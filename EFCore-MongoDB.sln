@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.12
+VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{FAF9C31C-A1AF-42A9-9306-EC190DCACCC7}"
 	ProjectSection(SolutionItems) = preProject
@@ -14,6 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Globals", "Globals", "{6841
 	ProjectSection(SolutionItems) = preProject
 		.travis.yml = .travis.yml
 		appveyor.yml = appveyor.yml
+		build.cmd = build.cmd
 		build.ps1 = build.ps1
 		build.sh = build.sh
 		NuGet.config = NuGet.config
@@ -35,17 +36,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{2B598B
 		src\Shared\StringBuilderExtensions.cs = src\Shared\StringBuilderExtensions.cs
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blueshift.EntityFrameworkCore.MongoDB", "src\Blueshift.EntityFrameworkCore.MongoDB\Blueshift.EntityFrameworkCore.MongoDB.csproj", "{E0841FBC-A266-41BF-AA5F-4514692D2161}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blueshift.EntityFrameworkCore.MongoDB", "src\Blueshift.EntityFrameworkCore.MongoDB\Blueshift.EntityFrameworkCore.MongoDB.csproj", "{E0841FBC-A266-41BF-AA5F-4514692D2161}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blueshift.EntityFrameworkCore.MongoDB.SampleDomain", "src\Blueshift.EntityFrameworkCore.MongoDB.SampleDomain\Blueshift.EntityFrameworkCore.MongoDB.SampleDomain.csproj", "{169261F6-0B97-47A5-98B8-E6AA084FF6A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blueshift.EntityFrameworkCore.MongoDB.SampleDomain", "src\Blueshift.EntityFrameworkCore.MongoDB.SampleDomain\Blueshift.EntityFrameworkCore.MongoDB.SampleDomain.csproj", "{169261F6-0B97-47A5-98B8-E6AA084FF6A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blueshift.EntityFrameworkCore.MongoDB.Tests", "test\Blueshift.EntityFrameworkCore.MongoDB.Tests\Blueshift.EntityFrameworkCore.MongoDB.Tests.csproj", "{314B80D1-CBB7-4EF5-A5BD-3AD9F14069E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blueshift.EntityFrameworkCore.MongoDB.Tests", "test\Blueshift.EntityFrameworkCore.MongoDB.Tests\Blueshift.EntityFrameworkCore.MongoDB.Tests.csproj", "{314B80D1-CBB7-4EF5-A5BD-3AD9F14069E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blueshift.Identity.MongoDB", "src\Blueshift.Identity.MongoDB\Blueshift.Identity.MongoDB.csproj", "{85A1B2BB-BF46-445A-85C3-CFB1CCCB33CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blueshift.Identity.MongoDB", "src\Blueshift.Identity.MongoDB\Blueshift.Identity.MongoDB.csproj", "{85A1B2BB-BF46-445A-85C3-CFB1CCCB33CE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blueshift.Identity.MongoDB.Tests", "test\Blueshift.Identity.MongoDB.Tests\Blueshift.Identity.MongoDB.Tests.csproj", "{E7AF1BE9-6017-4FDF-BDEC-B3FAC1888A25}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blueshift.Identity.MongoDB.Tests", "test\Blueshift.Identity.MongoDB.Tests\Blueshift.Identity.MongoDB.Tests.csproj", "{E7AF1BE9-6017-4FDF-BDEC-B3FAC1888A25}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blueshift.MongoDB.Tests.Shared", "src\Blueshift.MongoDB.Tests.Shared\Blueshift.MongoDB.Tests.Shared.csproj", "{5EAA5630-0DB1-4277-8ABE-404D336AA921}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blueshift.MongoDB.Tests.Shared", "src\Blueshift.MongoDB.Tests.Shared\Blueshift.MongoDB.Tests.Shared.csproj", "{5EAA5630-0DB1-4277-8ABE-404D336AA921}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Update;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
 using MongoDB.Bson;
@@ -27,6 +28,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Update
             var mockStateManager = new Mock<IStateManager>();
             var mockValueGenerationManager = new Mock<IValueGenerationManager>();
             var mockInternalEntityEntryNotifier = new Mock<IInternalEntityEntryNotifier>();
+            var mockTypeMapper = new Mock<ITypeMapper>();
             mockStateManager.SetupGet(stateManager => stateManager.ValueGeneration)
                 .Returns(() => mockValueGenerationManager.Object);
             mockStateManager.SetupGet(stateManager => stateManager.Notify)
@@ -37,8 +39,13 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Update
                     new MongoDbConventionSetBuilderDependencies(
                         new CurrentDbContext(
                             new ZooDbContext(
-                                new DbContextOptions<ZooDbContext>()))))
-                    .AddConventions(new CoreConventionSetBuilder().CreateConventionSet()));
+                                new DbContextOptions<ZooDbContext>())),
+                        mockTypeMapper.Object))
+                    .AddConventions(
+                        new CoreConventionSetBuilder(
+                            new CoreConventionSetBuilderDependencies(
+                                mockTypeMapper.Object))
+                            .CreateConventionSet()));
             Type entityClrType = entity.GetType();
             EntityType entityType = model.AddEntityType(entityClrType);
             entityType.Builder

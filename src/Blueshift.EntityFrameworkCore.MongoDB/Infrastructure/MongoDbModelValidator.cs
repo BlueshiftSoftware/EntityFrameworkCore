@@ -60,7 +60,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
                 .Where(tuple => !tables.Add(tuple.CollectionName));
             foreach (var tuple in duplicateCollectionNames)
             {
-                ShowError($"Duplicate collection name \"{tuple.CollectionName}\" defined on entity type \"{tuple.DisplayName}\".");
+                throw new InvalidOperationException($"Duplicate collection name \"{tuple.CollectionName}\" defined on entity type \"{tuple.DisplayName}\".");
             }
         }
 
@@ -90,7 +90,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
             foreach (var pair in unregisteredTypes)
             {
                 if (!pair.BaseType.GetTypeInfo().IsAssignableFrom(pair.DerivedType))
-                    ShowError($"Known type {pair.DerivedType} declared on base type {pair.BaseType} does not inherit from base type.");
+                    throw new InvalidOperationException($"Known type {pair.DerivedType} declared on base type {pair.BaseType} does not inherit from base type.");
             }
         }
 
@@ -115,11 +115,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
             var annotations = new MongoDbEntityTypeAnnotations(entityType);
             if (string.IsNullOrWhiteSpace(annotations.Discriminator))
             {
-                ShowError($"Missing discriminator value for entity type {entityType.DisplayName()}.");
+                throw new InvalidOperationException($"Missing discriminator value for entity type {entityType.DisplayName()}.");
             }
             if (!discriminatorSet.Add(Tuple.Create(entityType.RootType(), annotations.Discriminator)))
             {
-                ShowError($"Duplicate discriminator value {annotations.Discriminator} for root entity type {entityType.RootType().DisplayName()} (defined on {entityType.DisplayName()}).");
+                throw new InvalidOperationException($"Duplicate discriminator value {annotations.Discriminator} for root entity type {entityType.RootType().DisplayName()} (defined on {entityType.DisplayName()}).");
             }
         }
     }

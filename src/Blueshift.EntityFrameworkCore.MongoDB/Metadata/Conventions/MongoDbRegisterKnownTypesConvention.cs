@@ -15,7 +15,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
     ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
     ///     directly from your code. This API may change or be removed in future releases.
     /// </summary>
-    public class MongoDbRegisterKnownTypesConvention : IModelConvention
+    public class MongoDbRegisterKnownTypesConvention : IModelBuiltConvention
     {
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used

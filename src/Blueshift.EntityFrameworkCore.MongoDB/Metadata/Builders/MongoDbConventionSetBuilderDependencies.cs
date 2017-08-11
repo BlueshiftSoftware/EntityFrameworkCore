@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Utilities;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
@@ -28,15 +29,23 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
         /// Initializes a new instance of the <see cref="MongoDbConventionSetBuilderDependencies"/> class.
         /// </summary>
         /// <param name="currentDbContext">Indirection to the current <see cref="DbContext" /> instance.</param>
+        /// <param name="typeMapper">Maps .NET types to their corresponding database provider types.</param>
         public MongoDbConventionSetBuilderDependencies(
-            [NotNull] ICurrentDbContext currentDbContext)
+            [NotNull] ICurrentDbContext currentDbContext,
+            [NotNull] ITypeMapper typeMapper)
         {
             CurrentDbContext = Check.NotNull(currentDbContext, nameof(currentDbContext));
+            TypeMapper = Check.NotNull(typeMapper, nameof(typeMapper));
         }
 
         /// <summary>
         ///     Indirection to the current <see cref="DbContext" /> instance.
         /// </summary>
         public ICurrentDbContext CurrentDbContext { get; private set; }
+
+        /// <summary>
+        /// Maps .NET types to their corresponding database provider types.
+        /// </summary>
+        public ITypeMapper TypeMapper { get; private set; }
     }
 }

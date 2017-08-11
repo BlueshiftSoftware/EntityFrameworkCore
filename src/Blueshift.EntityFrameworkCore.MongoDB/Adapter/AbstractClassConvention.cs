@@ -13,7 +13,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter
     /// <summary>
     /// A convention that specifies that a discriminator is required when the given type is abstract.
     /// </summary>
-    public class AbstractClassConvention : ConventionBase, IClassMapConvention, IEntityTypeConvention
+    public class AbstractClassConvention : ConventionBase, IClassMapConvention, IEntityTypeAddedConvention
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AbstractClassConvention" /> class.

@@ -34,6 +34,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
             var mockMongoCollection = new Mock<IMongoCollection<Employee>>();
             var mockValueGenerationManager = new Mock<IValueGenerationManager>();
             var mockInternalEntityEntryNotifier = new Mock<IInternalEntityEntryNotifier>();
+            var mockTypeMapper = new Mock<ITypeMapper>();
             mockStateManager.SetupGet(stateManager => stateManager.ValueGeneration)
                 .Returns(() => mockValueGenerationManager.Object);
             mockStateManager.SetupGet(stateManager => stateManager.Notify)
@@ -68,8 +69,13 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
                     new MongoDbConventionSetBuilderDependencies(
                         new CurrentDbContext(
                             new ZooDbContext(
-                                new DbContextOptions<ZooDbContext>()))))
-                    .AddConventions(new CoreConventionSetBuilder().CreateConventionSet()));
+                                new DbContextOptions<ZooDbContext>())),
+                        mockTypeMapper.Object))
+                    .AddConventions(
+                        new CoreConventionSetBuilder(
+                            new CoreConventionSetBuilderDependencies(
+                                mockTypeMapper.Object))
+                            .CreateConventionSet()));
             EntityType entityType = model.AddEntityType(typeof(Employee));
             entityType.Builder
                 .GetOrCreateProperties(typeof(Employee).GetTypeInfo().GetProperties(), ConfigurationSource.Convention);
