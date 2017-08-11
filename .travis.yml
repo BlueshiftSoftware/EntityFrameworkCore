@@ -10,12 +10,18 @@ services:
   - mongodb
 os:
   - linux
-  # - osx CoreCLR tests time out too frequently on OSX to be useful.
+#  - osx
+osx_image: xcode8.1
+addons:
+  apt:
+    packages:
+      - libunwind8
 branches:
   only:
     - master
     - release
     - develop
+    - /^rel\/.*/
     - /^(.*\/)?ci-.*$/
 before_install:
   - if test "$TRAVIS_OS_NAME" == "osx"; then brew update; brew install openssl; ln -s /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib /usr/local/lib/; ln -s /usr/local/opt/openssl/lib/libssl.1.0.0.dylib /usr/local/lib/; fi
