@@ -95,11 +95,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
             IList<Animal> queriedEntities = _zooDbContext.Animals
                 .OrderBy(animal => animal.Name)
                 .ToList();
-            Assert.Equal(insertedEntities.Count, queriedEntities.Count);
-            for (var i = 0; i < insertedEntities.Count; i++)
-            {
-                Assert.Equal(insertedEntities[i], queriedEntities[i], AnimalComparer);
-            }
+            Assert.Equal(insertedEntities, queriedEntities, AnimalComparer);
         }
 
         [Fact]

@@ -21,7 +21,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.MongoDB.Adapter
             Assert.Equal(keyExpected, memberInfo.IsDefined(typeof(KeyAttribute), false));
             var keyAttributeConvention = new KeyAttributeConvention();
             var bsonClasspMap = new BsonClassMap<Employee>();
-            BsonMemberMap bsonMemberMap = bsonClasspMap.MapMember(typeof(Employee).GetTypeInfo().GetProperty(memberName));
+            BsonMemberMap bsonMemberMap = bsonClasspMap.MapMember(memberInfo);
             keyAttributeConvention.Apply(bsonMemberMap);
             Assert.Equal(keyExpected, bsonClasspMap.IdMemberMap == bsonMemberMap);
         }

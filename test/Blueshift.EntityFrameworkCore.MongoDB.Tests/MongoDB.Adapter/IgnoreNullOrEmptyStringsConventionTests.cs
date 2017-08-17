@@ -8,7 +8,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.MongoDB.Adapter
     public class IgnoreNullOrEmptyStringsConventionTests
     {
         [Theory]
-        [InlineData(data: null)]
+        [InlineData(null)]
         [InlineData("")]
         [InlineData(" \t\v\r\n")]
         [InlineData("TestData")]

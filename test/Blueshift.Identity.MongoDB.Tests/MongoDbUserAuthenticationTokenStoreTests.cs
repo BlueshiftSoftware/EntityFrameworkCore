@@ -68,14 +68,12 @@ namespace Blueshift.Identity.MongoDB.Tests
         {
             var user = CreateUser();
             await _mongoDbUserAuthenticationTokenStore.RemoveTokenAsync(user, "Google", Token1Name, new CancellationToken());
-            Assert.False(user.Logins
+            var userTokens = user.Logins
                    .First(login => login.LoginProvider == "Google")
-                   .UserTokens
-                   .Any(userToken => userToken.Name == Token1Name));
-            Assert.Equal(Token2Value, user.Logins
-                   .First(login => login.LoginProvider == "Google")
-                   .UserTokens
-                   .First(userToken => userToken.Name == Token2Name).Value,
+                   .UserTokens;
+            Assert.DoesNotContain(userTokens, userToken => userToken.Name == Token1Name);
+            Assert.Equal(Token2Value,
+                userTokens.First(userToken => userToken.Name == Token2Name).Value,
                 StringComparer.Ordinal);
         }
     }

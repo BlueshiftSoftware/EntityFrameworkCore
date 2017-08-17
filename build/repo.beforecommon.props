@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <!-- for local builds, always use the time-based build number -->
+    <IncrementalVersion>true</IncrementalVersion>
+  </PropertyGroup>
+</Project>

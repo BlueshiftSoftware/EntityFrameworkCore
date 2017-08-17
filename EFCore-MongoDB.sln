@@ -7,6 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{FAF9C31C
 	ProjectSection(SolutionItems) = preProject
 		build\common.props = build\common.props
 		build\dependencies.props = build\dependencies.props
+		build\repo.beforecommon.props = build\repo.beforecommon.props
 		build\repo.props = build\repo.props
 	EndProjectSection
 EndProject
@@ -19,7 +20,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Globals", "Globals", "{6841
 		build.sh = build.sh
 		NuGet.config = NuGet.config
 		README.md = README.md
-		version.props = version.props
+		version.xml = version.xml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{CE6B50B2-34AE-44C9-940A-4E48C3E1B3BC}"
