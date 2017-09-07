@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Utilities;
@@ -15,42 +14,33 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
     ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
     ///     directly from your code. This API may change or be removed in future releases.
     /// </summary>
-    public class MongoDbRegisterKnownTypesConvention : IModelBuiltConvention
+    public class MongoDbRegisterKnownTypesConvention : IEntityTypeAddedConvention
     {
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public virtual InternalModelBuilder Apply(InternalModelBuilder modelBuilder)
+        public InternalEntityTypeBuilder Apply(InternalEntityTypeBuilder entityTypeBuilder)
         {
-            IModel model = Check.NotNull(modelBuilder, nameof(modelBuilder)).Metadata;
-            var unregisteredKnownTypes = model
-                .GetEntityTypes()
-                .Where(entityType => entityType.HasClrType())
-                .Select(entityType => entityType.ClrType)
-                .ToList();
-            foreach (var type in unregisteredKnownTypes)
-            {
-                RegisterKnownTypes(modelBuilder, type);
-            }
-            return modelBuilder;
-        }
-
-        private void RegisterKnownTypes(InternalModelBuilder modelBuilder, Type baseType)
-        {
-            IEnumerable<Type> knownTypes = baseType.GetTypeInfo()
+            EntityType baseEntityType = Check.NotNull(entityTypeBuilder, nameof(entityTypeBuilder)).Metadata;
+            IEnumerable<Type> knownTypes = baseEntityType.ClrType
+                ?.GetTypeInfo()
                 .GetCustomAttributes<BsonKnownTypesAttribute>(false)
                 .SelectMany(bsonKnownTypeAttribute => bsonKnownTypeAttribute.KnownTypes)
                 .ToList();
-            foreach (var derivedType in knownTypes)
+            if (knownTypes != null)
             {
-                modelBuilder
-                    .Entity(derivedType, ConfigurationSource.Convention)
-                    .HasBaseType(baseType, ConfigurationSource.Convention)
-                    .MongoDb()
-                    .IsDerivedType = true;
-                RegisterKnownTypes(modelBuilder, derivedType);
+                InternalModelBuilder modelBuilder = entityTypeBuilder.ModelBuilder;
+                foreach (Type derivedType in knownTypes)
+                {
+                    modelBuilder
+                        .Entity(derivedType, ConfigurationSource.DataAnnotation)
+                        .HasBaseType(baseEntityType, ConfigurationSource.DataAnnotation)
+                        .MongoDb()
+                        .IsDerivedType = true;
+                }
             }
+            return entityTypeBuilder;
         }
     }
 }

@@ -34,47 +34,32 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
         {
             Check.NotNull(conventionSet, nameof(conventionSet));
 
+            BaseTypeDiscoveryConvention baseTypeDiscoveryConvention = new MongoDbBaseTypeDiscoveryConvention();
+            DatabaseGeneratedAttributeConvention databaseGeneratedAttributeConvention
+                = new MongoDbDatabaseGeneratedAttributeConvention();
+            KeyAttributeConvention keyAttributeConvention = new MongoDbKeyAttributeConvention();
             var mongoDatabaseAttributeConvention
                 = new MongoDatabaseAttributeConvention(_mongoDbConventionSetBuilderDependencies.CurrentDbContext.Context);
-            PropertyDiscoveryConvention mongoDbPropertyDiscoveryConvention
-                = new MongoDbPropertyDiscoveryConvention(_mongoDbConventionSetBuilderDependencies.TypeMapper);
-            RelationshipDiscoveryConvention mongoDbRelationshipDiscoveryConvention
-                = new MongoDbRelationshipDiscoveryConvention(_mongoDbConventionSetBuilderDependencies.TypeMapper);
-            PropertyMappingValidationConvention mongoDbPropertyMappingValidationConvention
-                = new MongoDbPropertyMappingValidationConvention(_mongoDbConventionSetBuilderDependencies.TypeMapper);
-            DatabaseGeneratedAttributeConvention mongoDbDatabaseGeneratedAttributeConvention
-                = new MongoDbDatabaseGeneratedAttributeConvention();
 
             conventionSet.ModelInitializedConventions
                 .With(mongoDatabaseAttributeConvention);
 
             conventionSet.EntityTypeAddedConventions
-                .Replace(mongoDbPropertyDiscoveryConvention)
-                .Replace(mongoDbRelationshipDiscoveryConvention)
-                .Replace(mongoDbPropertyDiscoveryConvention)
-                .Replace(mongoDbRelationshipDiscoveryConvention)
-                .With(new BsonDiscriminatorAttributeConvention());
-
-            conventionSet.EntityTypeMemberIgnoredConventions
-                .Replace(mongoDbRelationshipDiscoveryConvention);
+                .Replace(baseTypeDiscoveryConvention)
+                .With(new BsonIgnoreAttributeConvention())
+                .With(new BsonDiscriminatorAttributeConvention())
+                .With(new MongoDbRegisterKnownTypesConvention());
 
             conventionSet.PropertyAddedConventions
-                .Replace(mongoDbDatabaseGeneratedAttributeConvention)
-                .With(new BsonIdAttributeConvention())
-                .With(new BsonIgnoreAttributeConvention());
+                .Replace(databaseGeneratedAttributeConvention)
+                .Replace(keyAttributeConvention);
 
             conventionSet.PropertyFieldChangedConventions
-                .Replace(mongoDbDatabaseGeneratedAttributeConvention);
-
-            conventionSet.NavigationAddedConventions
-                .Replace(mongoDbRelationshipDiscoveryConvention);
-
-            conventionSet.NavigationRemovedConventions
-                .Replace(mongoDbRelationshipDiscoveryConvention);
+                .Replace(databaseGeneratedAttributeConvention)
+                .Replace(keyAttributeConvention);
 
             conventionSet.ModelBuiltConventions
-                .Replace(mongoDbPropertyMappingValidationConvention)
-                .With(new MongoDbRegisterKnownTypesConvention());
+                .Replace(keyAttributeConvention);
 
             return conventionSet;
         }

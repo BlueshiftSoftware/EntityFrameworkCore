@@ -71,8 +71,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
         /// <param name="model">The <see cref="Model"/> to be ensured.</param>
         protected virtual void EnsureKnownTypes([NotNull] IModel model)
         {
-            Check.NotNull(model, nameof(model));
-            var unregisteredTypes = model
+            var unregisteredTypes = Check.NotNull(model, nameof(model))
                 .GetEntityTypes()
                 .Where(entityType => entityType.HasClrType()
                     && entityType.ClrType.GetTypeInfo().IsDefined(typeof(BsonKnownTypesAttribute), false))
@@ -86,7 +85,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
                     }))
                 .Where(tuple => model.FindEntityType(tuple.DerivedType.Name) == null)
                 .ToList();
-            InternalModelBuilder modelBuilder = model.AsModel().Builder;
             foreach (var pair in unregisteredTypes)
             {
                 if (!pair.BaseType.GetTypeInfo().IsAssignableFrom(pair.DerivedType))
@@ -100,10 +98,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
         /// <param name="model">The <see cref="Model"/> to validate.</param>
         protected virtual void ValidateDerivedTypes([NotNull] IModel model)
         {
-            Check.NotNull(model, nameof(model));
-            var discriminatorSet = new HashSet<Tuple<IEntityType,string>>();
-            IEnumerable<IEntityType> derivedTypes = model.GetEntityTypes()
+            IEnumerable<IEntityType> derivedTypes = Check.NotNull(model, nameof(model))
+                .GetEntityTypes()
                 .Where(entityType => entityType.BaseType != null && entityType.ClrType.IsInstantiable());
+            var discriminatorSet = new HashSet<Tuple<IEntityType, string>>();
             foreach (IEntityType entityType in derivedTypes)
             {
                 ValidateDiscriminator(entityType, discriminatorSet);

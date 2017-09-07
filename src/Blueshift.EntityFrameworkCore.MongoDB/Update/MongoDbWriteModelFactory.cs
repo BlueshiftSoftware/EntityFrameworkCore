@@ -20,7 +20,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
     /// <typeparam name="TEntity">The type of entity to write.</typeparam>
     public abstract class MongoDbWriteModelFactory<TEntity> : IMongoDbWriteModelFactory<TEntity>
     {
-        private readonly static MethodInfo _genericEqMethodInfo =
+        private static readonly MethodInfo GenericEqMethodInfo =
             typeof(FilterDefinitionBuilder<TEntity>)
             .GetTypeInfo()
             .GetDeclaredMethods(nameof(FilterDefinitionBuilder<TEntity>.Eq))
@@ -39,7 +39,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
         /// </summary>
         /// <param name="valueGeneratorSelector">The <see cref="IValueGeneratorSelector"/> to use for populating concurrency tokens.</param>
         /// <param name="entityType">The <see cref="IEntityType"/> for which this <see cref="MongoDbWriteModelFactory{TDocument}"/> will be used.</param>
-        public MongoDbWriteModelFactory(
+        protected MongoDbWriteModelFactory(
             [NotNull] IValueGeneratorSelector valueGeneratorSelector,
             [NotNull] IEntityType entityType)
         {
@@ -109,7 +109,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
             LambdaExpression lambdaExpression = Expression.Lambda(
                 Expression.MakeMemberAccess(parameterExpression, property.PropertyInfo),
                 parameterExpression);
-            return (FilterDefinition<TEntity>)_genericEqMethodInfo
+            return (FilterDefinition<TEntity>)GenericEqMethodInfo
                 .MakeGenericMethod(property.ClrType)
                 .Invoke(Builders<TEntity>.Filter, new[] { lambdaExpression, propertyValue });
         }

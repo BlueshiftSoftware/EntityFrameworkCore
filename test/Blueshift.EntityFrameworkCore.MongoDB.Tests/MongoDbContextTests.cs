@@ -141,6 +141,26 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         }
 
         [Fact]
+        public async void Can_query_to_list_async()
+        {
+            IList<Animal> insertedEntities = new Animal[]
+                {
+                    new Tiger { Name = "Tigger", Age = 6.4, Weight = 270, Height = .98 },
+                    new PolarBear { Name = "Ursus", Age = 4.9, Weight = 612, Height = 2.7 },
+                    new SeaOtter { Name = "Hydron", Age = 1.8, Weight = 19, Height = .3 },
+                    new EurasianOtter { Name = "Yuri", Age = 1.8, Weight = 19, Height = .3 }
+                }
+                .OrderBy(animal => animal.Name)
+                .ToList();
+            _zooDbContext.Animals.AddRange(insertedEntities);
+            _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
+            IList<Animal> queriedEntities = await _zooDbContext.Animals
+                .OrderBy(animal => animal.Name)
+                .ToListAsync();
+            Assert.Equal(insertedEntities, queriedEntities, AnimalComparer);
+        }
+
+        [Fact]
         public async void Can_query_first_or_default_async()
         {
             IList<Animal> insertedEntities = new Animal[]

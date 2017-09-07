@@ -2,6 +2,7 @@
 using System.Reflection;
 using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders;
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
+using Blueshift.EntityFrameworkCore.MongoDB.Storage;
 using Blueshift.EntityFrameworkCore.MongoDB.Update;
 using Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +29,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Update
             var mockStateManager = new Mock<IStateManager>();
             var mockValueGenerationManager = new Mock<IValueGenerationManager>();
             var mockInternalEntityEntryNotifier = new Mock<IInternalEntityEntryNotifier>();
-            var mockTypeMapper = new Mock<ITypeMapper>();
+            var typeMapper = new MongoDbTypeMapper();
             mockStateManager.SetupGet(stateManager => stateManager.ValueGeneration)
                 .Returns(() => mockValueGenerationManager.Object);
             mockStateManager.SetupGet(stateManager => stateManager.Notify)
@@ -40,14 +41,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Update
                         new CurrentDbContext(
                             new ZooDbContext(
                                 new DbContextOptions<ZooDbContext>())),
-                        mockTypeMapper.Object))
+                        typeMapper))
                     .AddConventions(
                         new CoreConventionSetBuilder(
                             new CoreConventionSetBuilderDependencies(
-                                mockTypeMapper.Object))
+                                typeMapper))
                             .CreateConventionSet()));
             Type entityClrType = entity.GetType();
-            EntityType entityType = model.AddEntityType(entityClrType);
+            EntityType entityType = model.GetOrAddEntityType(entityClrType);
             entityType.Builder
                 .GetOrCreateProperties(entityClrType.GetTypeInfo().GetProperties(), ConfigurationSource.Convention);
             new EntityTypeBuilder(entityType.Builder)

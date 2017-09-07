@@ -60,6 +60,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
             TryAdd<IDatabaseProvider, DatabaseProvider<MongoDbOptionsExtension>>();
             TryAdd<IModelSource, MongoDbModelSource>();
             TryAdd<IModelValidator, MongoDbModelValidator>();
+            TryAdd<ITypeMapper, MongoDbTypeMapper>();
             TryAdd<IDatabase, MongoDbDatabase>();
             TryAdd<IDatabaseCreator, MongoDbDatabaseCreator>();
             TryAdd<IValueGeneratorSelector, MongoDbValueGeneratorSelector>();

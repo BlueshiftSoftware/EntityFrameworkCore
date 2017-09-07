@@ -10,13 +10,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration
     public class ObjectIdValueGenerator : ValueGenerator<ObjectId>
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="ObjectIdValueGenerator"/> class.
-        /// </summary>
-        public ObjectIdValueGenerator()
-        {
-        }
-
-        /// <summary>
         ///     Generates a new <see cref="ObjectId"/> value.
         /// </summary>
         /// <param name="entry">The <see cref="EntityEntry"/> whose value is to be generated.</param>

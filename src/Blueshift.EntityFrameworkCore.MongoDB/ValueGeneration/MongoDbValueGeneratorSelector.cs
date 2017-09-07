@@ -39,7 +39,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration
             Check.NotNull(property, nameof(property));
             Check.NotNull(entityType, nameof(entityType));
 
-            return property.ClrType.UnwrapNullableType().UnwrapEnumType() == typeof(ObjectId)
+            return property.ClrType.UnwrapNullableType() == typeof(ObjectId)
                 ? new ObjectIdValueGenerator()
                 : base.Create(property, entityType);
         }
