@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
 using Blueshift.MongoDB.Tests.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -56,7 +57,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         }
 
         [Fact]
-        public void Can_write_complex_record()
+        public async Task Can_write_complex_record()
         {
             var employee = new Employee
             {
@@ -73,8 +74,31 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
             };
             _zooDbContext.Add(employee);
             _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
-            Assert.Equal(employee, _zooDbContext.Employees
-                .Single(searchedEmployee => searchedEmployee.Specialties
+            Assert.Equal(employee, await _zooDbContext.Employees
+                .SingleAsync(searchedEmployee => searchedEmployee.FirstName == "Taiga"
+                    && searchedEmployee.LastName == "Masuta"), EmployeeComparer);
+        }
+
+        [Fact]
+        public async Task Can_query_complex_record()
+        {
+            var employee = new Employee
+            {
+                FirstName = "Taiga",
+                LastName = "Masuta",
+                Age = 31.7,
+                Specialties =
+                {
+                    new Specialty { AnimalType = nameof(Tiger), Task = ZooTask.Feeding },
+                    new Specialty { AnimalType = nameof(Tiger), Task = ZooTask.Exercise },
+                    new Specialty { AnimalType = nameof(Tiger), Task = ZooTask.TourGuide },
+                    new Specialty { AnimalType = nameof(Tiger), Task = ZooTask.TourGuide },
+                }
+            };
+            _zooDbContext.Add(employee);
+            _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
+            Assert.Equal(employee, await _zooDbContext.Employees
+                .SingleAsync(searchedEmployee => searchedEmployee.Specialties
                     .Any(speciality => speciality.Task == ZooTask.Feeding)), EmployeeComparer);
         }
 
@@ -141,7 +165,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_query_to_list_async()
+        public async void Can_list_async()
         {
             IList<Animal> insertedEntities = new Animal[]
                 {
