@@ -5,7 +5,6 @@ namespace Blueshift.Identity.MongoDB
     /// <summary>
     /// A representation of a user's security authorization role for use with a MongoDB EntityFramework provider.
     /// </summary>
-    [ComplexType]
     public class MongoDbIdentityUserRole
     {
         /// <summary>

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Utilities;
 using MongoDB.Driver;
 
@@ -21,23 +18,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata
         public MongoDbModelAnnotations([NotNull] IModel model)
             : base(model)
         {
-        }
-
-        /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        public virtual IList<IEntityType> ComplexTypes
-        {
-            get
-            {
-                var complexTypes = GetAnnotation<IList<IEntityType>>(MongoDbAnnotationNames.ComplexTypes);
-                if (complexTypes == null)
-                {
-                    SetAnnotation(MongoDbAnnotationNames.ComplexTypes, complexTypes = new List<IEntityType>());
-                }
-                return complexTypes;
-            }
         }
 
         /// <summary>

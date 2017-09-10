@@ -8,7 +8,6 @@ namespace Blueshift.Identity.MongoDB
     /// <summary>
     /// A representation of an external user login provider for use with a MongoDB EntityFramework provider.
     /// </summary>
-    [ComplexType]
     public class MongoDbIdentityUserLogin : MongoDbIdentityUserLogin<MongoDbIdentityUserToken>
     {
         /// <summary>
@@ -30,7 +29,6 @@ namespace Blueshift.Identity.MongoDB
     /// A representation of an external user login provider for use with a MongoDB EntityFramework provider.
     /// </summary>
     /// <typeparam name="TUserToken">The type of tokens assigned to this external login provider information.</typeparam>
-    [ComplexType]
     public class MongoDbIdentityUserLogin<TUserToken>
         where TUserToken : MongoDbIdentityUserToken
     {

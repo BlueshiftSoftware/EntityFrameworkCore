@@ -7,7 +7,6 @@ namespace Blueshift.Identity.MongoDB
     /// <summary>
     /// A representation of an authorization claim for use with a MongoDB EntityFramework provider.
     /// </summary>
-    [ComplexType]
     public class MongoDbIdentityClaim
     {
         /// <summary>

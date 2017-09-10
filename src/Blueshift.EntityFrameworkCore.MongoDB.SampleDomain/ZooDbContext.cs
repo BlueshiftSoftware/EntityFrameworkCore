@@ -100,7 +100,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
         TourGuide
     }
 
-    [ComplexType]
     public class Specialty
     {
         public string AnimalType { get; set; }
