@@ -23,12 +23,12 @@ namespace Blueshift.Identity.MongoDB.Tests
         private static readonly Claim Claim2 = new Claim(Claim2Type, Claim2Value);
         private static readonly Claim Claim3 = new Claim(Claim3Type, Claim3Value);
 
-        private IUserClaimStore<MongoDbIdentityUser> _mongoDbUserClaimStore;
+        private readonly IUserClaimStore<MongoDbIdentityUser> _mongoDbUserClaimStore;
 
         public MongoDbUserClaimStoreTests(MongoDbFixture mongoDbFixture)
             : base(mongoDbFixture)
         {
-            _mongoDbUserClaimStore = _serviceProvider.GetRequiredService<IUserClaimStore<MongoDbIdentityUser>>();
+            _mongoDbUserClaimStore = ServiceProvider.GetRequiredService<IUserClaimStore<MongoDbIdentityUser>>();
         }
 
         protected static IEqualityComparer<Claim> ClaimComparer
@@ -49,7 +49,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         {
             var user = CreateUser();
             await _mongoDbUserClaimStore.AddClaimsAsync(user, new[] { Claim3 }, new CancellationToken());
-            var newClaims = new Claim[] { Claim1, Claim2, Claim3 };
+            var newClaims = new [] { Claim1, Claim2, Claim3 };
             Assert.Equal(newClaims, user.Claims.Select(claim => claim.ToClaim()), ClaimComparer);
         }
 
@@ -57,7 +57,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         public async void Can_get_claims_async()
         {
             var user = CreateUser();
-            var claims = new Claim[] { Claim1, Claim2 };
+            var claims = new [] { Claim1, Claim2 };
             Assert.Equal(claims, await _mongoDbUserClaimStore.GetClaimsAsync(user, new CancellationToken()), ClaimComparer);
         }
 
@@ -74,7 +74,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         public async void Can_remove_claims_async()
         {
             var user = CreateUser();
-            var claimsToRemove = new Claim[] { Claim1, Claim2 };
+            var claimsToRemove = new [] { Claim1, Claim2 };
             await _mongoDbUserClaimStore.RemoveClaimsAsync(user, claimsToRemove, new CancellationToken());
             Assert.Empty(user.Claims);
         }
@@ -83,7 +83,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         public async void Can_replace_claims_async()
         {
             var user = CreateUser();
-            var newClaims = new Claim[] { Claim3, Claim2 };
+            var newClaims = new [] { Claim3, Claim2 };
             await _mongoDbUserClaimStore.ReplaceClaimAsync(user, Claim1, Claim3, new CancellationToken());
             Assert.Equal(newClaims, user.Claims.Select(claim => claim.ToClaim()), ClaimComparer);
         }

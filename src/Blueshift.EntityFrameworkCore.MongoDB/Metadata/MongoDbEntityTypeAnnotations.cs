@@ -26,8 +26,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata
         /// </summary>
         public virtual bool AssignIdOnInsert
         {
-            get { return CollectionSettings?.AssignIdOnInsert ?? false; }
-            set { GetOrCreateCollectionSettings().AssignIdOnInsert = value; }
+            get => CollectionSettings?.AssignIdOnInsert ?? false;
+            set => GetOrCreateCollectionSettings().AssignIdOnInsert = value;
         }
 
         /// <summary>
@@ -36,13 +36,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata
         /// </summary>
         public virtual string CollectionName
         {
-            get
-            {
-                return GetAnnotation<string>(MongoDbAnnotationNames.CollectionName)
-                       ?? MongoDbUtilities.Pluralize(MongoDbUtilities.ToLowerCamelCase(Metadata.ClrType.Name));
-            }
+            get => GetAnnotation<string>(MongoDbAnnotationNames.CollectionName)
+                   ?? MongoDbUtilities.Pluralize(MongoDbUtilities.ToLowerCamelCase(Metadata.ClrType.Name));
             [param: NotNull]
-            set { SetAnnotation(MongoDbAnnotationNames.CollectionName, Check.NotEmpty(value, nameof(CollectionName))); }
+            set => SetAnnotation(MongoDbAnnotationNames.CollectionName, Check.NotEmpty(value, nameof(CollectionName)));
         }
 
         /// <summary>
@@ -51,9 +48,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata
         /// </summary>
         public virtual MongoCollectionSettings CollectionSettings
         {
-            get { return GetAnnotation<MongoCollectionSettings>(MongoDbAnnotationNames.CollectionSettings); }
+            get => GetAnnotation<MongoCollectionSettings>(MongoDbAnnotationNames.CollectionSettings);
             [param: NotNull]
-            set { SetAnnotation(MongoDbAnnotationNames.CollectionSettings, Check.NotNull(value, nameof(CollectionSettings))); }
+            set => SetAnnotation(MongoDbAnnotationNames.CollectionSettings, Check.NotNull(value, nameof(CollectionSettings)));
         }
 
         /// <summary>
@@ -62,9 +59,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata
         /// </summary>
         public virtual string Discriminator
         {
-            get { return GetAnnotation<string>(MongoDbAnnotationNames.Discriminator) ?? Metadata.ClrType.Name; }
+            get => GetAnnotation<string>(MongoDbAnnotationNames.Discriminator) ?? Metadata.ClrType.Name;
             [param: NotNull]
-            set { SetAnnotation(MongoDbAnnotationNames.Discriminator, Check.NotEmpty(value, nameof(Discriminator))); }
+            set => SetAnnotation(MongoDbAnnotationNames.Discriminator, Check.NotEmpty(value, nameof(Discriminator)));
         }
 
         /// <summary>
@@ -73,8 +70,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata
         /// </summary>
         public virtual bool DiscriminatorIsRequired
         {
-            get { return GetAnnotation<bool?>(MongoDbAnnotationNames.DiscriminatorIsRequired) ?? false; }
-            set { SetAnnotation(MongoDbAnnotationNames.DiscriminatorIsRequired, value); }
+            get => GetAnnotation<bool?>(MongoDbAnnotationNames.DiscriminatorIsRequired) ?? false;
+            set => SetAnnotation(MongoDbAnnotationNames.DiscriminatorIsRequired, value);
         }
 
         /// <summary>
@@ -83,8 +80,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata
         /// </summary>
         public virtual bool IsDerivedType
         {
-            get { return GetAnnotation<bool?>(MongoDbAnnotationNames.IsDerivedType) ?? false; }
-            set { SetAnnotation(MongoDbAnnotationNames.IsDerivedType, value); }
+            get => GetAnnotation<bool?>(MongoDbAnnotationNames.IsDerivedType) ?? false;
+            set => SetAnnotation(MongoDbAnnotationNames.IsDerivedType, value);
         }
 
         /// <summary>
@@ -93,8 +90,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata
         /// </summary>
         public virtual bool IsRootType
         {
-            get { return GetAnnotation<bool?>(MongoDbAnnotationNames.IsRootType) ?? false; }
-            set { SetAnnotation(MongoDbAnnotationNames.IsRootType, value); }
+            get => GetAnnotation<bool?>(MongoDbAnnotationNames.IsRootType) ?? false;
+            set => SetAnnotation(MongoDbAnnotationNames.IsRootType, value);
         }
 
         private MongoCollectionSettings GetOrCreateCollectionSettings()

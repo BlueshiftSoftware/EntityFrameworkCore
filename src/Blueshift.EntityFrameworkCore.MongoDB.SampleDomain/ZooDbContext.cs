@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
+using JetBrains.Annotations;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
 {
@@ -27,7 +28,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var connectionString = "mongodb://localhost";
+            const string connectionString = "mongodb://localhost";
             //optionsBuilder.UseMongoDb(connectionString);
 
             var mongoUrl = new MongoUrl(connectionString);
@@ -50,14 +51,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
     public abstract class Animal
     {
         [BsonId, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public ObjectId Id { get; private set; }
+        public ObjectId Id { get; [UsedImplicitly] private set; }
         public string Name { get; set; }
         public double Age { get; set; }
         public double Height { get; set; }
         public double Weight { get; set; }
 
         [ConcurrencyCheck, DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        public string ConcurrencyField { get; private set; }
+        public string ConcurrencyField { get; [UsedImplicitly] private set; }
     }
 
     [BsonDiscriminator("panthera tigris")]
@@ -79,7 +80,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
     public class Employee
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public ObjectId Id { get; private set; }
+        public ObjectId Id { get; [UsedImplicitly] private set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
 

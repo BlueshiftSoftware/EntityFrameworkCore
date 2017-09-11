@@ -22,6 +22,6 @@ namespace Blueshift.MongoDB.Tests.Shared
                     && list2.All(item => list1.Contains(item, _comparer)));
 
         public int GetHashCode(IEnumerable<T> obj)
-            => obj?.GetHashCode() ?? 0;
+            => obj.GetHashCode();
     }
 }

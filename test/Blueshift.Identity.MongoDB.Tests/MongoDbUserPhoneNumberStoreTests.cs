@@ -11,12 +11,12 @@ namespace Blueshift.Identity.MongoDB.Tests
     {
         private const string PhoneNumber = "+1.123.456.7890";
 
-        private IUserPhoneNumberStore<MongoDbIdentityUser> _mongoDbUserPhoneNumberStore;
+        private readonly IUserPhoneNumberStore<MongoDbIdentityUser> _mongoDbUserPhoneNumberStore;
 
         public MongoDbUserPhoneNumberStoreTests(MongoDbFixture mongoDbFixture)
             : base(mongoDbFixture)
         {
-            _mongoDbUserPhoneNumberStore = _serviceProvider.GetRequiredService<IUserPhoneNumberStore<MongoDbIdentityUser>>();
+            _mongoDbUserPhoneNumberStore = ServiceProvider.GetRequiredService<IUserPhoneNumberStore<MongoDbIdentityUser>>();
         }
 
         protected override MongoDbIdentityUser CreateUser()

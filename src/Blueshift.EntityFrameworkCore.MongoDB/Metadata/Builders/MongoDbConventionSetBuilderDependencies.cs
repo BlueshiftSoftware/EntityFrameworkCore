@@ -41,11 +41,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
         /// <summary>
         ///     Indirection to the current <see cref="DbContext" /> instance.
         /// </summary>
-        public ICurrentDbContext CurrentDbContext { get; private set; }
+        public ICurrentDbContext CurrentDbContext { get; }
 
         /// <summary>
         /// Maps .NET types to their corresponding database provider types.
         /// </summary>
-        public ITypeMapper TypeMapper { get; private set; }
+        public ITypeMapper TypeMapper { get; }
     }
 }

@@ -32,7 +32,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
         ///     Validates a model, throwing an exception if any errors are found.
         /// </summary>
         /// <param name="model">The <see cref="Model"/> to validate.</param>
-        public override void Validate([NotNull] IModel model)
+        public override void Validate(IModel model)
         {
             base.Validate(Check.NotNull(model, nameof(model)));
 

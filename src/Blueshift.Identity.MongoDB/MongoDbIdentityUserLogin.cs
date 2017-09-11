@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Utilities;
 
@@ -64,7 +64,7 @@ namespace Blueshift.Identity.MongoDB
         /// <summary>
         /// A collection of <typeparamref name="TUserToken"/> assigned to this provider.
         /// </summary>
-        public ICollection<TUserToken> UserTokens { get; private set; } = new List<TUserToken>();
+        public ICollection<TUserToken> UserTokens { get; [UsedImplicitly] private set; } = new List<TUserToken>();
 
         /// <summary>
         /// Constructs a new claim with the type and value.

@@ -40,34 +40,33 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
 
         private struct CacheKey : IEquatable<CacheKey>
         {
+            private readonly IEntityType _entityType;
+            private readonly EntityState _entityState;
+
             public CacheKey(
                 IEntityType entityType,
                 EntityState entityState,
                 Func<IEntityType, EntityState, object> factoryFunc)
             {
-                EntityType = entityType;
-                EntityState = entityState;
+                _entityType = entityType;
+                _entityState = entityState;
                 FactoryFunc = factoryFunc;
             }
 
-            public IEntityType EntityType { get; private set; }
-
-            public EntityState EntityState { get; private set; }
-
-            public Func<IEntityType, EntityState, object> FactoryFunc { get; private set; }
+            public Func<IEntityType, EntityState, object> FactoryFunc { get; }
 
             public override bool Equals(object obj)
                 => Equals((CacheKey)obj);
 
             public bool Equals(CacheKey other)
-                => Equals(EntityType, other.EntityType)
-                    && Equals(EntityState, other.EntityState);
+                => Equals(_entityType, other._entityType)
+                    && Equals(_entityState, other._entityState);
 
             public override int GetHashCode()
             {
                 unchecked
                 {
-                    return (EntityType.GetHashCode() * 492) ^ EntityState.GetHashCode();
+                    return (_entityType.GetHashCode() * 492) ^ _entityState.GetHashCode();
                 }
             }
         }

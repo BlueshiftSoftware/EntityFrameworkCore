@@ -5,7 +5,8 @@ namespace Blueshift.MongoDB.Tests.Shared
 {
     public class FuncEqualityComparer<T> : IEqualityComparer<T>
     {
-        private Func<T, T, bool> _comparer;
+        private readonly Func<T, T, bool> _comparer;
+
         public FuncEqualityComparer(Func<T, T, bool> comparer)
         {
             _comparer = comparer;

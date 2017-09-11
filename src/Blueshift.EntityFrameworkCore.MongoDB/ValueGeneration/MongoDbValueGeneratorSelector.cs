@@ -33,8 +33,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration
         ///     declared entity type on property
         /// </param>
         /// <returns>The newly created value generator.</returns>
-        public override ValueGenerator Create([NotNull] IProperty property,
-            [NotNull] IEntityType entityType)
+        public override ValueGenerator Create(IProperty property,
+            IEntityType entityType)
         {
             Check.NotNull(property, nameof(property));
             Check.NotNull(entityType, nameof(entityType));

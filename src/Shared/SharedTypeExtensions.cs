@@ -222,7 +222,7 @@ namespace System
             while (currentType != null);
         }
 
-        private static readonly Dictionary<Type, object> _commonTypeDictionary = new Dictionary<Type, object>
+        private static readonly Dictionary<Type, object> CommonTypeDictionary = new Dictionary<Type, object>
         {
             { typeof(int), default(int) },
             { typeof(Guid), default(Guid) },
@@ -252,7 +252,7 @@ namespace System
             // to avoid boxing on every call. This is about 50% faster than just calling CreateInstance
             // for all value types.
             object value;
-            return _commonTypeDictionary.TryGetValue(type, out value)
+            return CommonTypeDictionary.TryGetValue(type, out value)
                 ? value
                 : Activator.CreateInstance(type);
         }

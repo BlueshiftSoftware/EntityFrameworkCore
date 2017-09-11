@@ -12,12 +12,12 @@ namespace Blueshift.Identity.MongoDB.Tests
     {
         private static readonly string AuthenticatorKey = new Guid().ToString();
 
-        private IUserAuthenticatorKeyStore<MongoDbIdentityUser> _mongoDbUserAuthenticatorKeyStore;
+        private readonly IUserAuthenticatorKeyStore<MongoDbIdentityUser> _mongoDbUserAuthenticatorKeyStore;
 
         public MongoDbUserAuthenticatorKeyStoreTests(MongoDbFixture mongoDbFixture)
             : base(mongoDbFixture)
         {
-            _mongoDbUserAuthenticatorKeyStore = _serviceProvider.GetRequiredService<IUserAuthenticatorKeyStore<MongoDbIdentityUser>>();
+            _mongoDbUserAuthenticatorKeyStore = ServiceProvider.GetRequiredService<IUserAuthenticatorKeyStore<MongoDbIdentityUser>>();
         }
 
         protected override MongoDbIdentityUser CreateUser()

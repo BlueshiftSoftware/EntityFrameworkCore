@@ -43,17 +43,17 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         [Fact]
         public void Can_query_from_mongodb()
         {
-            Assert.Empty(_zooDbContext.Animals.ToList());
-            Assert.Empty(_zooDbContext.Employees.ToList());
+            Assert.Empty(ZooDbContext.Animals.ToList());
+            Assert.Empty(ZooDbContext.Employees.ToList());
         }
 
         [Fact]
         public void Can_write_simple_record()
         {
             var employee = new Employee { FirstName = "Taiga", LastName = "Masuta", Age = 31.7 };
-            _zooDbContext.Add(employee);
-            _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
-            Assert.Equal(employee, _zooDbContext.Employees.Single(), EmployeeComparer);
+            ZooDbContext.Add(employee);
+            ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
+            Assert.Equal(employee, ZooDbContext.Employees.Single(), EmployeeComparer);
         }
 
         [Fact]
@@ -72,9 +72,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                     new Specialty { AnimalType = nameof(Tiger), Task = ZooTask.TourGuide },
                 }
             };
-            _zooDbContext.Add(employee);
-            _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
-            Assert.Equal(employee, await _zooDbContext.Employees
+            ZooDbContext.Add(employee);
+            ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
+            Assert.Equal(employee, await ZooDbContext.Employees
                 .SingleAsync(searchedEmployee => searchedEmployee.FirstName == "Taiga"
                     && searchedEmployee.LastName == "Masuta"), EmployeeComparer);
         }
@@ -95,9 +95,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                     new Specialty { AnimalType = nameof(Tiger), Task = ZooTask.TourGuide },
                 }
             };
-            _zooDbContext.Add(employee);
-            _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
-            Assert.Equal(employee, await _zooDbContext.Employees
+            ZooDbContext.Add(employee);
+            ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
+            Assert.Equal(employee, await ZooDbContext.Employees
                 .SingleAsync(searchedEmployee => searchedEmployee.Specialties
                     .Any(speciality => speciality.Task == ZooTask.Feeding)), EmployeeComparer);
         }
@@ -114,9 +114,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                 }
                 .OrderBy(animal => animal.Name)
                 .ToList();
-            _zooDbContext.Animals.AddRange(insertedEntities);
-            _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
-            IList<Animal> queriedEntities = _zooDbContext.Animals
+            ZooDbContext.Animals.AddRange(insertedEntities);
+            ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
+            IList<Animal> queriedEntities = ZooDbContext.Animals
                 .OrderBy(animal => animal.Name)
                 .ToList();
             Assert.Equal(insertedEntities, queriedEntities, AnimalComparer);
@@ -134,30 +134,30 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                 }
                 .OrderBy(animal => animal.Name)
                 .ToList();
-            _zooDbContext.Animals.AddRange(insertedEntities);
-            _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
+            ZooDbContext.Animals.AddRange(insertedEntities);
+            ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
 
             Assert.Equal(
                 insertedEntities.OfType<Tiger>().Single(),
-                _zooDbContext.Animals.OfType<Tiger>().Single(),
+                ZooDbContext.Animals.OfType<Tiger>().Single(),
                 AnimalComparer);
             Assert.Equal(
                 insertedEntities.OfType<PolarBear>().Single(),
-                _zooDbContext.Animals.OfType<PolarBear>().Single(),
+                ZooDbContext.Animals.OfType<PolarBear>().Single(),
                 AnimalComparer);
             Assert.Equal(
                 insertedEntities.OfType<SeaOtter>().Single(),
-                _zooDbContext.Animals.OfType<SeaOtter>().Single(),
+                ZooDbContext.Animals.OfType<SeaOtter>().Single(),
                 AnimalComparer);
             Assert.Equal(
                 insertedEntities.OfType<EurasianOtter>().Single(),
-                _zooDbContext.Animals.OfType<EurasianOtter>().Single(),
+                ZooDbContext.Animals.OfType<EurasianOtter>().Single(),
                 AnimalComparer);
             IList<Otter> insertedOtters = insertedEntities
                 .OfType<Otter>()
                 .OrderBy(otter => otter.Name)
                 .ToList();
-            IList<Otter> queriedOtters = _zooDbContext.Animals
+            IList<Otter> queriedOtters = ZooDbContext.Animals
                 .OfType<Otter>()
                 .OrderBy(otter => otter.Name)
                 .ToList();
@@ -176,9 +176,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                 }
                 .OrderBy(animal => animal.Name)
                 .ToList();
-            _zooDbContext.Animals.AddRange(insertedEntities);
-            _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
-            IList<Animal> queriedEntities = await _zooDbContext.Animals
+            ZooDbContext.Animals.AddRange(insertedEntities);
+            ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
+            IList<Animal> queriedEntities = await ZooDbContext.Animals
                 .OrderBy(animal => animal.Name)
                 .ToListAsync();
             Assert.Equal(insertedEntities, queriedEntities, AnimalComparer);
@@ -196,11 +196,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                 }
                 .OrderBy(animal => animal.Name)
                 .ToList();
-            _zooDbContext.Animals.AddRange(insertedEntities);
-            _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
+            ZooDbContext.Animals.AddRange(insertedEntities);
+            ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
             Assert.Equal(
                 insertedEntities.OfType<Tiger>().Single(),
-                await _zooDbContext.Animals.OfType<Tiger>().FirstOrDefaultAsync(),
+                await ZooDbContext.Animals.OfType<Tiger>().FirstOrDefaultAsync(),
                 AnimalComparer);
         }
 
@@ -208,27 +208,27 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         public void Can_update_existing_entity()
         {
             Animal animal = new Tiger { Name = "Tigger", Age = 6.4, Weight = 270, Height = .98 };
-            EntityEntry entityEntry = _zooDbContext.Add(animal);
+            EntityEntry entityEntry = ZooDbContext.Add(animal);
             Assert.Equal(EntityState.Added, entityEntry.State);
             Assert.Null(animal.ConcurrencyField);
-            Assert.Equal(1, _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true));
+            Assert.Equal(1, ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true));
             Assert.Equal(EntityState.Unchanged, entityEntry.State);
             Assert.NotNull(animal.ConcurrencyField);
 
             Assert.NotNull(entityEntry.OriginalValues[nameof(animal.ConcurrencyField)]);
 
             animal.Name = "Tigra";
-            _zooDbContext.ChangeTracker.DetectChanges();
+            ZooDbContext.ChangeTracker.DetectChanges();
             Assert.Equal(EntityState.Modified, entityEntry.State);
-            Assert.Equal(1, _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true));
+            Assert.Equal(1, ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true));
         }
 
         [Fact]
         public void Concurrency_field_prevents_updates()
         {
             Animal animal = new Tiger { Name = "Tigger", Age = 6.4, Weight = 270, Height = .98 };
-            EntityEntry entityEntry = _zooDbContext.Add(animal);
-            Assert.Equal(1, _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true));
+            EntityEntry entityEntry = ZooDbContext.Add(animal);
+            Assert.Equal(1, ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true));
             Assert.False(string.IsNullOrWhiteSpace(animal.ConcurrencyField));
 
             string newConcurrencyToken = Guid.NewGuid().ToString();
@@ -237,7 +237,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                 .GetTypeInfo()
                 .GetProperty(nameof(Animal.ConcurrencyField))
                 .SetValue(animal, newConcurrencyToken);
-            Assert.Equal(0, _zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true));
+            Assert.Equal(0, ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true));
         }
     }
 }

@@ -15,12 +15,12 @@ namespace Blueshift.Identity.MongoDB.Tests
         private const string Token1Value = nameof(Token1Value);
         private const string Token2Value = nameof(Token2Value);
 
-        private IUserAuthenticationTokenStore<MongoDbIdentityUser> _mongoDbUserAuthenticationTokenStore;
+        private readonly IUserAuthenticationTokenStore<MongoDbIdentityUser> _mongoDbUserAuthenticationTokenStore;
 
         public MongoDbUserAuthenticationTokenStoreTests(MongoDbFixture mongoDbFixture)
             : base(mongoDbFixture)
         {
-            _mongoDbUserAuthenticationTokenStore = _serviceProvider.GetRequiredService<IUserAuthenticationTokenStore<MongoDbIdentityUser>>();
+            _mongoDbUserAuthenticationTokenStore = ServiceProvider.GetRequiredService<IUserAuthenticationTokenStore<MongoDbIdentityUser>>();
         }
 
         protected override MongoDbIdentityUser CreateUser()

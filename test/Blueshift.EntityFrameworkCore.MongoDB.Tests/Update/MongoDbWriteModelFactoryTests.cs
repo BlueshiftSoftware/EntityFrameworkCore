@@ -8,11 +8,9 @@ using Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Update;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
 using MongoDB.Bson;
@@ -77,6 +75,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Update
             var mongoDbWriteModelFactory = CreateMongoDbWriteModelFactory<Employee>(entityEntry);
             var insertOneModel = mongoDbWriteModelFactory.CreateWriteModel(entityEntry) as InsertOneModel<Employee>;
             Assert.NotNull(insertOneModel);
+            Assert.Same(employee, insertOneModel.Document);
         }
 
         [Fact]
@@ -89,18 +88,22 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Update
             var insertOneModel = mongoDbWriteModelFactory.CreateWriteModel(entityEntry) as InsertOneModel<Animal>;
             Assert.NotNull(insertOneModel);
             Assert.Same(tiger, insertOneModel.Document);
+            Assert.NotNull(tiger.ConcurrencyField);
+            Assert.NotEmpty(tiger.ConcurrencyField);
         }
 
         [Fact]
         public void Creates_update_one_model_for_modified_entity_referencing_only_id()
         {
             var employee = new Employee();
-            var entityEntry = GetEntityEntry(EntityState.Modified, employee);
+            InternalEntityEntry entityEntry = GetEntityEntry(EntityState.Modified, employee);
             employee.FirstName = "Bob";
-            var mongoDbWriteModelFactory = CreateMongoDbWriteModelFactory<Employee>(entityEntry);
+            IMongoDbWriteModelFactory<Employee> mongoDbWriteModelFactory = CreateMongoDbWriteModelFactory<Employee>(entityEntry);
             var updateOneModel = mongoDbWriteModelFactory.CreateWriteModel(entityEntry) as UpdateOneModel<Employee>;
             FilterDefinition<Employee> filter = Builders<Employee>.Filter.Eq(record => record.Id, employee.Id);
             Assert.NotNull(updateOneModel);
+            Assert.Equal(updateOneModel.Filter.ToBsonDocument(),
+                filter.ToBsonDocument());
         }
 
         [Fact]
@@ -117,6 +120,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Update
                 Builders<Animal>.Filter.Eq(record => record.Id, tiger.Id),
                 Builders<Animal>.Filter.Eq(record => record.ConcurrencyField, tiger.ConcurrencyField));
             Assert.NotNull(updateOneModel);
+            Assert.Equal(updateOneModel.Filter.ToBsonDocument(),
+                filter.ToBsonDocument());
         }
 
         [Fact]

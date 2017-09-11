@@ -39,7 +39,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
         /// <typeparam name="TEntity">The type of entity for which to create a <see cref="IMongoDbWriteModelFactory{TEntity}"/> instance.</typeparam>
         /// <returns>An instance of <see cref="IMongoDbWriteModelFactory{TEntity}"/> that can be used to convert <see cref="IUpdateEntry"/>
         /// instances to <see cref="WriteModel{TDocument}"/> instances.</returns>
-        public IMongoDbWriteModelFactory<TEntity> Select<TEntity>([NotNull] IUpdateEntry updateEntry)
+        public IMongoDbWriteModelFactory<TEntity> Select<TEntity>(IUpdateEntry updateEntry)
             => _mongoDbWriteModelFactoryCache.GetOrAdd(
                 Check.NotNull(updateEntry, nameof(updateEntry)).EntityType,
                 updateEntry.EntityState,

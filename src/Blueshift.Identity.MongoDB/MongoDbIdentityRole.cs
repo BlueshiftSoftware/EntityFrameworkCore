@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Blueshift.EntityFrameworkCore.MongoDB.Annotations;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Utilities;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -56,13 +57,13 @@ namespace Blueshift.Identity.MongoDB
         /// <summary>
         /// A collection of the security claims assigned to this role.
         /// </summary>
-        public virtual ICollection<TClaim> Claims { get; private set; } = new List<TClaim>();
+        public virtual ICollection<TClaim> Claims { get; [UsedImplicitly] private set; } = new List<TClaim>();
 
         /// <summary>
         /// Gets or sets the primary key for this role.
         /// </summary>
         [BsonId, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public virtual TKey Id { get; private set; }
+        public virtual TKey Id { get; [UsedImplicitly] private set; }
 
         /// <summary>
         /// Gets or sets the name for this role.

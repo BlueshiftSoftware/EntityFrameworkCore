@@ -17,9 +17,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public override InternalPropertyBuilder Apply([NotNull] InternalPropertyBuilder propertyBuilder,
-            [NotNull] BsonRequiredAttribute attribute,
-            [NotNull] MemberInfo clrMember)
+        public override InternalPropertyBuilder Apply(InternalPropertyBuilder propertyBuilder,
+            BsonRequiredAttribute attribute,
+            MemberInfo clrMember)
         {
             Check.NotNull(propertyBuilder, nameof(propertyBuilder));
             Check.NotNull(attribute, nameof(attribute));

@@ -15,13 +15,13 @@ namespace Blueshift.Identity.MongoDB.Tests
         private static readonly string RoleName2 = nameof(RoleName2);
         private static readonly string NormalizedRoleName2 = RoleName2.ToUpper();
 
-        private IUserRoleStore<MongoDbIdentityUser> _mongoDbUserRoleStore;
+        private readonly IUserRoleStore<MongoDbIdentityUser> _mongoDbUserRoleStore;
 
         public MongoDbUserRoleStoreTests(MongoDbFixture mongoDbFixture)
             : base(mongoDbFixture)
         {
-            _mongoDbUserRoleStore = _serviceProvider.GetRequiredService<IUserRoleStore<MongoDbIdentityUser>>();
-            var roleStore = _serviceProvider
+            _mongoDbUserRoleStore = ServiceProvider.GetRequiredService<IUserRoleStore<MongoDbIdentityUser>>();
+            var roleStore = ServiceProvider
                 .GetRequiredService<IRoleStore<MongoDbIdentityRole>>();
             if (roleStore.FindByNameAsync(NormalizedRoleName1, new CancellationToken()).Result == null)
             {

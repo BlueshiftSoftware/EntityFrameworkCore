@@ -18,12 +18,12 @@ namespace Blueshift.Identity.MongoDB.Tests
             RecoveryCode1, RecoveryCode2, RecoveryCode3
         };
 
-        private IUserTwoFactorRecoveryCodeStore<MongoDbIdentityUser> _mongoDbUserTwoFactorRecoveryCodeStore;
+        private readonly IUserTwoFactorRecoveryCodeStore<MongoDbIdentityUser> _mongoDbUserTwoFactorRecoveryCodeStore;
 
         public MongoDbUserTwoFactorRecoveryCodeStoreTests(MongoDbFixture mongoDbFixture)
             : base(mongoDbFixture)
         {
-            _mongoDbUserTwoFactorRecoveryCodeStore = _serviceProvider.GetRequiredService<IUserTwoFactorRecoveryCodeStore<MongoDbIdentityUser>>();
+            _mongoDbUserTwoFactorRecoveryCodeStore = ServiceProvider.GetRequiredService<IUserTwoFactorRecoveryCodeStore<MongoDbIdentityUser>>();
         }
 
         protected override MongoDbIdentityUser CreateUser()
@@ -57,7 +57,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         public async void Can_replace_codes_async()
         {
             var user = CreateUser();
-            var newRecoveryCodes = new string[] { "New Code 1", "New Code 2", "New Code 3" };
+            var newRecoveryCodes = new [] { "New Code 1", "New Code 2", "New Code 3" };
             await _mongoDbUserTwoFactorRecoveryCodeStore.ReplaceCodesAsync(user, newRecoveryCodes, new CancellationToken());
             var recoveryCodes = user.Logins
                    .First(login => login.LoginProvider == "[BlueshiftMongoDbUserStore]")

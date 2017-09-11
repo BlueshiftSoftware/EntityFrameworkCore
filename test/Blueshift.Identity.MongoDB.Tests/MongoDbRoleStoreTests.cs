@@ -9,12 +9,12 @@ namespace Blueshift.Identity.MongoDB.Tests
 {
     public class MongoDbRoleStoreTests : MongoDbIdentityStoreTestBase
     {
-        private IRoleStore<MongoDbIdentityRole> _mongoDbRoleStore;
+        private readonly IRoleStore<MongoDbIdentityRole> _mongoDbRoleStore;
 
         public MongoDbRoleStoreTests(MongoDbFixture mongoDbFixture)
             : base(mongoDbFixture)
         {
-            _mongoDbRoleStore = _serviceProvider.GetRequiredService<IRoleStore<MongoDbIdentityRole>>();
+            _mongoDbRoleStore = ServiceProvider.GetRequiredService<IRoleStore<MongoDbIdentityRole>>();
         }
 
         [Fact]

@@ -25,11 +25,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
     /// </summary>
     public class MongoDbDatabase : Database
     {
-        private static readonly MethodInfo _genericSaveChanges = typeof(MongoDbDatabase).GetTypeInfo()
+        private static readonly MethodInfo GenericSaveChanges = typeof(MongoDbDatabase).GetTypeInfo()
             .GetMethod(nameof(SaveChanges), BindingFlags.NonPublic | BindingFlags.Instance)
             .GetGenericMethodDefinition();
 
-        private static readonly MethodInfo _genericSaveChangesAsync = typeof(MongoDbDatabase).GetTypeInfo()
+        private static readonly MethodInfo GenericSaveChangesAsync = typeof(MongoDbDatabase).GetTypeInfo()
             .GetMethod(nameof(SaveChangesAsync), BindingFlags.NonPublic | BindingFlags.Instance)
             .GetGenericMethodDefinition();
 
@@ -58,10 +58,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
         /// </summary>
         /// <param name="entries">A list of entries to be persisted.</param>
         /// <returns>The number of entries that were persisted.</returns>
-        public override int SaveChanges([NotNull] IReadOnlyList<IUpdateEntry> entries)
+        public override int SaveChanges(IReadOnlyList<IUpdateEntry> entries)
             => Check.NotNull(entries, nameof(entries))
                 .ToLookup(entry => GetCollectionEntityType(entry.EntityType))
-                .Sum(grouping => (int)_genericSaveChanges.MakeGenericMethod(grouping.Key.ClrType)
+                .Sum(grouping => (int)GenericSaveChanges.MakeGenericMethod(grouping.Key.ClrType)
                     .Invoke(this, new object[] { grouping }));
 
         private IEntityType GetCollectionEntityType(IEntityType entityType)
@@ -94,7 +94,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
         ///     A <see cref="Task{TResult}"/> representing the state of the operation. The result contains the number
         ///     of entries that were persisted to the database.
         /// </returns>
-        public override async Task<int> SaveChangesAsync([NotNull] IReadOnlyList<IUpdateEntry> entries,
+        public override async Task<int> SaveChangesAsync(IReadOnlyList<IUpdateEntry> entries,
             CancellationToken cancellationToken = new CancellationToken())
         {
             IEnumerable<Task<int>> tasks = Check.NotNull(entries, nameof(entries))
@@ -105,7 +105,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
         }
 
         private async Task<int> InvokeSaveChangesAsync(IGrouping<IEntityType, IUpdateEntry> entryGrouping, CancellationToken cancellationToken)
-            => await (Task<int>)_genericSaveChangesAsync.MakeGenericMethod(entryGrouping.Key.ClrType)
+            => await (Task<int>)GenericSaveChangesAsync.MakeGenericMethod(entryGrouping.Key.ClrType)
                 .Invoke(this, new object[] {entryGrouping, cancellationToken});
 
         private async Task<int> SaveChangesAsync<TEntity>(IEnumerable<IUpdateEntry> entries, CancellationToken cancellationToken)

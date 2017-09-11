@@ -15,7 +15,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
         /// </summary>
         /// <param name="clrType">The .NET type.</param>
         /// <returns>Always returns <c>true</c>, since MongoDB supports arbitrary property types and subdocument structures.</returns>
-        public bool IsTypeMapped([NotNull] Type clrType)
+        public bool IsTypeMapped(Type clrType)
             => true;
     }
 }

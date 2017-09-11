@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace Blueshift.Identity.MongoDB
+﻿namespace Blueshift.Identity.MongoDB
 {
     /// <summary>
     /// A representation of a user's security authorization role for use with a MongoDB EntityFramework provider.

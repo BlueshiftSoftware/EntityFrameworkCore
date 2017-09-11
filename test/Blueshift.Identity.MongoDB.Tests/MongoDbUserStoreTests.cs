@@ -3,19 +3,18 @@ using System.Threading;
 using Blueshift.MongoDB.Tests.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Bson;
 using Xunit;
 
 namespace Blueshift.Identity.MongoDB.Tests
 {
     public class MongoDbUserStoreTests : MongoDbIdentityStoreTestBase
     {
-        private IUserStore<MongoDbIdentityUser> _mongoDbUserStore;
+        private readonly IUserStore<MongoDbIdentityUser> _mongoDbUserStore;
 
         public MongoDbUserStoreTests(MongoDbFixture mongoDbFixture)
             : base(mongoDbFixture)
         {
-            _mongoDbUserStore = _serviceProvider.GetRequiredService<IUserStore<MongoDbIdentityUser>>();
+            _mongoDbUserStore = ServiceProvider.GetRequiredService<IUserStore<MongoDbIdentityUser>>();
         }
 
         [Fact]

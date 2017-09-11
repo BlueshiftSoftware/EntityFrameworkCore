@@ -59,7 +59,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
         /// </summary>
         /// <param name="updateEntry">The <see cref="IUpdateEntry"/> entry to convert.</param>
         /// <returns>A new <see cref="WriteModel{TEntity}"/> that contains the updates in <see cref="IUpdateEntry"/>.</returns>
-        public abstract WriteModel<TEntity> CreateWriteModel([NotNull] IUpdateEntry updateEntry);
+        public abstract WriteModel<TEntity> CreateWriteModel(IUpdateEntry updateEntry);
 
         /// <summary>
         /// Generates a <see cref="FilterDefinition{TEntity}"/> for <paramref name="updateEntry"/>.

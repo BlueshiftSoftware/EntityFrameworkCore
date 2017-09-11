@@ -30,9 +30,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public override InternalModelBuilder Apply([NotNull] InternalModelBuilder modelBuilder)
+        public override InternalModelBuilder Apply(InternalModelBuilder modelBuilder)
         {
-            MongoDbOptionsExtension extension = ((IInfrastructure<IServiceProvider>)DbContext)
+            var extension = DbContext
                 .GetService<IDbContextServices>()
                 ?.ContextOptions
                 ?.FindExtension<MongoDbOptionsExtension>();
@@ -51,7 +51,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        protected override IEnumerable<MongoDatabaseAttribute> GetAttributes([NotNull] Type dbContextType)
+        protected override IEnumerable<MongoDatabaseAttribute> GetAttributes(Type dbContextType)
             => base.GetAttributes(dbContextType)
                 .DefaultIfEmpty(new MongoDatabaseAttribute(GetDefaultDatabaseName(dbContextType)));
 

@@ -2,9 +2,7 @@
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
 using Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
-using Moq;
 using Xunit;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.ValueGeneration

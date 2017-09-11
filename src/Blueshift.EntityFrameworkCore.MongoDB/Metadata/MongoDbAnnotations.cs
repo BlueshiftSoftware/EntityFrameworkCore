@@ -39,7 +39,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         public virtual T GetAnnotation<T>([CanBeNull] string annotationName)
-            => (T)Annotatable[annotationName];
+            => (T)Annotatable[Check.NullButNotEmpty(annotationName, nameof(annotationName))];
 
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used

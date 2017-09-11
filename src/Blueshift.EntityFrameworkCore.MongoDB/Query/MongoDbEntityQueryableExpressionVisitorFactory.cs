@@ -16,18 +16,15 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
     public class MongoDbEntityQueryableExpressionVisitorFactory : IEntityQueryableExpressionVisitorFactory
     {
         private readonly IModel _model;
-        private readonly IMongoDbConnection _mongoDbConnection;
 
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         public MongoDbEntityQueryableExpressionVisitorFactory(
-            [NotNull] IModel model,
-            [NotNull] IMongoDbConnection mongoDbConnection)
+            [NotNull] IModel model)
         {
             _model = Check.NotNull(model, nameof(model));
-            _mongoDbConnection = Check.NotNull(mongoDbConnection, nameof(mongoDbConnection));
         }
 
         /// <summary>
@@ -35,11 +32,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         public virtual ExpressionVisitor Create(
-            [NotNull] EntityQueryModelVisitor entityQueryModelVisitor,
-            [CanBeNull] IQuerySource querySource)
+            EntityQueryModelVisitor entityQueryModelVisitor,
+            IQuerySource querySource)
             =>  new MongoDbEntityQueryableExpressionVisitor(
                     Check.NotNull(entityQueryModelVisitor, nameof(entityQueryModelVisitor)),
-                    _model,
-                    _mongoDbConnection);
+                    _model);
     }
 }

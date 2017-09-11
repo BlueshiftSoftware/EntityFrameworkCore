@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Blueshift.MongoDB.Tests.Shared;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -51,14 +52,14 @@ namespace Blueshift.Identity.MongoDB.Tests
                 => string.Equals(claim1.ClaimType, claim2.ClaimType, StringComparison.Ordinal)
                     && string.Equals(claim1.ClaimValue, claim2.ClaimValue, StringComparison.Ordinal));
 
-        protected IServiceProvider _serviceProvider;
+        protected IServiceProvider ServiceProvider;
         private IdentityMongoDbContext _identityDbContext;
-        private IUserStore<MongoDbIdentityUser> _userStore;
-        private IRoleStore<MongoDbIdentityRole> _roleStore;
+        private readonly IUserStore<MongoDbIdentityUser> _userStore;
+        private readonly IRoleStore<MongoDbIdentityRole> _roleStore;
 
-        protected MongoDbIdentityStoreTestBase(MongoDbFixture mongoDbFixture)
+        protected MongoDbIdentityStoreTestBase([UsedImplicitly] MongoDbFixture mongoDbFixture)
         {
-            _serviceProvider = new ServiceCollection()
+            ServiceProvider = new ServiceCollection()
                 .AddDbContext<IdentityMongoDbContext>(options => options
                     .UseMongoDb(
                         connectionString: MongoDbConstants.MongoUrl,
@@ -68,9 +69,9 @@ namespace Blueshift.Identity.MongoDB.Tests
                 .AddEntityFrameworkMongoDbStores<IdentityMongoDbContext>()
                 .Services
                 .BuildServiceProvider();
-            _identityDbContext = _serviceProvider.GetService<IdentityMongoDbContext>();
-            _userStore = _serviceProvider.GetRequiredService<IUserStore<MongoDbIdentityUser>>();
-            _roleStore = _serviceProvider.GetRequiredService<IRoleStore<MongoDbIdentityRole>>();
+            _identityDbContext = ServiceProvider.GetService<IdentityMongoDbContext>();
+            _userStore = ServiceProvider.GetRequiredService<IUserStore<MongoDbIdentityUser>>();
+            _roleStore = ServiceProvider.GetRequiredService<IRoleStore<MongoDbIdentityRole>>();
             _identityDbContext.Database.EnsureCreated();
         }
 

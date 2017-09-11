@@ -23,7 +23,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
     /// </summary>
     public class EntityFrameworkMongoDbServicesBuilder : EntityFrameworkServicesBuilder
     {
-        private static readonly IDictionary<Type, ServiceCharacteristics> _relationalServices
+        private static readonly IDictionary<Type, ServiceCharacteristics> RelationalServices
             = new Dictionary<Type, ServiceCharacteristics>
             {
                 { typeof(IMongoClient), new ServiceCharacteristics(ServiceLifetime.Singleton) },
@@ -46,7 +46,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
         /// This API may change or be removed in future releases.
         /// </summary>
         protected override ServiceCharacteristics GetServiceCharacteristics(Type serviceType)
-            => _relationalServices.TryGetValue(serviceType, out ServiceCharacteristics characteristics)
+            => RelationalServices.TryGetValue(serviceType, out ServiceCharacteristics characteristics)
                 ? characteristics
                 : base.GetServiceCharacteristics(serviceType);
 

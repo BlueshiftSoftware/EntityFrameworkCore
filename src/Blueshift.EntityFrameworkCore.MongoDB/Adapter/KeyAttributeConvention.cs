@@ -17,7 +17,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter
         /// </summary>
         /// <param name="memberMap">The <see cref="BsonMemberMap" /> to which the convention will be applied.</param>
         /// <param name="attribute">The <see cref="KeyAttribute"/> to apply.</param>
-        protected override void Apply([NotNull] BsonMemberMap memberMap, KeyAttribute attribute)
+        protected override void Apply(BsonMemberMap memberMap, KeyAttribute attribute)
         {
             Check.NotNull(memberMap, nameof(memberMap));
             if (memberMap.MemberInfo.IsDefined(typeof(KeyAttribute)))

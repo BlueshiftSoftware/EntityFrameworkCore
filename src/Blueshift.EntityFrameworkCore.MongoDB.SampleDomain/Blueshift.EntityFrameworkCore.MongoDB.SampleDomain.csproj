@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\CodeAnnotations.cs" Link="CodeAnnotations.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Blueshift.EntityFrameworkCore.MongoDB\Blueshift.EntityFrameworkCore.MongoDB.csproj" />
   </ItemGroup>
 

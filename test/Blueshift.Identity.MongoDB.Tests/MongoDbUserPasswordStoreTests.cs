@@ -11,12 +11,12 @@ namespace Blueshift.Identity.MongoDB.Tests
     {
         private static readonly string PasswordHash = new Guid().ToString();
 
-        private IUserPasswordStore<MongoDbIdentityUser> _mongoDbUserPasswordStore;
+        private readonly IUserPasswordStore<MongoDbIdentityUser> _mongoDbUserPasswordStore;
 
         public MongoDbUserPasswordStoreTests(MongoDbFixture mongoDbFixture)
             : base(mongoDbFixture)
         {
-            _mongoDbUserPasswordStore = _serviceProvider.GetRequiredService<IUserPasswordStore<MongoDbIdentityUser>>();
+            _mongoDbUserPasswordStore = ServiceProvider.GetRequiredService<IUserPasswordStore<MongoDbIdentityUser>>();
         }
 
         protected override MongoDbIdentityUser CreateUser()

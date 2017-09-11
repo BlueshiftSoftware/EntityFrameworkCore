@@ -1,6 +1,7 @@
 ﻿using System;
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
 using Blueshift.MongoDB.Tests.Shared;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -9,27 +10,27 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
 {
     public abstract class MongoDbContextTestBase : IClassFixture<MongoDbFixture>, IDisposable
     {
-        protected IServiceProvider _serviceProvider;
-        protected ZooDbContext _zooDbContext;
+        protected IServiceProvider ServiceProvider;
+        protected ZooDbContext ZooDbContext;
 
-        protected MongoDbContextTestBase(MongoDbFixture mongoDbFixture)
+        protected MongoDbContextTestBase([UsedImplicitly] MongoDbFixture mongoDbFixture)
         {
-            _serviceProvider = new ServiceCollection()
+            ServiceProvider = new ServiceCollection()
                 .AddDbContext<ZooDbContext>(options => options
                     .UseMongoDb(connectionString: MongoDbConstants.MongoUrl)
                     .EnableSensitiveDataLogging(true))
                 .BuildServiceProvider();
-            _zooDbContext = _serviceProvider.GetService<ZooDbContext>();
-            _zooDbContext.Database.EnsureCreated();
+            ZooDbContext = ServiceProvider.GetService<ZooDbContext>();
+            ZooDbContext.Database.EnsureCreated();
         }
 
         public void Dispose()
         {
-            if (_zooDbContext != null)
+            if (ZooDbContext != null)
             {
-                _zooDbContext.Database.EnsureDeleted();
-                _zooDbContext.Dispose();
-                _zooDbContext = null;
+                ZooDbContext.Database.EnsureDeleted();
+                ZooDbContext.Dispose();
+                ZooDbContext = null;
             }
         }
     }

@@ -18,7 +18,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
     /// <typeparam name="TEntity">The type of entity being added.</typeparam>
     public class UpdateOneModelFactory<TEntity> : MongoDbWriteModelFactory<TEntity>
     {
-        private static readonly MethodInfo _setMethodInfo = typeof(UpdateDefinitionBuilder<TEntity>)
+        private static readonly MethodInfo SetMethodInfo = typeof(UpdateDefinitionBuilder<TEntity>)
             .GetTypeInfo()
             .GetMember(nameof(UpdateDefinitionBuilder<TEntity>.Set), MemberTypes.Method, BindingFlags.Public | BindingFlags.Instance)
             .Select(memberInfo => (MethodInfo)memberInfo)
@@ -46,7 +46,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
         /// <param name="updateEntry">The <see cref="IUpdateEntry"/> to map.</param>
         /// <returns>A new <see cref="UpdateOneModel{TEntity}"/> containing the inserted values represented
         /// by <paramref name="updateEntry"/>.</returns>
-        public override WriteModel<TEntity> CreateWriteModel([NotNull] IUpdateEntry updateEntry)
+        public override WriteModel<TEntity> CreateWriteModel(IUpdateEntry updateEntry)
         {
             InternalEntityEntry internalEntityEntry = Check.Is<InternalEntityEntry>(updateEntry, nameof(updateEntry));
             UpdateDbGeneratedProperties(internalEntityEntry);
@@ -61,7 +61,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
             IList<UpdateDefinition<TEntity>> updateDefinitions = internalEntityEntry
                 .EntityType
                 .GetProperties()
-                .Where(property => internalEntityEntry.IsModified(property))
+                .Where(internalEntityEntry.IsModified)
                 .Select(property => CreatePropertyUpdateDefinition(builder, internalEntityEntry, property))
                 .ToList();
             return builder.Combine(updateDefinitions);
@@ -71,11 +71,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
             UpdateDefinitionBuilder<TEntity> builder,
             InternalEntityEntry entityEntry,
             IProperty property)
-            => (UpdateDefinition<TEntity>)_setMethodInfo
+            => (UpdateDefinition<TEntity>)SetMethodInfo
                 .MakeGenericMethod(property.ClrType)
                 .Invoke(
                     builder,
-                    new object[]
+                    new []
                     {
                         CreateFieldDefintion(property),
                         entityEntry.GetCurrentValue(property)

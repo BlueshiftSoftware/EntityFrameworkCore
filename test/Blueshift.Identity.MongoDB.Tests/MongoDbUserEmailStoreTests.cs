@@ -12,12 +12,12 @@ namespace Blueshift.Identity.MongoDB.Tests
         private const string EmailAddress = "test.user@domain.com";
         private static readonly string EmailAddressNormalized = EmailAddress.ToUpper();
 
-        private IUserEmailStore<MongoDbIdentityUser> _mongoDbUserEmailStore;
+        private readonly IUserEmailStore<MongoDbIdentityUser> _mongoDbUserEmailStore;
 
         public MongoDbUserEmailStoreTests(MongoDbFixture mongoDbFixture)
             : base(mongoDbFixture)
         {
-            _mongoDbUserEmailStore = _serviceProvider.GetRequiredService<IUserEmailStore<MongoDbIdentityUser>>();
+            _mongoDbUserEmailStore = ServiceProvider.GetRequiredService<IUserEmailStore<MongoDbIdentityUser>>();
         }
 
         protected override MongoDbIdentityUser CreateUser()

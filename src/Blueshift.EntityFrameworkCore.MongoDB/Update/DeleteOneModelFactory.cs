@@ -33,7 +33,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
         /// <param name="updateEntry">The <see cref="IUpdateEntry"/> to map.</param>
         /// <returns>A new <see cref="DeleteOneModel{TEntity}"/> containing the inserted values represented
         /// by <paramref name="updateEntry"/>.</returns>
-        public override WriteModel<TEntity> CreateWriteModel([NotNull] IUpdateEntry updateEntry)
+        public override WriteModel<TEntity> CreateWriteModel(IUpdateEntry updateEntry)
             => new DeleteOneModel<TEntity>(GetLookupFilter(updateEntry));
     }
 }

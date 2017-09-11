@@ -34,7 +34,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public virtual InternalModelBuilder Apply([NotNull] InternalModelBuilder modelBuilder)
+        public virtual InternalModelBuilder Apply(InternalModelBuilder modelBuilder)
         {
             Check.NotNull(modelBuilder, nameof(modelBuilder));
             foreach (TModelAttribute modelAttribute in GetAttributes(DbContext.GetType()))

@@ -11,12 +11,12 @@ namespace Blueshift.Identity.MongoDB.Tests
     {
         private static readonly DateTime LockoutEndDate = DateTime.Now.AddDays(1);
 
-        private IUserLockoutStore<MongoDbIdentityUser> _mongoDbUserLockoutStore;
+        private readonly IUserLockoutStore<MongoDbIdentityUser> _mongoDbUserLockoutStore;
 
         public MongoDbUserLockoutStoreTests(MongoDbFixture mongoDbFixture)
             : base(mongoDbFixture)
         {
-            _mongoDbUserLockoutStore = _serviceProvider.GetRequiredService<IUserLockoutStore<MongoDbIdentityUser>>();
+            _mongoDbUserLockoutStore = ServiceProvider.GetRequiredService<IUserLockoutStore<MongoDbIdentityUser>>();
         }
 
         protected override MongoDbIdentityUser CreateUser()

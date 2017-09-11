@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace Blueshift.Identity.MongoDB
+﻿namespace Blueshift.Identity.MongoDB
 {
     /// <summary>
     /// A representation of an external user login provider token for use with a MongoDB EntityFramework provider.

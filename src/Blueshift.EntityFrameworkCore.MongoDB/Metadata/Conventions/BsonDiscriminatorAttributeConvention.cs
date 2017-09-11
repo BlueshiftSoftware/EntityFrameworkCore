@@ -17,8 +17,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public override InternalEntityTypeBuilder Apply([NotNull] InternalEntityTypeBuilder entityTypeBuilder,
-            [NotNull] BsonDiscriminatorAttribute attribute)
+        public override InternalEntityTypeBuilder Apply(InternalEntityTypeBuilder entityTypeBuilder,
+            BsonDiscriminatorAttribute attribute)
         {
             Check.NotNull(entityTypeBuilder, nameof(entityTypeBuilder));
             Check.NotNull(attribute, nameof(attribute));

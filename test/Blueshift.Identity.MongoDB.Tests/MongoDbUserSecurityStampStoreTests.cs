@@ -11,12 +11,12 @@ namespace Blueshift.Identity.MongoDB.Tests
     {
         private static readonly string SecurityStamp = new Guid().ToString();
 
-        private IUserSecurityStampStore<MongoDbIdentityUser> _mongoDbUserSecurityStampStore;
+        private readonly IUserSecurityStampStore<MongoDbIdentityUser> _mongoDbUserSecurityStampStore;
 
         public MongoDbUserSecurityStampStoreTests(MongoDbFixture mongoDbFixture)
             : base(mongoDbFixture)
         {
-            _mongoDbUserSecurityStampStore = _serviceProvider.GetRequiredService<IUserSecurityStampStore<MongoDbIdentityUser>>();
+            _mongoDbUserSecurityStampStore = ServiceProvider.GetRequiredService<IUserSecurityStampStore<MongoDbIdentityUser>>();
         }
 
         protected override MongoDbIdentityUser CreateUser()

@@ -23,12 +23,12 @@ namespace Blueshift.Identity.MongoDB.Tests
         private static readonly Claim Claim2 = new Claim(Claim2Type, Claim2Value);
         private static readonly Claim Claim3 = new Claim(Claim3Type, Claim3Value);
 
-        private IRoleClaimStore<MongoDbIdentityRole> _mongoDbRoleClaimStore;
+        private readonly IRoleClaimStore<MongoDbIdentityRole> _mongoDbRoleClaimStore;
 
         public MongoDbRoleClaimStoreTests(MongoDbFixture mongoDbFixture)
             : base(mongoDbFixture)
         {
-            _mongoDbRoleClaimStore = _serviceProvider.GetRequiredService<IRoleClaimStore<MongoDbIdentityRole>>();
+            _mongoDbRoleClaimStore = ServiceProvider.GetRequiredService<IRoleClaimStore<MongoDbIdentityRole>>();
         }
 
         protected static IEqualityComparer<Claim> ClaimComparer
@@ -48,8 +48,8 @@ namespace Blueshift.Identity.MongoDB.Tests
         public async void Can_add_claim_async()
         {
             var role = CreateRole();
-            await _mongoDbRoleClaimStore.AddClaimAsync(role, Claim3, new CancellationToken());
-            var newClaims = new Claim[] { Claim1, Claim2, Claim3 };
+            await _mongoDbRoleClaimStore.AddClaimAsync(role, Claim3);
+            var newClaims = new [] { Claim1, Claim2, Claim3 };
             Assert.Equal(newClaims, role.Claims.Select(claim => claim.ToClaim()), ClaimComparer);
         }
 
@@ -57,16 +57,15 @@ namespace Blueshift.Identity.MongoDB.Tests
         public async void Can_get_claims_async()
         {
             var role = CreateRole();
-            var claims = new Claim[] { Claim1, Claim2 };
-            Assert.Equal(claims, await _mongoDbRoleClaimStore.GetClaimsAsync(role, new CancellationToken()), ClaimComparer);
+            var claims = new [] { Claim1, Claim2 };
+            Assert.Equal(claims, await _mongoDbRoleClaimStore.GetClaimsAsync(role), ClaimComparer);
         }
 
         [Fact]
         public async void Can_remove_claims_async()
         {
             var role = CreateRole();
-            var claimsToRemove = new Claim[] { Claim1, Claim2 };
-            await _mongoDbRoleClaimStore.RemoveClaimAsync(role, Claim1, new CancellationToken());
+            await _mongoDbRoleClaimStore.RemoveClaimAsync(role, Claim1);
             Assert.Equal(Claim2, role.Claims.Select(claim => claim.ToClaim()).Single(), ClaimComparer);
         }
     }

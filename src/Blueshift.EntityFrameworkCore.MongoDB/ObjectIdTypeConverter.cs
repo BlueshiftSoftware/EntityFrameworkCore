@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Globalization;
+using Microsoft.EntityFrameworkCore.Utilities;
 using MongoDB.Bson;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB
@@ -28,7 +29,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB
         /// <returns>A new <see cref="ObjectId"/> represented by <paramref name="value"/>.</returns>
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
-            if (!CanConvertFrom(context, value?.GetType()))
+            if (!CanConvertFrom(context, Check.NotNull(value, nameof(value)).GetType()))
             {
                 throw new InvalidOperationException($"Cannot convert {value} from {typeof(ObjectId)}.");
             }

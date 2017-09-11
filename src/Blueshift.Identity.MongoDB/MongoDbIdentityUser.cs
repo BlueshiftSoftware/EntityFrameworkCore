@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Blueshift.EntityFrameworkCore.MongoDB.Annotations;
+using JetBrains.Annotations;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -82,7 +83,7 @@ namespace Blueshift.Identity.MongoDB
         /// Gets or sets the primary key for this user.
         /// </summary>
         [BsonId, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public virtual TKey Id { get; private set; }
+        public virtual TKey Id { get; [UsedImplicitly] private set; }
 
         /// <summary>
         /// Gets or sets the user name for this user.
@@ -165,17 +166,17 @@ namespace Blueshift.Identity.MongoDB
         /// <summary>
         /// A collection of security roles assigned to this user.
         /// </summary>
-        public virtual ICollection<TUserRole> Roles { get; private set; } = new List<TUserRole>();
+        public virtual ICollection<TUserRole> Roles { get; [UsedImplicitly] private set; } = new List<TUserRole>();
 
         /// <summary>
         /// A collection of security claims assigned to this user.
         /// </summary>
-        public virtual ICollection<TClaim> Claims { get; private set; } = new List<TClaim>();
+        public virtual ICollection<TClaim> Claims { get; [UsedImplicitly] private set; } = new List<TClaim>();
 
         /// <summary>
         /// A collection of external login provider information assigned to this user.
         /// </summary>
-        public virtual ICollection<TUserLogin> Logins { get; private set; } = new List<TUserLogin>();
+        public virtual ICollection<TUserLogin> Logins { get; [UsedImplicitly] private set; } = new List<TUserLogin>();
 
         /// <summary>
         /// Returns the <see cref="UserName"/> for this user.
