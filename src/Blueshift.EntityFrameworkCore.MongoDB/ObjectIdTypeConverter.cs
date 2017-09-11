@@ -31,7 +31,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB
         {
             if (!CanConvertFrom(context, Check.NotNull(value, nameof(value)).GetType()))
             {
-                throw new InvalidOperationException($"Cannot convert {value} from {typeof(ObjectId)}.");
+                throw new InvalidOperationException($"Cannot convert {value} to {typeof(ObjectId)}.");
             }
             return ObjectId.Parse(value as string);
         }
@@ -57,7 +57,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB
         {
             if (!CanConvertTo(context, destinationType))
             {
-                throw new InvalidOperationException($"Cannot convert {value} to {typeof(ObjectId)}.");
+                throw new InvalidOperationException($"Cannot convert {value} to {destinationType}.");
             }
             return value.ToString();
         }
