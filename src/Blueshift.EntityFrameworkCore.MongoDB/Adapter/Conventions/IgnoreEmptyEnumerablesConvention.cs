@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Utilities;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 
-namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter
+namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter.Conventions
 {
     /// <summary>
     /// A convention that ignores empty <see cref="IEnumerable"/> instances when serializing Bson documents. 
@@ -17,7 +17,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter
         /// Initializes a new instance of the <see cref="IgnoreEmptyEnumerablesConvention"/> class.
         /// </summary>
         public IgnoreEmptyEnumerablesConvention()
-            : base(Regex.Replace(nameof(IgnoreEmptyEnumerablesConvention), pattern: "Convention$", replacement: ""))
+            : base(Regex.Replace(nameof(IgnoreEmptyEnumerablesConvention), "Convention$", ""))
         {
         }
 

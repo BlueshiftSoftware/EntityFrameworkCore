@@ -1,10 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Reflection;
-using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Utilities;
 using MongoDB.Bson.Serialization;
 
-namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter
+namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter.Conventions
 {
     /// <summary>
     /// A convention that sets the <see cref="BsonClassMap.IdMemberMap"/> of a <see cref="BsonClassMap"/>
@@ -18,12 +16,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter
         /// <param name="memberMap">The <see cref="BsonMemberMap" /> to which the convention will be applied.</param>
         /// <param name="attribute">The <see cref="KeyAttribute"/> to apply.</param>
         protected override void Apply(BsonMemberMap memberMap, KeyAttribute attribute)
-        {
-            Check.NotNull(memberMap, nameof(memberMap));
-            if (memberMap.MemberInfo.IsDefined(typeof(KeyAttribute)))
-            {
-                memberMap.ClassMap.SetIdMember(memberMap);
-            }
-        }
+            => Check.NotNull(memberMap, nameof(memberMap))
+                .ClassMap
+                .SetIdMember(memberMap);
     }
 }

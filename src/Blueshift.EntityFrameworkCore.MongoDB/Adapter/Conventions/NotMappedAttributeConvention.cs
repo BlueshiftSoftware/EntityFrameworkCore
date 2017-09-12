@@ -1,11 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Reflection;
-using JetBrains.Annotations;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore.Utilities;
 using MongoDB.Bson.Serialization;
 
-namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter
+namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter.Conventions
 {
     /// <summary>
     /// Marks a <see cref="BsonMemberMap"/> as ignored during serialization.
@@ -18,12 +15,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter
         /// <param name="memberMap">The <see cref="BsonMemberMap" /> to which the convention will be applied.</param>
         /// <param name="attribute">The <see cref="NotMappedAttribute"/> to apply.</param>
         protected override void Apply(BsonMemberMap memberMap, NotMappedAttribute attribute)
-        {
-            Check.NotNull(memberMap, nameof(memberMap));
-            if (memberMap.MemberInfo.IsDefined(typeof(KeyAttribute)))
-            {
-                memberMap.ClassMap.UnmapMember(memberMap.MemberInfo);
-            }
-        }
+            => Check.NotNull(memberMap, nameof(memberMap))
+                .ClassMap
+                .UnmapMember(memberMap.MemberInfo);
     }
 }

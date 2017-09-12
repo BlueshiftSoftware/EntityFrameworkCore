@@ -1,12 +1,11 @@
-using Blueshift.EntityFrameworkCore.MongoDB.Adapter;
+using System.Linq;
+using System.Text;
+using Blueshift.EntityFrameworkCore.MongoDB.Adapter.Conventions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
-using System;
-using System.Text;
-using System.Linq;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.EntityFrameworkCore.Infrastructure
@@ -81,7 +80,7 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
         {
             get => _mongoClient == null
                 ? null
-                : MongoUrl.Create($"mongodb://{String.Join(",", _mongoClient.Settings.Servers.Select(server => $"{server.Host}:{server.Port}"))}");
+                : MongoUrl.Create($"mongodb://{string.Join(",", _mongoClient.Settings.Servers.Select(server => $"{server.Host}:{server.Port}"))}");
             [param: NotNull] set
             {
                 MongoClientSettings = MongoClientSettings.FromUrl(Check.NotNull(value, nameof(MongoUrl)));
@@ -94,10 +93,7 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
         public string DatabaseName
         {
             get => _databaseName;
-            [param: NotNull] set
-            {
-                _databaseName = Check.NotEmpty(value, nameof(value));
-            }
+            [param: NotNull] set => _databaseName = Check.NotEmpty(value, nameof(value));
         }
 
         /// <inheritdoc/>
@@ -132,9 +128,9 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
         public virtual bool ApplyServices(IServiceCollection services)
         {
             ConventionRegistry.Register(
-                name: "EntityFramework.MongoDb.Conventions",
-                conventions: EntityFrameworkConventionPack.Instance,
-                filter: type => true);
+                "EntityFramework.MongoDb.Conventions",
+                EntityFrameworkConventionPack.Instance,
+                type => true);
             Check.NotNull(services, nameof(services)).AddEntityFrameworkMongoDb();
             return true;
         }

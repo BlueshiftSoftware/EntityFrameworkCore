@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Utilities;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 
-namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter
+namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter.Conventions
 {
     /// <summary>
     /// Instructs the MongoDb C# driver to ignore null, empty, or default values of <see cref="string"/> properties.
@@ -15,8 +15,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter
         /// Initializes a new instance of the <see cref="IgnoreNullOrEmptyStringsConvention"/> class.
         /// </summary>
         public IgnoreNullOrEmptyStringsConvention()
-            : base(Regex.Replace(nameof(IgnoreNullOrEmptyStringsConvention), pattern: "Convention$", replacement: ""))
-        {            
+            : base(Regex.Replace(nameof(IgnoreNullOrEmptyStringsConvention), "Convention$", ""))
+        {
         }
 
         /// <summary>

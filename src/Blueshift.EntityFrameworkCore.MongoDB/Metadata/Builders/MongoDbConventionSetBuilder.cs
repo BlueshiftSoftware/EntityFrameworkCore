@@ -48,6 +48,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
                 .Replace(baseTypeDiscoveryConvention)
                 .With(new BsonIgnoreAttributeConvention())
                 .With(new BsonDiscriminatorAttributeConvention())
+                .With(new MongoDbAbstractClassConvention())
                 .With(new MongoDbRegisterKnownTypesConvention());
 
             conventionSet.PropertyAddedConventions

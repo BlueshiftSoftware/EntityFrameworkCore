@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Reflection;
-using Blueshift.EntityFrameworkCore.MongoDB.Adapter;
+using Blueshift.EntityFrameworkCore.MongoDB.Adapter.Conventions;
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
 using MongoDB.Bson.Serialization;
 using Xunit;
 
-namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.MongoDB.Adapter
+namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.MongoDB.Adapter.Conventions
 {
     public class KeyAttributeConventionTests
     {

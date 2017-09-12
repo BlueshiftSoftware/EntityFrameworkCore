@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Utilities;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 
-namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter
+namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter.Conventions
 {
     /// <summary>
     /// Base class for attribute-based <see cref="BsonMemberMap"/> convention processing.
@@ -20,8 +20,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter
         /// Initializes a new instance of the <see cref="BsonMemberMapAttributeConvention{TAttribute}"/>.
         /// </summary>
         protected BsonMemberMapAttributeConvention()
-            : base(Regex.Replace(typeof(TAttribute).Name,
-                pattern: "Attribute$", replacement: ""))
+            : base(Regex.Replace(typeof(TAttribute).Name, "Attribute$", ""))
         {
         }
 
@@ -46,6 +45,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter
         /// </summary>
         /// <param name="memberMap">The <see cref="BsonMemberMap"/> to which the conventions will be assigned.</param>
         /// <param name="attribute">The <typeparamref name="TAttribute" /> that defines the convention.</param>
-        protected abstract void Apply([NotNull] BsonMemberMap memberMap, TAttribute attribute);
+        protected abstract void Apply([NotNull] BsonMemberMap memberMap, [NotNull] TAttribute attribute);
     }
 }
