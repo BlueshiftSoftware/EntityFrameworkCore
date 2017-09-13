@@ -1,6 +1,7 @@
-﻿using MongoDB.Bson.Serialization.Conventions;
+﻿using Blueshift.EntityFrameworkCore.MongoDB.Adapter.Conventions;
+using MongoDB.Bson.Serialization.Conventions;
 
-namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter.Conventions
+namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter
 {
     /// <summary>
     /// Provides a set of conventions that configures the MongoDb C# Driver to work appropriately with the EntityFrameworkCore.

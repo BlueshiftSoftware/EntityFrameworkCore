@@ -1,6 +1,6 @@
 using System.Linq;
 using System.Text;
-using Blueshift.EntityFrameworkCore.MongoDB.Adapter.Conventions;
+using Blueshift.EntityFrameworkCore.MongoDB.Adapter;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Utilities;
 using Microsoft.Extensions.DependencyInjection;

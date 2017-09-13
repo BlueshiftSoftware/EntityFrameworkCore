@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Reflection;
+using Blueshift.EntityFrameworkCore.MongoDB.Adapter;
 using Blueshift.EntityFrameworkCore.MongoDB.Adapter.Conventions;
 using MongoDB.Bson.Serialization.Conventions;
 using Xunit;
 
-namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.MongoDB.Adapter.Conventions
+namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.MongoDB.Adapter
 {
     public class EntityFrameworkConventionPackTests
     {
