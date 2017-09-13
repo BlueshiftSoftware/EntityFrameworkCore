@@ -39,13 +39,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
                 = new MongoDbDatabaseGeneratedAttributeConvention();
             KeyAttributeConvention keyAttributeConvention = new MongoDbKeyAttributeConvention();
             var mongoDatabaseAttributeConvention
-                = new MongoDatabaseAttributeConvention(_mongoDbConventionSetBuilderDependencies.CurrentDbContext.Context);
+                = new MongoDatabaseConvention(_mongoDbConventionSetBuilderDependencies.CurrentDbContext.Context);
 
             conventionSet.ModelInitializedConventions
                 .With(mongoDatabaseAttributeConvention);
 
             conventionSet.EntityTypeAddedConventions
                 .Replace(baseTypeDiscoveryConvention)
+                .With(new MongoCollectionAttributeConvention())
                 .With(new BsonIgnoreAttributeConvention())
                 .With(new BsonDiscriminatorAttributeConvention())
                 .With(new MongoDbAbstractClassConvention())
@@ -60,7 +61,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
                 .Replace(keyAttributeConvention);
 
             conventionSet.ModelBuiltConventions
-                .Replace(keyAttributeConvention);
+                .Replace(keyAttributeConvention)
+                .With(mongoDatabaseAttributeConvention);
 
             return conventionSet;
         }

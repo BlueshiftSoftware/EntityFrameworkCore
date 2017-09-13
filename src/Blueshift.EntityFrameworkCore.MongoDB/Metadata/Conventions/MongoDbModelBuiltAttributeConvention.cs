@@ -13,14 +13,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
     ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
     ///     directly from your code. This API may change or be removed in future releases.
     /// </summary>
-    public abstract class MongoDbModelAttributeConvention<TModelAttribute> : IModelInitializedConvention
-        where TModelAttribute : Attribute, IModelBuiltConvention
+    public abstract class MongoDbModelBuiltAttributeConvention<TModelAttribute> : IModelBuiltConvention
+        where TModelAttribute : Attribute
     {
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        protected MongoDbModelAttributeConvention([NotNull] DbContext dbContext)
+        protected MongoDbModelBuiltAttributeConvention([NotNull] DbContext dbContext)
         {
             DbContext = Check.NotNull(dbContext, nameof(dbContext));
         }
@@ -37,7 +37,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
         public virtual InternalModelBuilder Apply(InternalModelBuilder modelBuilder)
         {
             Check.NotNull(modelBuilder, nameof(modelBuilder));
-            foreach (TModelAttribute modelAttribute in GetAttributes(DbContext.GetType()))
+            IEnumerable<TModelAttribute> modelAttributes = DbContext.GetType()
+                .GetTypeInfo()
+                .GetCustomAttributes<TModelAttribute>();
+            foreach (TModelAttribute modelAttribute in modelAttributes)
             {
                 if (!Apply(modelBuilder, modelAttribute))
                 {
@@ -51,22 +54,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        protected virtual IEnumerable<TModelAttribute> GetAttributes([NotNull] Type dbContextType)
-            => Check.NotNull(dbContextType, nameof(dbContextType))
-                .GetTypeInfo()
-                .GetCustomAttributes<TModelAttribute>();
-
-        /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        protected virtual bool Apply([NotNull] InternalModelBuilder modelBuilder,
-            [NotNull] TModelAttribute modelAttribute)
-        {
-            Check.NotNull(modelBuilder, nameof(modelBuilder));
-            Check.NotNull(modelAttribute, nameof(modelAttribute));
-            modelAttribute.Apply(modelBuilder);
-            return true;
-        }
+        protected abstract bool Apply([NotNull] InternalModelBuilder modelBuilder,
+            [NotNull] TModelAttribute modelAttribute);
     }
 }
