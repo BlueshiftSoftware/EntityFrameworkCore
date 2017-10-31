@@ -39,7 +39,9 @@ namespace Microsoft.EntityFrameworkCore
         public MongoDbContextOptionsBuilder UseDatabase([NotNull] string databaseName)
         {
             Check.NotEmpty(databaseName, nameof(databaseName));
-            CloneExtension().DatabaseName = databaseName;
+            MongoDbOptionsExtension extension = CloneExtension();
+            extension.DatabaseName = databaseName;
+            ((IDbContextOptionsBuilderInfrastructure)OptionsBuilder).AddOrUpdateExtension(extension);
             return this;
         }
 
