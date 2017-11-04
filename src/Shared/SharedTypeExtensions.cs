@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
 namespace System
@@ -114,16 +115,19 @@ namespace System
         }
 
         public static Type TryGetSequenceType(this Type type)
-            => type.TryGetElementType(typeof(IEnumerable<>))
-               ?? type.TryGetElementType(typeof(IAsyncEnumerable<>));
+            => type.IsArray
+                ? type.GetElementType()
+                : type.TryGetElementType(typeof(IDictionary<,>), 1)
+                   ?? type.TryGetElementType(typeof(IEnumerable<>))
+                   ?? type.TryGetElementType(typeof(IAsyncEnumerable<>));
 
-        public static Type TryGetElementType(this Type type, Type interfaceOrBaseType)
+        public static Type TryGetElementType(this Type type, Type interfaceOrBaseType, int elementIndex = 0)
         {
             if (!type.GetTypeInfo().IsGenericTypeDefinition)
             {
                 var types = GetGenericTypeImplementations(type, interfaceOrBaseType).ToList();
 
-                return types.Count == 1 ? types[0].GetTypeInfo().GenericTypeArguments.FirstOrDefault() : null;
+                return types.Count == 1 ? types[0].GetTypeInfo().GenericTypeArguments[elementIndex] : null;
             }
 
             return null;
@@ -143,6 +147,23 @@ namespace System
 
             return Enumerable.Empty<Type>();
         }
+
+        public static IEnumerable<Type> GetImplementationTypes(this Type type, Type interfaceOrBaseType)
+        {
+            TypeInfo typeInfo = type.GetTypeInfo();
+            return (interfaceOrBaseType.GetTypeInfo().IsInterface ? typeInfo.ImplementedInterfaces : type.GetBaseTypes())
+                .Union(new[] { type })
+                .Where(
+                    t => t.GetTypeInfo().IsGenericType
+                         && (t.GetGenericTypeDefinition() == interfaceOrBaseType));
+        }
+
+        public static Type GetImplementationType(this Type type, Type interfaceOrBaseType)
+            => type.GetGenericTypeImplementations(interfaceOrBaseType)
+                .FirstOrDefault();
+
+        public static bool TryGetImplementationType(this Type type, Type interfaceOrBaseType, out Type implementedInterfaceType)
+            => (implementedInterfaceType = type.GetImplementationType(interfaceOrBaseType)) != null;
 
         public static IEnumerable<Type> GetBaseTypes(this Type type)
         {

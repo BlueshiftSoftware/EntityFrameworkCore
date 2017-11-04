@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -58,10 +59,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
         private UpdateDefinition<TEntity> CreateUpdateDefinition(InternalEntityEntry internalEntityEntry)
         {
             var builder = new UpdateDefinitionBuilder<TEntity>();
-            IList<UpdateDefinition<TEntity>> updateDefinitions = internalEntityEntry
-                .EntityType
+            IEntityType entityType = internalEntityEntry.EntityType;
+            IList<UpdateDefinition<TEntity>> updateDefinitions = entityType
                 .GetProperties()
-                .Where(internalEntityEntry.IsModified)
+                .Where(property => property.PropertyInfo != null && internalEntityEntry.IsModified(property))
                 .Select(property => CreatePropertyUpdateDefinition(builder, internalEntityEntry, property))
                 .ToList();
             return builder.Combine(updateDefinitions);
@@ -69,8 +70,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
 
         private UpdateDefinition<TEntity> CreatePropertyUpdateDefinition(
             UpdateDefinitionBuilder<TEntity> builder,
-            InternalEntityEntry entityEntry,
-            IProperty property)
+            IUpdateEntry entityEntry,
+            IPropertyBase property)
             => (UpdateDefinition<TEntity>)SetMethodInfo
                 .MakeGenericMethod(property.ClrType)
                 .Invoke(
@@ -81,7 +82,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
                         entityEntry.GetCurrentValue(property)
                     });
 
-        private object CreateFieldDefintion(IProperty property)
+        private object CreateFieldDefintion(IPropertyBase property)
         {
             ParameterExpression parameterExpression = Expression.Parameter(typeof(TEntity), name: "entity");
             return Expression.Lambda(

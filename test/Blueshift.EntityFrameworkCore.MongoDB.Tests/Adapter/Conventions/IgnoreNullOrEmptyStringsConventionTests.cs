@@ -3,7 +3,7 @@ using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
 using MongoDB.Bson.Serialization;
 using Xunit;
 
-namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.MongoDB.Adapter.Conventions
+namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Conventions
 {
     public class IgnoreNullOrEmptyStringsConventionTests
     {

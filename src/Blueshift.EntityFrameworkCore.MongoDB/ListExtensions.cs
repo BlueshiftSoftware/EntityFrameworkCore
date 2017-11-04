@@ -11,6 +11,28 @@ namespace System.Collections.Generic
     public static class ListExtensions
     {
         /// <summary>
+        /// Inserts the given <paramref name="item"/> before the first instance of <typeparamref name="TExisting"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of items contained in the list.</typeparam>
+        /// <typeparam name="TExisting">The type of the existing item.</typeparam>
+        /// <param name="list">An <see cref="IList{TBase}"/> whose values will be replaced.</param>
+        /// <param name="item">The new value to be inserted in <paramref name="list"/>.</param>
+        /// <returns>The modified <paramref name="list"/>, such that calls can be chained.</returns>
+        public static IList<T> InsertBefore<T, TExisting>([NotNull] this IList<T> list,
+            [NotNull] T item)
+            where TExisting : T
+        {
+            Check.NotNull(list, nameof(list));
+            Check.NotNull(item, nameof(item));
+            TExisting existing = list.OfType<TExisting>().FirstOrDefault();
+            int index = existing != null
+                ? list.IndexOf(existing)
+                : list.Count;
+            list.Insert(index, item);
+            return list;
+        }
+
+        /// <summary>
         /// Replaces instances of <typeparamref name="TBase"/> in <paramref name="replacement"/> with the
         /// given <paramref name="replacement"/>.
         /// </summary>

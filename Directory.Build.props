@@ -1,10 +1,11 @@
-<Project>
-  <Import Project="dependencies.props" />
-  <Import Project="..\version.xml" />
+﻿<Project>
+  <Import Project="version.xml" />
+  <Import Project="build/dependencies.props" />
 
   <PropertyGroup>
     <BuildYear>$([System.DateTime]::Now.ToString('yyyy'))</BuildYear>
     <RepositoryType>git</RepositoryType>
+    <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
     <RepositoryUrl>https://github.com/crhairr/EntityFrameworkCore.MongoDb.git</RepositoryUrl>
     <!--<AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Key.snk</AssemblyOriginatorKeyFile>
     <PublicSign Condition="'$(OS)' != 'Windows_NT'">True</PublicSign>
@@ -15,13 +16,16 @@
     <Authors>$(Company)</Authors>
     <Copyright>© $(Company) @ $(BuildYear) - all rights reserved.</Copyright>
     <PackageTags>Blueshift;MongoDB;Entity Framework Core;entity-framework-core;EF;Data;O/RM</PackageTags>
+    <Product>Blueshift Software MongoDB Provider for Entity Framework Core</Product>
+    <DebugType Condition="'$(Configuration)' == 'Debug' AND '$(OS)' == 'Windows_NT'">full</DebugType>
+    <StyleCopAnalyzersVersion>1.0.0</StyleCopAnalyzersVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="**\*.rd.xml" />
   </ItemGroup>
   
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' And '$(OutputType)' == 'library' And '$(DisableImplicitFrameworkReferences)' != 'true'">
+  <!--<ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' And '$(OutputType)' == 'library' And '$(DisableImplicitFrameworkReferences)' != 'true'">
     <PackageReference Include="NETStandard.Library" Version="$(BundledNETStandardPackageVersion)" />
-  </ItemGroup>
+  </ItemGroup>-->
 </Project>

@@ -22,11 +22,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
             Check.NotNull(propertyBuilder, nameof(propertyBuilder));
 
             MemberInfo memberInfo = propertyBuilder.Metadata.MemberInfo;
-            if (memberInfo?.IsDefined(typeof(BsonIdAttribute), true) ?? false)
-            {
-                base.Apply(propertyBuilder, KeyAttribute, memberInfo);
-            }
-            return base.Apply(propertyBuilder);
+            return (memberInfo?.IsDefined(typeof(BsonIdAttribute), true) ?? false)
+                ? base.Apply(propertyBuilder, KeyAttribute, memberInfo)
+                : base.Apply(propertyBuilder);
         }
 
         /// <inheritdoc />

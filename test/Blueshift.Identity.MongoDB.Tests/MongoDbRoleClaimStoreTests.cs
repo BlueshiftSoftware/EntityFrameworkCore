@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Security.Claims;
-using System.Threading;
 using Blueshift.MongoDB.Tests.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,11 +28,6 @@ namespace Blueshift.Identity.MongoDB.Tests
             _mongoDbRoleClaimStore = ServiceProvider.GetRequiredService<IRoleClaimStore<MongoDbIdentityRole>>();
         }
 
-        protected static IEqualityComparer<Claim> ClaimComparer
-            => new FuncEqualityComparer<Claim>((claim1, claim2)
-                => string.Equals(claim1.Type, claim2.Type, StringComparison.Ordinal)
-                    && string.Equals(claim1.Value, claim2.Value, StringComparison.Ordinal));
-
         protected override MongoDbIdentityRole CreateRole()
         {
             var role = base.CreateRole();
@@ -50,7 +42,7 @@ namespace Blueshift.Identity.MongoDB.Tests
             var role = CreateRole();
             await _mongoDbRoleClaimStore.AddClaimAsync(role, Claim3);
             var newClaims = new [] { Claim1, Claim2, Claim3 };
-            Assert.Equal(newClaims, role.Claims.Select(claim => claim.ToClaim()), ClaimComparer);
+            Assert.Equal(newClaims, role.Claims.Select(claim => claim.ToClaim()), new ClaimComparer());
         }
 
         [Fact]
@@ -58,7 +50,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         {
             var role = CreateRole();
             var claims = new [] { Claim1, Claim2 };
-            Assert.Equal(claims, await _mongoDbRoleClaimStore.GetClaimsAsync(role), ClaimComparer);
+            Assert.Equal(claims, await _mongoDbRoleClaimStore.GetClaimsAsync(role), new ClaimComparer());
         }
 
         [Fact]
@@ -66,7 +58,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         {
             var role = CreateRole();
             await _mongoDbRoleClaimStore.RemoveClaimAsync(role, Claim1);
-            Assert.Equal(Claim2, role.Claims.Select(claim => claim.ToClaim()).Single(), ClaimComparer);
+            Assert.Equal(Claim2, role.Claims.Select(claim => claim.ToClaim()).Single(), new ClaimComparer());
         }
     }
 }

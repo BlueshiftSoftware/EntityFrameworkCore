@@ -1,10 +1,12 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
 using Blueshift.EntityFrameworkCore.MongoDB;
+using Blueshift.EntityFrameworkCore.MongoDB.Adapter;
 using Blueshift.EntityFrameworkCore.MongoDB.Infrastructure;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Utilities;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Conventions;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection
@@ -20,6 +22,11 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 TypeDescriptor.AddAttributes(typeof(ObjectId), new TypeConverterAttribute(typeof(ObjectIdTypeConverter)));
             }
+
+            ConventionRegistry.Register(
+                "Blueshift.EntityFrameworkCore.MongoDb.Conventions",
+                EntityFrameworkConventionPack.Instance,
+                type => true);
         }
 
         /// <summary>

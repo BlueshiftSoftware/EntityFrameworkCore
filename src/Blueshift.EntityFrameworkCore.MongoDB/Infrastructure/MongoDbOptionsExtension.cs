@@ -1,10 +1,8 @@
 using System.Linq;
 using System.Text;
-using Blueshift.EntityFrameworkCore.MongoDB.Adapter;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Utilities;
 using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 
 // ReSharper disable once CheckNamespace
@@ -127,10 +125,6 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
         /// </summary>
         public virtual bool ApplyServices(IServiceCollection services)
         {
-            ConventionRegistry.Register(
-                "EntityFramework.MongoDb.Conventions",
-                EntityFrameworkConventionPack.Instance,
-                type => true);
             Check.NotNull(services, nameof(services)).AddEntityFrameworkMongoDb();
             return true;
         }

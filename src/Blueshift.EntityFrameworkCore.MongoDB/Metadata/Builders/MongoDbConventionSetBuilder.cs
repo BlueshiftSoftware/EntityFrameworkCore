@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Utilities;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
 {
@@ -34,7 +35,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
         {
             Check.NotNull(conventionSet, nameof(conventionSet));
 
-            BaseTypeDiscoveryConvention baseTypeDiscoveryConvention = new MongoDbBaseTypeDiscoveryConvention();
             DatabaseGeneratedAttributeConvention databaseGeneratedAttributeConvention
                 = new MongoDbDatabaseGeneratedAttributeConvention();
             KeyAttributeConvention keyAttributeConvention = new MongoDbKeyAttributeConvention();
@@ -45,7 +45,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
                 .With(mongoDatabaseAttributeConvention);
 
             conventionSet.EntityTypeAddedConventions
-                .Replace(baseTypeDiscoveryConvention)
+                .InsertBefore<IEntityTypeAddedConvention, BaseTypeDiscoveryConvention>(new MongoDbBaseTypeDiscoveryConvention())
                 .With(new MongoCollectionAttributeConvention())
                 .With(new BsonIgnoreAttributeConvention())
                 .With(new BsonDiscriminatorAttributeConvention())

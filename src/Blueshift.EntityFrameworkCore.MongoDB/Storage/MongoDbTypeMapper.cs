@@ -1,20 +1,23 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Utilities;
 using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
 {
     /// <summary>
-    /// An implementation of <see cref="ITypeMapper" /> that supports MongoDB's <see cref="ObjectId"/>.
+    /// Determines whether a .NET type can be mapped to a MongoDB database type.
     /// </summary>
     public class MongoDbTypeMapper : ITypeMapper
     {
-        private readonly ConcurrentDictionary<Type, bool> _typeCache = new ConcurrentDictionary<Type, bool>();
+        private readonly ConcurrentDictionary<Type, bool> _typeCache = new ConcurrentDictionary<Type, bool>
+        {
+            [typeof(string)] = true,
+            [typeof(ObjectId)] = true
+        };
 
         /// <summary>
         /// Gets a value indicating whether the given .NET type is mapped.
@@ -24,10 +27,13 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
         public bool IsTypeMapped(Type clrType)
             => _typeCache.GetOrAdd(
                 Check.NotNull(clrType, nameof(clrType)),
-                type => type.IsPrimitive()
-                    || type == typeof(ObjectId)
-                    || !type.GetProperties()
-                        .Any(property => property.IsDefined(typeof(KeyAttribute), true)
-                                         || property.IsDefined(typeof(BsonIdAttribute), true)));
+                type =>
+                {
+                    clrType = (clrType.TryGetSequenceType() ?? clrType).UnwrapNullableType();
+                    TypeInfo typeInfo = clrType.GetTypeInfo();
+                    return typeInfo.IsPrimitive
+                        || typeInfo.IsValueType
+                        || (typeInfo.IsClass && BsonClassMap.LookupClassMap(clrType).IdMemberMap == null);
+                });
     }
 }

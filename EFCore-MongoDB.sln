@@ -1,11 +1,10 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.16
+VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{FAF9C31C-A1AF-42A9-9306-EC190DCACCC7}"
 	ProjectSection(SolutionItems) = preProject
-		build\common.props = build\common.props
 		build\dependencies.props = build\dependencies.props
 		build\repo.beforecommon.props = build\repo.beforecommon.props
 		build\repo.props = build\repo.props
@@ -16,10 +15,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Globals", "Globals", "{6841
 		.travis.yml = .travis.yml
 		appveyor.yml = appveyor.yml
 		build.cmd = build.cmd
-		build.ps1 = build.ps1
 		build.sh = build.sh
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
+		global.json = global.json
 		NuGet.config = NuGet.config
 		README.md = README.md
+		run.cmd = run.cmd
+		run.ps1 = run.ps1
+		run.sh = run.sh
 		version.xml = version.xml
 	EndProjectSection
 EndProject
@@ -91,5 +95,8 @@ Global
 		{85A1B2BB-BF46-445A-85C3-CFB1CCCB33CE} = {CE6B50B2-34AE-44C9-940A-4E48C3E1B3BC}
 		{E7AF1BE9-6017-4FDF-BDEC-B3FAC1888A25} = {258D5057-81B9-40EC-A872-D21E27452749}
 		{5EAA5630-0DB1-4277-8ABE-404D336AA921} = {CE6B50B2-34AE-44C9-940A-4E48C3E1B3BC}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AA7DD3E1-6124-4D69-A1C3-E4D643A5C4D5}
 	EndGlobalSection
 EndGlobal

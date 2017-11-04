@@ -18,28 +18,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         {
         }
 
-        private static IEqualityComparer<Specialty> SpecialtyComparer
-            => new FuncEqualityComparer<Specialty>((specialtiy1, specialty2)
-                => string.Equals(specialtiy1.AnimalType, specialty2.AnimalType, StringComparison.Ordinal)
-                    && specialtiy1.Task == specialty2.Task);
-
-        private static IEqualityComparer<Employee> EmployeeComparer
-            => new FuncEqualityComparer<Employee>((employee1, employee2)
-                => Equals(employee1.Id, employee2.Id)
-                    && string.Equals(employee1.FirstName, employee2.FirstName, StringComparison.Ordinal)
-                    && string.Equals(employee1.LastName, employee2.LastName, StringComparison.Ordinal)
-                    && employee1.Age == employee2.Age
-                    && EnumerableEqualityComparer<Specialty>.Equals(employee1.Specialties, employee2.Specialties, SpecialtyComparer));
-
-        private static IEqualityComparer<Animal> AnimalComparer
-            => new FuncEqualityComparer<Animal>((animal1, animal2)
-                => Equals(animal1.Id, animal2.Id)
-                    && animal1.GetType() == animal2.GetType()
-                    && string.Equals(animal1.Name, animal2.Name, StringComparison.Ordinal)
-                    && animal1.Age == animal2.Age
-                    && animal1.Height == animal2.Height
-                    && animal1.Weight == animal2.Weight);
-
         [Fact]
         public void Can_query_from_mongodb()
         {
@@ -48,112 +26,70 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         }
 
         [Fact]
-        public void Can_write_simple_record()
+        public async void Can_write_simple_record()
         {
-            var employee = new Employee { FirstName = "Taiga", LastName = "Masuta", Age = 31.7 };
+            var employee = new Employee { FirstName = "Taiga", LastName = "Masuta", Age = 31.7M };
             ZooDbContext.Add(employee);
-            ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
-            Assert.Equal(employee, ZooDbContext.Employees.Single(), EmployeeComparer);
+            Assert.Equal(1, await ZooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
+            Assert.Equal(employee, ZooDbContext.Employees.Single(), new EmployeeEqualityComparer());
         }
 
         [Fact]
-        public async Task Can_write_complex_record()
+        public async void Can_write_complex_record()
         {
-            var employee = new Employee
-            {
-                FirstName = "Taiga",
-                LastName = "Masuta",
-                Age = 31.7,
-                Specialties =
-                {
-                    new Specialty { AnimalType = nameof(Tiger), Task = ZooTask.Feeding },
-                    new Specialty { AnimalType = nameof(Tiger), Task = ZooTask.Exercise },
-                    new Specialty { AnimalType = nameof(Tiger), Task = ZooTask.TourGuide },
-                    new Specialty { AnimalType = nameof(Tiger), Task = ZooTask.TourGuide },
-                }
-            };
-            ZooDbContext.Add(employee);
-            ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
-            Assert.Equal(employee, await ZooDbContext.Employees
-                .SingleAsync(searchedEmployee => searchedEmployee.FirstName == "Taiga"
-                    && searchedEmployee.LastName == "Masuta"), EmployeeComparer);
+            ZooDbContext.Add(TestEntityFixture.TaigaMasuta);
+            Assert.Equal(1, await ZooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
         }
 
         [Fact]
-        public async Task Can_query_complex_record()
+        public async void Can_query_complex_record()
         {
-            var employee = new Employee
-            {
-                FirstName = "Taiga",
-                LastName = "Masuta",
-                Age = 31.7,
-                Specialties =
-                {
-                    new Specialty { AnimalType = nameof(Tiger), Task = ZooTask.Feeding },
-                    new Specialty { AnimalType = nameof(Tiger), Task = ZooTask.Exercise },
-                    new Specialty { AnimalType = nameof(Tiger), Task = ZooTask.TourGuide },
-                    new Specialty { AnimalType = nameof(Tiger), Task = ZooTask.TourGuide },
-                }
-            };
-            ZooDbContext.Add(employee);
-            ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
-            Assert.Equal(employee, await ZooDbContext.Employees
+            ZooDbContext.Add(TestEntityFixture.TaigaMasuta);
+            Assert.Equal(1, await ZooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
+            Assert.Equal(TestEntityFixture.TaigaMasuta, await ZooDbContext.Employees
                 .SingleAsync(searchedEmployee => searchedEmployee.Specialties
-                    .Any(speciality => speciality.Task == ZooTask.Feeding)), EmployeeComparer);
+                    .Any(speciality => speciality.Task == ZooTask.Feeding)), new EmployeeEqualityComparer());
         }
 
         [Fact]
-        public void Can_write_polymorphic_records()
+        public async void Can_write_polymorphic_records()
         {
-            IList<Animal> insertedEntities = new Animal[]
-                {
-                    new Tiger { Name = "Tigger", Age = 6.4, Weight = 270, Height = .98 },
-                    new PolarBear { Name = "Ursus", Age = 4.9, Weight = 612, Height = 2.7 },
-                    new SeaOtter { Name = "Hydron", Age = 1.8, Weight = 19, Height = .3 },
-                    new EurasianOtter { Name = "Yuri", Age = 1.8, Weight = 19, Height = .3 }
-                }
-                .OrderBy(animal => animal.Name)
-                .ToList();
-            ZooDbContext.Animals.AddRange(insertedEntities);
-            ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
+            ZooDbContext.Animals.AddRange(TestEntityFixture.Animals);
+            Assert.Equal(
+                TestEntityFixture.Animals.Count + TestEntityFixture.Enclosures.Count,
+                await ZooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
             IList<Animal> queriedEntities = ZooDbContext.Animals
-                .OrderBy(animal => animal.Name)
+                .OrderBy(animal => animal.GetType().Name)
+                .ThenBy(animal => animal.Name)
                 .ToList();
-            Assert.Equal(insertedEntities, queriedEntities, AnimalComparer);
+            Assert.Equal(TestEntityFixture.Animals, queriedEntities, new AnimalEqualityComparer());
         }
 
         [Fact]
-        public void Can_query_polymorphic_sub_types()
+        public async void Can_query_polymorphic_sub_types()
         {
-            IList<Animal> insertedEntities = new Animal[]
-                {
-                    new Tiger { Name = "Tigger", Age = 6.4, Weight = 270, Height = .98 },
-                    new PolarBear { Name = "Ursus", Age = 4.9, Weight = 612, Height = 2.7 },
-                    new SeaOtter { Name = "Hydron", Age = 1.8, Weight = 19, Height = .3 },
-                    new EurasianOtter { Name = "Yuri", Age = 1.8, Weight = 19, Height = .3 }
-                }
-                .OrderBy(animal => animal.Name)
-                .ToList();
-            ZooDbContext.Animals.AddRange(insertedEntities);
-            ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
+            ZooDbContext.Animals.AddRange(TestEntityFixture.Animals);
+            Assert.Equal(
+                TestEntityFixture.Animals.Count + TestEntityFixture.Enclosures.Count,
+                await ZooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
 
             Assert.Equal(
-                insertedEntities.OfType<Tiger>().Single(),
+                TestEntityFixture.Animals.OfType<Tiger>().Single(),
                 ZooDbContext.Animals.OfType<Tiger>().Single(),
-                AnimalComparer);
+                new AnimalEqualityComparer());
             Assert.Equal(
-                insertedEntities.OfType<PolarBear>().Single(),
+                TestEntityFixture.Animals.OfType<PolarBear>().Single(),
                 ZooDbContext.Animals.OfType<PolarBear>().Single(),
-                AnimalComparer);
+                new AnimalEqualityComparer());
             Assert.Equal(
-                insertedEntities.OfType<SeaOtter>().Single(),
+                TestEntityFixture.Animals.OfType<SeaOtter>().Single(),
                 ZooDbContext.Animals.OfType<SeaOtter>().Single(),
-                AnimalComparer);
+                new AnimalEqualityComparer());
             Assert.Equal(
-                insertedEntities.OfType<EurasianOtter>().Single(),
+                TestEntityFixture.Animals.OfType<EurasianOtter>().Single(),
                 ZooDbContext.Animals.OfType<EurasianOtter>().Single(),
-                AnimalComparer);
-            IList<Otter> insertedOtters = insertedEntities
+                new AnimalEqualityComparer());
+            IList<Otter> insertedOtters = TestEntityFixture.Animals
                 .OfType<Otter>()
                 .OrderBy(otter => otter.Name)
                 .ToList();
@@ -161,83 +97,93 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                 .OfType<Otter>()
                 .OrderBy(otter => otter.Name)
                 .ToList();
-            Assert.Equal(insertedOtters, queriedOtters, AnimalComparer);
+            Assert.Equal(insertedOtters, queriedOtters, new AnimalEqualityComparer());
         }
 
         [Fact]
         public async void Can_list_async()
         {
-            IList<Animal> insertedEntities = new Animal[]
-                {
-                    new Tiger { Name = "Tigger", Age = 6.4, Weight = 270, Height = .98 },
-                    new PolarBear { Name = "Ursus", Age = 4.9, Weight = 612, Height = 2.7 },
-                    new SeaOtter { Name = "Hydron", Age = 1.8, Weight = 19, Height = .3 },
-                    new EurasianOtter { Name = "Yuri", Age = 1.8, Weight = 19, Height = .3 }
-                }
-                .OrderBy(animal => animal.Name)
-                .ToList();
-            ZooDbContext.Animals.AddRange(insertedEntities);
-            ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
-            IList<Animal> queriedEntities = await ZooDbContext.Animals
-                .OrderBy(animal => animal.Name)
+            ZooDbContext.Animals.AddRange(TestEntityFixture.Animals);
+            Assert.Equal(
+                TestEntityFixture.Animals.Count + TestEntityFixture.Enclosures.Count,
+                await ZooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
+            Assert.Equal(TestEntityFixture.Animals,
+                await ZooDbContext.Animals
+                    .OrderBy(animal => animal.GetType().Name)
+                    .ThenBy(animal => animal.Name)
+                    .ToListAsync(),
+                new AnimalEqualityComparer());
+        }
+
+        [Fact]
+        public async void Can_list_async_with_include()
+        {
+            ZooDbContext.Animals.AddRange(TestEntityFixture.Animals);
+            Assert.Equal(
+                TestEntityFixture.Animals.Count + TestEntityFixture.Enclosures.Count,
+                await ZooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
+            IEnumerable<Animal> queriedAnimals = await ZooDbContext.Animals
+                .Include(animal => animal.Enclosure)
+                .OrderBy(animal => animal.GetType().Name)
+                .ThenBy(animal => animal.Name)
                 .ToListAsync();
-            Assert.Equal(insertedEntities, queriedEntities, AnimalComparer);
+            Assert.Equal(TestEntityFixture.Animals,
+                queriedAnimals,
+                new AnimalWithEnclosureEqualityComparer());
+            Assert.Equal(TestEntityFixture.Enclosures,
+                queriedAnimals
+                    .Select(animal => animal.Enclosure)
+                    .Distinct(EqualityComparer<Enclosure>.Default)
+                    .OrderBy(enclosure => enclosure.AnimalEnclosureType)
+                    .ThenBy(enclosure => enclosure.Name)
+                    .ToList(),
+                new EnclosureEqualityComparer());
         }
 
         [Fact]
         public async void Can_query_first_or_default_async()
         {
-            IList<Animal> insertedEntities = new Animal[]
-                {
-                    new Tiger { Name = "Tigger", Age = 6.4, Weight = 270, Height = .98 },
-                    new PolarBear { Name = "Ursus", Age = 4.9, Weight = 612, Height = 2.7 },
-                    new SeaOtter { Name = "Hydron", Age = 1.8, Weight = 19, Height = .3 },
-                    new EurasianOtter { Name = "Yuri", Age = 1.8, Weight = 19, Height = .3 }
-                }
-                .OrderBy(animal => animal.Name)
-                .ToList();
-            ZooDbContext.Animals.AddRange(insertedEntities);
-            ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true);
+            ZooDbContext.Animals.AddRange(TestEntityFixture.Animals);
             Assert.Equal(
-                insertedEntities.OfType<Tiger>().Single(),
+                TestEntityFixture.Animals.Count + TestEntityFixture.Enclosures.Count,
+                await ZooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
+            Assert.Equal(
+                TestEntityFixture.Animals.OfType<Tiger>().Single(),
                 await ZooDbContext.Animals.OfType<Tiger>().FirstOrDefaultAsync(),
-                AnimalComparer);
+                new AnimalEqualityComparer());
         }
 
         [Fact]
-        public void Can_update_existing_entity()
+        public async Task Can_update_existing_entity()
         {
-            Animal animal = new Tiger { Name = "Tigger", Age = 6.4, Weight = 270, Height = .98 };
-            EntityEntry entityEntry = ZooDbContext.Add(animal);
+            EntityEntry entityEntry = ZooDbContext.Add(TestEntityFixture.Tigger);
             Assert.Equal(EntityState.Added, entityEntry.State);
-            Assert.Null(animal.ConcurrencyField);
-            Assert.Equal(1, ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true));
+            Assert.Equal(2, await ZooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
             Assert.Equal(EntityState.Unchanged, entityEntry.State);
-            Assert.NotNull(animal.ConcurrencyField);
+            Assert.NotNull(TestEntityFixture.Tigger.ConcurrencyField);
 
-            Assert.NotNull(entityEntry.OriginalValues[nameof(animal.ConcurrencyField)]);
+            Assert.NotNull(entityEntry.OriginalValues[nameof(TestEntityFixture.Tigger.ConcurrencyField)]);
 
-            animal.Name = "Tigra";
+            TestEntityFixture.Tigger.Name = "Tigra";
             ZooDbContext.ChangeTracker.DetectChanges();
             Assert.Equal(EntityState.Modified, entityEntry.State);
-            Assert.Equal(1, ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true));
+            Assert.Equal(1, await ZooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
         }
 
         [Fact]
-        public void Concurrency_field_prevents_updates()
+        public async void Concurrency_field_prevents_updates()
         {
-            Animal animal = new Tiger { Name = "Tigger", Age = 6.4, Weight = 270, Height = .98 };
-            EntityEntry entityEntry = ZooDbContext.Add(animal);
-            Assert.Equal(1, ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true));
-            Assert.False(string.IsNullOrWhiteSpace(animal.ConcurrencyField));
+            EntityEntry entityEntry = ZooDbContext.Add(TestEntityFixture.Tigger);
+            Assert.Equal(2, await ZooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
+            Assert.False(string.IsNullOrWhiteSpace(TestEntityFixture.Tigger.ConcurrencyField));
 
             string newConcurrencyToken = Guid.NewGuid().ToString();
             entityEntry.Property(nameof(Animal.ConcurrencyField)).OriginalValue = newConcurrencyToken;
             typeof(Animal)
                 .GetTypeInfo()
                 .GetProperty(nameof(Animal.ConcurrencyField))
-                .SetValue(animal, newConcurrencyToken);
-            Assert.Equal(0, ZooDbContext.SaveChanges(acceptAllChangesOnSuccess: true));
+                .SetValue(TestEntityFixture.Tigger, newConcurrencyToken);
+            Assert.Equal(0, await ZooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
         }
     }
 }

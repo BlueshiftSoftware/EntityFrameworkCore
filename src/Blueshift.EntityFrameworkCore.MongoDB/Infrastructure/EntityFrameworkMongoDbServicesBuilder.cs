@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using Blueshift.EntityFrameworkCore.MongoDB.ChangeTracking;
 using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders;
 using Blueshift.EntityFrameworkCore.MongoDB.Query;
+using Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors;
 using Blueshift.EntityFrameworkCore.MongoDB.Storage;
 using Blueshift.EntityFrameworkCore.MongoDB.Update;
 using Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Query;
@@ -58,7 +61,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
         public override EntityFrameworkServicesBuilder TryAddCoreServices()
         {
             TryAdd<IDatabaseProvider, DatabaseProvider<MongoDbOptionsExtension>>();
-            TryAdd<IModelSource, MongoDbModelSource>();
             TryAdd<IModelValidator, MongoDbModelValidator>();
             TryAdd<ITypeMapper, MongoDbTypeMapper>();
             TryAdd<IDatabase, MongoDbDatabase>();
@@ -66,10 +68,12 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
             TryAdd<IValueGeneratorSelector, MongoDbValueGeneratorSelector>();
             TryAdd<IConventionSetBuilder, MongoDbConventionSetBuilder>();
             TryAdd<IQueryContextFactory, MongoDbQueryContextFactory>();
+            TryAdd<IQueryCompilationContextFactory, MongoDbQueryCompilationContextFactory>();
             TryAdd<IEntityQueryableExpressionVisitorFactory, MongoDbEntityQueryableExpressionVisitorFactory>();
             TryAdd<IEntityQueryModelVisitorFactory, MongoDbEntityQueryModelVisitorFactory>();
             TryAdd<IMongoDbWriteModelFactoryCache, MongoDbWriteModelFactoryCache>();
             TryAdd<IMongoDbWriteModelFactorySelector, MongoDbWriteModelFactorySelector>();
+            TryAdd<IInternalEntityEntryFactory, MongoDbInternalEntityEntryFactory>();
             TryAddProviderSpecificServices(serviceCollectionMap =>
             {
                 serviceCollectionMap.TryAddScoped<IMongoDbConnection, MongoDbConnection>();

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -118,17 +119,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
             return (int)(result.DeletedCount + result.InsertedCount + result.ModifiedCount);
         }
 
-        /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
+        /// <inheritdoc />
         public override Func<QueryContext, IAsyncEnumerable<TResult>> CompileAsyncQuery<TResult>(QueryModel queryModel)
-        {
-            Check.NotNull(queryModel, nameof(queryModel));
-
-            var syncQueryExecutor = CompileQuery<TResult>(queryModel);
-
-            return qc => syncQueryExecutor(qc).ToAsyncEnumerable();
-        }
+            =>  queryContext => CompileQuery<TResult>(queryModel)(queryContext)
+                .ToAsyncEnumerable();
     }
 }

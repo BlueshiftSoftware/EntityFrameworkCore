@@ -1,8 +1,11 @@
 <Project>
+
   <PropertyGroup>
     <CoreOnly Condition="'$(CoreOnly)' == ''">False</CoreOnly>
+
+    <DisablePackageReferenceRestrictions>true</DisablePackageReferenceRestrictions>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <ExcludeFromPack Include="$(RepositoryRoot)src\*Sample*\*.csproj" />
     <ExcludeFromPack Include="$(RepositoryRoot)src\*Tests*\*.csproj" />

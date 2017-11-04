@@ -1,5 +1,4 @@
 ﻿using System.Linq.Expressions;
-using Blueshift.EntityFrameworkCore.MongoDB.Storage;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Query;
@@ -7,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors;
 using Microsoft.EntityFrameworkCore.Utilities;
 using Remotion.Linq.Clauses;
 
-namespace Blueshift.EntityFrameworkCore.MongoDB.Query
+namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
 {
     /// <summary>
     ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
@@ -35,7 +34,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
             EntityQueryModelVisitor entityQueryModelVisitor,
             IQuerySource querySource)
             =>  new MongoDbEntityQueryableExpressionVisitor(
-                    Check.NotNull(entityQueryModelVisitor, nameof(entityQueryModelVisitor)),
-                    _model);
+                    Check.Is<MongoDbEntityQueryModelVisitor>(entityQueryModelVisitor, nameof(entityQueryModelVisitor)),
+                    _model,
+                    querySource);
     }
 }

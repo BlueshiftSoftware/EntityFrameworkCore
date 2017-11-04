@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using Blueshift.MongoDB.Tests.Shared;
@@ -31,11 +29,6 @@ namespace Blueshift.Identity.MongoDB.Tests
             _mongoDbUserClaimStore = ServiceProvider.GetRequiredService<IUserClaimStore<MongoDbIdentityUser>>();
         }
 
-        protected static IEqualityComparer<Claim> ClaimComparer
-            => new FuncEqualityComparer<Claim>((claim1, claim2)
-                => string.Equals(claim1.Type, claim2.Type, StringComparison.Ordinal)
-                    && string.Equals(claim1.Value, claim2.Value, StringComparison.Ordinal));
-
         protected override MongoDbIdentityUser CreateUser()
         {
             var user = base.CreateUser();
@@ -50,7 +43,7 @@ namespace Blueshift.Identity.MongoDB.Tests
             var user = CreateUser();
             await _mongoDbUserClaimStore.AddClaimsAsync(user, new[] { Claim3 }, new CancellationToken());
             var newClaims = new [] { Claim1, Claim2, Claim3 };
-            Assert.Equal(newClaims, user.Claims.Select(claim => claim.ToClaim()), ClaimComparer);
+            Assert.Equal(newClaims, user.Claims.Select(claim => claim.ToClaim()), new ClaimComparer());
         }
 
         [Fact]
@@ -58,7 +51,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         {
             var user = CreateUser();
             var claims = new [] { Claim1, Claim2 };
-            Assert.Equal(claims, await _mongoDbUserClaimStore.GetClaimsAsync(user, new CancellationToken()), ClaimComparer);
+            Assert.Equal(claims, await _mongoDbUserClaimStore.GetClaimsAsync(user, new CancellationToken()), new ClaimComparer());
         }
 
         [Fact]
@@ -85,7 +78,7 @@ namespace Blueshift.Identity.MongoDB.Tests
             var user = CreateUser();
             var newClaims = new [] { Claim3, Claim2 };
             await _mongoDbUserClaimStore.ReplaceClaimAsync(user, Claim1, Claim3, new CancellationToken());
-            Assert.Equal(newClaims, user.Claims.Select(claim => claim.ToClaim()), ClaimComparer);
+            Assert.Equal(newClaims, user.Claims.Select(claim => claim.ToClaim()), new ClaimComparer());
         }
     }
 }

@@ -5,13 +5,14 @@ using Blueshift.EntityFrameworkCore.MongoDB.Adapter.Conventions;
 using MongoDB.Bson.Serialization.Conventions;
 using Xunit;
 
-namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.MongoDB.Adapter
+namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter
 {
     public class EntityFrameworkConventionPackTests
     {
         [Theory]
         [InlineData(typeof(AbstractClassConvention))]
         [InlineData(typeof(KeyAttributeConvention))]
+        [InlineData(typeof(NavigationMemberMapConvention))]
         [InlineData(typeof(NotMappedAttributeConvention))]
         public void Singleton_contains_default_convention_set(Type conventionType)
         {

@@ -1,22 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\..\build\common.props" />
-
-  <PropertyGroup>    
-    <TargetFrameworks>net461;netcoreapp2.0</TargetFrameworks>
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp2.0;net461</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' != 'Windows_NT' OR '$(CoreOnly)' == 'True'">netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="..\..\src\Shared\CodeAnnotations.cs" Link="CodeAnnotations.cs" />
+    <Compile Include="..\..\src\Shared\PropertyInfoExtensions.cs" Link="PropertyInfoExtensions.cs" />
+    <Compile Include="..\..\src\Shared\SharedTypeExtensions.cs" Link="SharedTypeExtensions.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Specification.Tests" Version="$(AspNetCoreVersion)" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(TestSdkVersion)" />
-    <PackageReference Include="Moq" Version="$(MoqVersion)" />
-    <PackageReference Include="xunit" Version="$(XunitVersion)" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitVersion)" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Specification.Tests" Version="$(MicrosoftEntityFrameworkCoreSpecificationTestsPackageVersion)" NoWarn="KRB4002" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkPackageVersion)" NoWarn="KRB4002" />
+    <PackageReference Include="Moq" Version="$(MoqPackageVersion)" NoWarn="KRB4002" />
+    <PackageReference Include="xunit" Version="$(XunitPackageVersion)" NoWarn="KRB4002" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioPackageVersion)" NoWarn="KRB4002" />
   </ItemGroup>
 
   <ItemGroup>

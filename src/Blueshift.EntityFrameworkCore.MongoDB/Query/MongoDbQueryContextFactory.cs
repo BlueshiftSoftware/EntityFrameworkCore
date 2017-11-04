@@ -5,18 +5,12 @@ using Microsoft.EntityFrameworkCore.Utilities;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Query
 {
-    /// <summary>
-    ///     A factory for <see cref="MongoDbQueryContext"/> instances.
-    /// </summary>
+    /// <inheritdoc />
     public class MongoDbQueryContextFactory : QueryContextFactory
     {
         private readonly IMongoDbConnection _mongoDbConnection;
 
-        /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended
-        ///     to be used directly from your code. This API may change or be removed in future
-        ///     releases.
-        /// </summary>
+        /// <inheritdoc />
         public MongoDbQueryContextFactory(
             [NotNull] QueryContextDependencies queryContextDependencies,
             [NotNull] IMongoDbConnection mongoDbConnection)
@@ -25,11 +19,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
             _mongoDbConnection = Check.NotNull(mongoDbConnection, nameof(mongoDbConnection));
         }
 
-        /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended
-        ///     to be used directly from your code. This API may change or be removed in future
-        ///     releases.
-        /// </summary>
+        /// <inheritdoc />
         public override QueryContext Create()
             => new MongoDbQueryContext(Dependencies, CreateQueryBuffer, _mongoDbConnection);
     }

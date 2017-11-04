@@ -24,8 +24,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public override EntityQueryModelVisitor Create(QueryCompilationContext queryCompilationContext,
-                EntityQueryModelVisitor parentEntityQueryModelVisitor)
-            => new MongoDbEntityQueryModelVisitor(Dependencies, queryCompilationContext);
+        public override EntityQueryModelVisitor Create(
+            QueryCompilationContext queryCompilationContext,
+            EntityQueryModelVisitor parentEntityQueryModelVisitor)
+            => new MongoDbEntityQueryModelVisitor(
+                Dependencies,
+                Check.NotNull(queryCompilationContext, nameof(queryCompilationContext)));
     }
 }

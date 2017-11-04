@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Utilities;

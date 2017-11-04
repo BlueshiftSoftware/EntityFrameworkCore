@@ -7,17 +7,20 @@ using Microsoft.EntityFrameworkCore.Utilities;
 namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
 {
     /// <inheritdoc />
-    public class MongoDbBaseTypeDiscoveryConvention : BaseTypeDiscoveryConvention
+    public class MongoDbBaseTypeDiscoveryConvention : IEntityTypeAddedConvention
     {
         /// <inheritdoc />
-        protected override EntityType FindClosestBaseType(EntityType entityType)
+        public InternalEntityTypeBuilder Apply(InternalEntityTypeBuilder entityTypeBuilder)
         {
-            Check.NotNull(entityType, nameof(entityType));
+            Check.NotNull(entityTypeBuilder, nameof(entityTypeBuilder));
 
+            EntityType entityType = entityTypeBuilder.Metadata;
             Type baseType = entityType.ClrType?.GetTypeInfo().BaseType;
-            return (baseType != null && baseType != typeof(object))
-                ? entityType.Model.GetOrAddEntityType(baseType)
-                : null;
+            if (baseType != null && baseType != typeof(object))
+            {
+                entityType.Model.GetOrAddEntityType(baseType);
+            }
+            return entityTypeBuilder;
         }
     }
 }

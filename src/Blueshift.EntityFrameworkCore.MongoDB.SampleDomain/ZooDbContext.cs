@@ -2,11 +2,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Blueshift.EntityFrameworkCore.MongoDB.Annotations;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
-using JetBrains.Annotations;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
 {
@@ -15,6 +15,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
     {
         public DbSet<Animal> Animals { get; set; }
         public DbSet<Employee> Employees { get; set; }
+        public DbSet<Enclosure> Enclosures { get; set; }
 
         public ZooDbContext()
             : this(new DbContextOptions<ZooDbContext>())
@@ -41,7 +42,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
             //};
             //optionsBuilder.UseMongoDb(settings);
 
-            MongoClient mongoClient = new MongoClient(settings);
+            var mongoClient = new MongoClient(settings);
             optionsBuilder.UseMongoDb(mongoClient);
         }
     }
@@ -52,13 +53,17 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
     {
         [BsonId, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public ObjectId Id { get; [UsedImplicitly] private set; }
+
         public string Name { get; set; }
-        public double Age { get; set; }
-        public double Height { get; set; }
-        public double Weight { get; set; }
+        public decimal Age { get; set; }
+        public decimal Height { get; set; }
+        public decimal Weight { get; set; }
 
         [ConcurrencyCheck, DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public string ConcurrencyField { get; [UsedImplicitly] private set; }
+
+        [Denormalize(nameof(SampleDomain.Enclosure.Name))]
+        public Enclosure Enclosure { get; set; }
     }
 
     [BsonDiscriminator("panthera tigris")]
@@ -89,8 +94,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
             ? LastName
             : $"{LastName}, {FirstName}";
 
-        public double Age { get; set; }
-        public List<Specialty> Specialties { get; set; } = new List<Specialty>();
+        public decimal Age { get; set; }
+        public IList<Specialty> Specialties { get; set; } = new List<Specialty>();
     }
 
     public enum ZooTask
@@ -105,5 +110,18 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
     {
         public string AnimalType { get; set; }
         public ZooTask Task { get; set; }
+    }
+
+    public class Enclosure
+    {
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public ObjectId Id { get; [UsedImplicitly] private set; }
+
+        public string Name { get; set; }
+
+        public string AnimalEnclosureType { get; set; }
+
+        //[Denormalize(nameof(Animal.Name))]
+        //public IList<Animal> Animals { get; } = new List<Animal>();
     }
 }

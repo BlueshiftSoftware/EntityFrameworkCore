@@ -1,9 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\..\build\common.props" />
-
   <PropertyGroup>
-    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <Product>Blueshift MongoDb Provider for EntityFrameworkCore</Product>
     <Description>Sample Domain Library for EntityFramework Core MongoDb Provider</Description>
   </PropertyGroup>
@@ -13,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Blueshift.EntityFrameworkCore.MongoDB\Blueshift.EntityFrameworkCore.MongoDB.csproj" />
+    <ProjectReference Include="..\Blueshift.EntityFrameworkCore.MongoDB\Blueshift.EntityFrameworkCore.MongoDB.csproj" NoWarn="KRB4002" />
   </ItemGroup>
 
 </Project>

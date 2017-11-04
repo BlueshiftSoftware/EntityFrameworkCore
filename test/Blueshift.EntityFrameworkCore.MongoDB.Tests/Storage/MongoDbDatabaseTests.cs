@@ -33,9 +33,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
             var mockValueGenerationManager = new Mock<IValueGenerationManager>();
             var mockInternalEntityEntryNotifier = new Mock<IInternalEntityEntryNotifier>();
             var mockTypeMapper = new Mock<ITypeMapper>();
-            mockStateManager.SetupGet(stateManager => stateManager.ValueGeneration)
+            mockStateManager.SetupGet(stateManager => stateManager.ValueGenerationManager)
                 .Returns(() => mockValueGenerationManager.Object);
-            mockStateManager.SetupGet(stateManager => stateManager.Notify)
+            mockStateManager.SetupGet(stateManager => stateManager.InternalEntityEntryNotifier)
                 .Returns(() => mockInternalEntityEntryNotifier.Object);
             mockMongoDbConnection.Setup(mockedMongoDbConnection => mockedMongoDbConnection.GetCollection<Employee>())
                 .Returns(() => mockMongoCollection.Object);

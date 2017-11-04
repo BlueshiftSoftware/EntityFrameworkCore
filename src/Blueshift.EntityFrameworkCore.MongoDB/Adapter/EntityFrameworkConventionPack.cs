@@ -19,6 +19,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter
             {
                 new AbstractClassConvention(),
                 new KeyAttributeConvention(),
+                new NavigationMemberMapConvention(),
                 new NotMappedAttributeConvention()
             });
         }

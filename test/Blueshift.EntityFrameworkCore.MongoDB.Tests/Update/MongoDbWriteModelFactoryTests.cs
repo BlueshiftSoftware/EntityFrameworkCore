@@ -28,9 +28,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Update
             var mockValueGenerationManager = new Mock<IValueGenerationManager>();
             var mockInternalEntityEntryNotifier = new Mock<IInternalEntityEntryNotifier>();
             var typeMapper = new MongoDbTypeMapper();
-            mockStateManager.SetupGet(stateManager => stateManager.ValueGeneration)
+            mockStateManager.SetupGet(stateManager => stateManager.ValueGenerationManager)
                 .Returns(() => mockValueGenerationManager.Object);
-            mockStateManager.SetupGet(stateManager => stateManager.Notify)
+            mockStateManager.SetupGet(stateManager => stateManager.InternalEntityEntryNotifier)
                 .Returns(() => mockInternalEntityEntryNotifier.Object);
 
             var model = new Model(
@@ -46,9 +46,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Update
                                 typeMapper))
                             .CreateConventionSet()));
             Type entityClrType = entity.GetType();
-            EntityType entityType = model.GetOrAddEntityType(entityClrType);
-            entityType.Builder
-                .GetOrCreateProperties(entityClrType.GetTypeInfo().GetProperties(), ConfigurationSource.Convention);
+
+            EntityType entityType = model.AddEntityType(entityClrType);
             new EntityTypeBuilder(entityType.Builder)
                 .ForMongoDbFromCollection(collectionName: "employees");
 
@@ -102,8 +101,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Update
             var updateOneModel = mongoDbWriteModelFactory.CreateWriteModel(entityEntry) as UpdateOneModel<Employee>;
             FilterDefinition<Employee> filter = Builders<Employee>.Filter.Eq(record => record.Id, employee.Id);
             Assert.NotNull(updateOneModel);
-            Assert.Equal(updateOneModel.Filter.ToBsonDocument(),
-                filter.ToBsonDocument());
+            Assert.Equal(updateOneModel.Filter.ToJson(),
+                filter.ToJson());
         }
 
         [Fact]
@@ -120,8 +119,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Update
                 Builders<Animal>.Filter.Eq(record => record.Id, tiger.Id),
                 Builders<Animal>.Filter.Eq(record => record.ConcurrencyField, tiger.ConcurrencyField));
             Assert.NotNull(updateOneModel);
-            Assert.Equal(updateOneModel.Filter.ToBsonDocument(),
-                filter.ToBsonDocument());
+            Assert.Equal(updateOneModel.Filter.ToJson(),
+                filter.ToJson());
         }
 
         [Fact]
@@ -133,7 +132,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Update
             var deleteOneModel = mongoDbWriteModelFactory.CreateWriteModel(entityEntry) as DeleteOneModel<Employee>;
             FilterDefinition<Employee> filter = Builders<Employee>.Filter.Eq(record => record.Id, employee.Id);
             Assert.NotNull(deleteOneModel);
-            Assert.Equal(filter.ToBsonDocument(), deleteOneModel.Filter.ToBsonDocument());
+            Assert.Equal(filter.ToJson(), deleteOneModel.Filter.ToJson());
         }
 
         [Fact]
@@ -150,7 +149,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Update
                 Builders<Animal>.Filter.Eq(record => record.Id, tiger.Id),
                 Builders<Animal>.Filter.Eq(record => record.ConcurrencyField, tiger.ConcurrencyField));
             Assert.NotNull(deleteOneModel);
-            Assert.Equal(filter.ToBsonDocument(), deleteOneModel.Filter.ToBsonDocument());
+            Assert.Equal(filter.ToJson(), deleteOneModel.Filter.ToJson());
         }
     }
 }
