@@ -1,7 +1,7 @@
 init:
   - git config --global core.autocrlf true
 build_script:
-  - ps: .\build.ps1
+  - ps: .\run.ps1 default-build
 clone_depth: 1
 test: off
 services:
