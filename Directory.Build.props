@@ -1,5 +1,5 @@
 ﻿<Project>
-  <Import Project="version.xml" />
+  <Import Project="version.props" />
   <Import Project="build/dependencies.props" />
 
   <PropertyGroup>
@@ -11,7 +11,6 @@
     <PublicSign Condition="'$(OS)' != 'Windows_NT'">True</PublicSign>
     <SignAssembly>True</SignAssembly>-->
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-    <VersionSuffix Condition="'$(VersionSuffix)' != '' And '$(BuildNumber)' != ''">$(VersionSuffix)-$(BuildNumber)</VersionSuffix>
     <Company>Blueshift Software, LLC</Company>
     <Authors>$(Company)</Authors>
     <Copyright>© $(Company) @ $(BuildYear) - all rights reserved.</Copyright>
@@ -19,13 +18,10 @@
     <Product>Blueshift Software MongoDB Provider for Entity Framework Core</Product>
     <DebugType Condition="'$(Configuration)' == 'Debug' AND '$(OS)' == 'Windows_NT'">full</DebugType>
     <StyleCopAnalyzersVersion>1.0.0</StyleCopAnalyzersVersion>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="**\*.rd.xml" />
   </ItemGroup>
-  
-  <!--<ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' And '$(OutputType)' == 'library' And '$(DisableImplicitFrameworkReferences)' != 'true'">
-    <PackageReference Include="NETStandard.Library" Version="$(BundledNETStandardPackageVersion)" />
-  </ItemGroup>-->
 </Project>

@@ -38,4 +38,3 @@ config.test.json
 .idea.*
 .cr/
 test/Microsoft.EntityFrameworkCore.MongoDB.Tests/.data/
-korebuild-lock.txt
