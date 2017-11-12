@@ -19,12 +19,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Globals", "Globals", "{6841
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
 		global.json = global.json
+		korebuild.json = korebuild.json
 		NuGet.config = NuGet.config
 		README.md = README.md
 		run.cmd = run.cmd
 		run.ps1 = run.ps1
 		run.sh = run.sh
-		version.xml = version.xml
+		version.props = version.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{CE6B50B2-34AE-44C9-940A-4E48C3E1B3BC}"

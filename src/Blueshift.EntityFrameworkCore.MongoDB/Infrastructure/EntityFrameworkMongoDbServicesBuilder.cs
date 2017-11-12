@@ -68,7 +68,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
             TryAdd<IValueGeneratorSelector, MongoDbValueGeneratorSelector>();
             TryAdd<IConventionSetBuilder, MongoDbConventionSetBuilder>();
             TryAdd<IQueryContextFactory, MongoDbQueryContextFactory>();
-            TryAdd<IQueryCompilationContextFactory, MongoDbQueryCompilationContextFactory>();
             TryAdd<IEntityQueryableExpressionVisitorFactory, MongoDbEntityQueryableExpressionVisitorFactory>();
             TryAdd<IEntityQueryModelVisitorFactory, MongoDbEntityQueryModelVisitorFactory>();
             TryAdd<IMongoDbWriteModelFactoryCache, MongoDbWriteModelFactoryCache>();
