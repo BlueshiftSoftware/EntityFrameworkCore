@@ -81,8 +81,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                     {
                         new IncludeResultOperator(
                             stack.Reverse().ToArray(),
-                            querySourceReferenceExpression,
-                            implicitLoad: true)
+                            querySourceReferenceExpression)
                     });
             }
             else
