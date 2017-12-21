@@ -59,8 +59,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                 TestEntityFixture.Animals.Count + TestEntityFixture.Enclosures.Count,
                 await ZooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
             IList<Animal> queriedEntities = ZooDbContext.Animals
-                .OrderBy(animal => animal.GetType().Name)
-                .ThenBy(animal => animal.Name)
+                .OrderBy(animal => animal.Name)
+                .ThenBy(animal => animal.Height)
                 .ToList();
             Assert.Equal(TestEntityFixture.Animals, queriedEntities, new AnimalEqualityComparer());
         }
@@ -109,8 +109,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                 await ZooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
             Assert.Equal(TestEntityFixture.Animals,
                 await ZooDbContext.Animals
-                    .OrderBy(animal => animal.GetType().Name)
-                    .ThenBy(animal => animal.Name)
+                    .OrderBy(animal => animal.Name)
+                    .ThenBy(animal => animal.Height)
                     .ToListAsync(),
                 new AnimalEqualityComparer());
         }
@@ -124,8 +124,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                 await ZooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
             IEnumerable<Animal> queriedAnimals = await ZooDbContext.Animals
                 .Include(animal => animal.Enclosure)
-                .OrderBy(animal => animal.GetType().Name)
-                .ThenBy(animal => animal.Name)
+                .OrderBy(animal => animal.Name)
+                .ThenBy(animal => animal.Age)
                 .ToListAsync();
             Assert.Equal(TestEntityFixture.Animals,
                 queriedAnimals,
@@ -138,6 +138,31 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                     .ThenBy(enclosure => enclosure.Name)
                     .ToList(),
                 new EnclosureEqualityComparer());
+        }
+
+        [Fact]
+        public async void Can_query_with_included_enumerable_property()
+        {
+            ZooDbContext.Enclosures.AddRange(TestEntityFixture.Enclosures);
+            Assert.Equal(
+                TestEntityFixture.Enclosures.Count + TestEntityFixture.Animals.Count,
+                await ZooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
+            IEnumerable<Enclosure> queriedEnclosures = await ZooDbContext.Enclosures
+                .Include(enclosure => enclosure.Animals)
+                .OrderBy(enclosure => enclosure.AnimalEnclosureType)
+                .ThenBy(enclosure => enclosure.Name)
+                .ToListAsync();
+            Assert.Equal(TestEntityFixture.Enclosures,
+                queriedEnclosures,
+                new EnclosureWithAnimalsEqualityComparer());
+            Assert.Equal(TestEntityFixture.Animals,
+                queriedEnclosures
+                    .SelectMany(enclosure => enclosure.Animals)
+                    .Distinct(EqualityComparer<Animal>.Default)
+                    .OrderBy(animal => animal.Name)
+                    .ThenBy(animal => animal.Height)
+                    .ToList(),
+                new AnimalWithEnclosureEqualityComparer());
         }
 
         [Fact]

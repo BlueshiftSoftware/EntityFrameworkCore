@@ -121,7 +121,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
 
         /// <inheritdoc />
         public override Func<QueryContext, IAsyncEnumerable<TResult>> CompileAsyncQuery<TResult>(QueryModel queryModel)
-            =>  queryContext => CompileQuery<TResult>(queryModel)(queryContext)
-                .ToAsyncEnumerable();
+            => queryContext => CompileQuery<TResult>(queryModel)(queryContext).ToAsyncEnumerable();
     }
 }

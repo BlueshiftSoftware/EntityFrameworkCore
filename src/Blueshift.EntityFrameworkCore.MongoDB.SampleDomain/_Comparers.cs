@@ -12,7 +12,13 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
                 : Comparer<string>.Default.Compare(x?.GetType().Name, y?.GetType().Name);
     }
 
-    public class AnimalEqualityComparer : EqualityComparer<Animal>
+    public abstract class BaseEqualityComparer<T> : EqualityComparer<T>
+    {
+        public override int GetHashCode(T obj)
+            => obj?.GetHashCode() ?? throw new ArgumentNullException(nameof(obj));
+    }
+
+    public class AnimalEqualityComparer : BaseEqualityComparer<Animal>
     {
         public override bool Equals(Animal animal1, Animal animal2)
             => (animal1 == null && animal2 == null)
@@ -24,9 +30,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
                    && animal1.Height == animal2.Height
                    && animal1.Weight == animal2.Weight
                    && Equals(animal1.Enclosure?.Id, animal2.Enclosure?.Id));
-
-        public override int GetHashCode(Animal obj)
-            => obj?.GetHashCode() ?? throw new ArgumentNullException(nameof(obj));
     }
 
     public class AnimalWithEnclosureEqualityComparer : AnimalEqualityComparer
@@ -34,14 +37,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
         private readonly EnclosureEqualityComparer _enclosureEqualityComparer = new EnclosureEqualityComparer();
 
         public override bool Equals(Animal animal1, Animal animal2)
-            => base.Equals(animal1, animal2) &&
-               _enclosureEqualityComparer.Equals(animal1.Enclosure, animal2.Enclosure);
-
-        public override int GetHashCode(Animal obj)
-            => obj?.GetHashCode() ?? throw new ArgumentNullException(nameof(obj));
+            => base.Equals(animal1, animal2)
+                && _enclosureEqualityComparer.Equals(animal1.Enclosure, animal2.Enclosure);
     }
 
-    public class EnclosureEqualityComparer : EqualityComparer<Enclosure>
+    public class EnclosureEqualityComparer : BaseEqualityComparer<Enclosure>
     {
         public override bool Equals(Enclosure enclosure1, Enclosure enclosure2)
             => (enclosure1 == null && enclosure2 == null)
@@ -49,12 +49,22 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
                    && Equals(enclosure1.Id, enclosure2.Id)
                    && string.Equals(enclosure1.Name, enclosure2.Name, StringComparison.Ordinal)
                    && string.Equals(enclosure1.AnimalEnclosureType, enclosure2.AnimalEnclosureType, StringComparison.Ordinal));
+    }
+
+    public class EnclosureWithAnimalsEqualityComparer : EnclosureEqualityComparer
+    {
+        private readonly AnimalEqualityComparer _animalEqualityComparer = new AnimalEqualityComparer();
+
+        public override bool Equals(Enclosure enclosure1, Enclosure enclosure2)
+            => base.Equals(enclosure1, enclosure2)
+               && enclosure1.Animals.All(animal => enclosure2.Animals.Contains(animal, _animalEqualityComparer))
+               && enclosure2.Animals.All(animal => enclosure1.Animals.Contains(animal, _animalEqualityComparer));
 
         public override int GetHashCode(Enclosure obj)
             => obj?.GetHashCode() ?? throw new ArgumentNullException(nameof(obj));
     }
 
-    public class EmployeeEqualityComparer : EqualityComparer<Employee>
+    public class EmployeeEqualityComparer : BaseEqualityComparer<Employee>
     {
         public override bool Equals(Employee employee1, Employee employee2)
             => (employee1 == null && employee2 == null)
@@ -65,21 +75,15 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
                    && employee1.Age == employee2.Age
                    && employee1.Specialties.Count() == employee2.Specialties.Count()
                    && employee1.Specialties.All(item => employee2.Specialties.Contains(item, new SpecialtyEqualityComparer()))
-                   && employee1.Specialties.All(item => employee2.Specialties.Contains(item, new SpecialtyEqualityComparer())));
-
-        public override int GetHashCode(Employee obj)
-            => obj?.GetHashCode() ?? throw new ArgumentNullException(nameof(obj));
+                   && employee2.Specialties.All(item => employee1.Specialties.Contains(item, new SpecialtyEqualityComparer())));
     }
 
-    public class SpecialtyEqualityComparer : EqualityComparer<Specialty>
+    public class SpecialtyEqualityComparer : BaseEqualityComparer<Specialty>
     {
         public override bool Equals(Specialty specialty1, Specialty specialty2)
             => (specialty1 == null && specialty2 == null)
                || (specialty1 != null && specialty2 != null
                    && string.Equals(specialty1.AnimalType, specialty2.AnimalType, StringComparison.Ordinal)
                    && specialty1.Task == specialty2.Task);
-
-        public override int GetHashCode(Specialty obj)
-            => obj?.GetHashCode() ?? throw new ArgumentNullException(nameof(obj));
     }
 }

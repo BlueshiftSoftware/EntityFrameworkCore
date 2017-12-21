@@ -3,17 +3,17 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
   <PropertyGroup Label="Package Versions">
-    <MicrosoftAspNetCoreIdentityPackageVersion>2.1.0-preview1-27512</MicrosoftAspNetCoreIdentityPackageVersion>
-    <MicrosoftEntityFrameworkCorePackageVersion>2.1.0-preview1-27512</MicrosoftEntityFrameworkCorePackageVersion>
-    <MicrosoftEntityFrameworkCoreSpecificationTestsPackageVersion>2.1.0-preview1-27512</MicrosoftEntityFrameworkCoreSpecificationTestsPackageVersion>
-    <MicrosoftExtensionsConfigurationPackageVersion>2.1.0-preview1-27512</MicrosoftExtensionsConfigurationPackageVersion>
+    <MicrosoftAspNetCoreIdentityPackageVersion>2.1.0-*</MicrosoftAspNetCoreIdentityPackageVersion>
+    <MicrosoftEntityFrameworkCorePackageVersion>2.1.0-*</MicrosoftEntityFrameworkCorePackageVersion>
+    <MicrosoftEntityFrameworkCoreSpecificationTestsPackageVersion>2.1.0-*</MicrosoftEntityFrameworkCoreSpecificationTestsPackageVersion>
+    <MicrosoftExtensionsConfigurationPackageVersion>2.1.0-*</MicrosoftExtensionsConfigurationPackageVersion>
     <MicrosoftNETCoreAppPackageVersion>2.0.0</MicrosoftNETCoreAppPackageVersion>
     <MicrosoftNETTestSdkPackageVersion>15.3.0</MicrosoftNETTestSdkPackageVersion>
     <MongoDBDriverPackageVersion>2.4.4-*</MongoDBDriverPackageVersion>
-    <MoqPackageVersion>4.7.49</MoqPackageVersion>
+    <MoqPackageVersion>4.7.145</MoqPackageVersion>
     <NETStandardLibraryPackageVersion>2.0.0</NETStandardLibraryPackageVersion>
-    <XunitPackageVersion>2.3.0</XunitPackageVersion>
-    <XunitRunnerVisualstudioPackageVersion>2.3.0</XunitRunnerVisualstudioPackageVersion>
+    <XunitPackageVersion>2.3.1</XunitPackageVersion>
+    <XunitRunnerVisualstudioPackageVersion>2.3.1</XunitRunnerVisualstudioPackageVersion>
   </PropertyGroup>
   <Import Project="$(DotNetPackageVersionPropsPath)" Condition=" '$(DotNetPackageVersionPropsPath)' != '' " />
 </Project>

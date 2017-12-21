@@ -24,7 +24,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
         /// </summary>
         /// <param name="mongoClient">The <see cref="IMongoClient"/> used to communicate with the MongoDB instance.</param>
         /// <param name="model">The <see cref="IModel"/> used by this connection.</param>
-        public MongoDbConnection([NotNull] IMongoClient mongoClient,
+        public MongoDbConnection(
+            [NotNull] IMongoClient mongoClient,
             [NotNull] IModel model)
         {
             _model = Check.NotNull(model, nameof(model));

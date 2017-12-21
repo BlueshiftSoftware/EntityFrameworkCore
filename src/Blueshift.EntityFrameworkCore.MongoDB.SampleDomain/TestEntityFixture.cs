@@ -14,6 +14,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
             return entity;
         }
 
+        private static TAnimal SetEnclosure<TAnimal>(TAnimal animal, Enclosure enclosure)
+            where TAnimal : Animal
+        {
+            animal.Enclosure = enclosure;
+            enclosure.Animals.Add(animal);
+            return animal;
+        }
+
         public static Employee TaigaMasuta { get; } = SetId(new Employee
         {
             FirstName = "Taiga",
@@ -48,23 +56,24 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
             .ToList();
 
         public static readonly Tiger Tigger =
-            SetId(new Tiger {Name = "Tigger", Age = 6.4M, Weight = 270, Height = .98M, Enclosure = TigerEnclosure});
+            SetEnclosure(SetId(new Tiger {Name = "Tigger", Age = 6.4M, Weight = 270, Height = .98M}), TigerEnclosure);
 
         public static readonly PolarBear Ursus =
-            SetId(new PolarBear
-            {
-                Name = "Ursus",
-                Age = 4.9M,
-                Weight = 612,
-                Height = 2.7M,
-                Enclosure = PolarBearEnclosure
-            });
+            SetEnclosure(
+                SetId(new PolarBear
+                {
+                    Name = "Ursus",
+                    Age = 4.9M,
+                    Weight = 612,
+                    Height = 2.7M
+                }),
+                PolarBearEnclosure);
 
         public static readonly SeaOtter Hydron =
-            SetId(new SeaOtter {Name = "Hydron", Age = 1.8M, Weight = 19, Height = .3M, Enclosure = OtterEnclosure});
+            SetEnclosure(SetId(new SeaOtter {Name = "Hydron", Age = 1.8M, Weight = 19, Height = .3M}),  OtterEnclosure);
 
         public static readonly EurasianOtter Yuri =
-            SetId(new EurasianOtter {Name = "Yuri", Age = 1.8M, Weight = 19, Height = .3M, Enclosure = OtterEnclosure});
+            SetEnclosure(SetId(new EurasianOtter {Name = "Yuri", Age = 1.8M, Weight = 19, Height = .3M}), OtterEnclosure);
 
         public static readonly ICollection<Animal> Animals = new Animal[]
             {
@@ -73,8 +82,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
                 Hydron,
                 Yuri
             }
-            .OrderBy(animal => animal.GetType().Name)
-            .ThenBy(animal => animal.Name)
+            .OrderBy(animal => animal.Name)
+            .ThenBy(animal => animal.Height)
             .ToList();
     }
 }

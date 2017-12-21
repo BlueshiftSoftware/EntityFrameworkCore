@@ -25,7 +25,7 @@ namespace Blueshift.MongoDB.Tests.Shared
                     new ProcessStartInfo
                     {
                         FileName = MongoDbConstants.MongodExe,
-                        Arguments = $@"-vvvvv --port {MongoDbConstants.MongodPort} --logpath "".data\{MongoDbConstants.MongodPort}.log"" --dbpath ""{MongoDbConstants.DataFolder}""",
+                        Arguments = $@"-vvv --port {MongoDbConstants.MongodPort} --logpath "".data\{MongoDbConstants.MongodPort}.log"" --dbpath ""{MongoDbConstants.DataFolder}""",
                         CreateNoWindow = true,
                         UseShellExecute = false
                     });

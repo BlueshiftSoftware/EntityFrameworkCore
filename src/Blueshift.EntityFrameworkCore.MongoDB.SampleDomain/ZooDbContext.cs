@@ -121,7 +121,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
 
         public string AnimalEnclosureType { get; set; }
 
-        //[Denormalize(nameof(Animal.Name))]
-        //public IList<Animal> Animals { get; } = new List<Animal>();
+        [Denormalize(nameof(Animal.Name))]
+        public IList<Animal> Animals { get; } = new List<Animal>();
     }
 }

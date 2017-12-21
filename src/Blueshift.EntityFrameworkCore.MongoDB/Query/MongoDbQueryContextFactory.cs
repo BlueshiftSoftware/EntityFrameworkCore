@@ -1,6 +1,7 @@
 ﻿using Blueshift.EntityFrameworkCore.MongoDB.Storage;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.EntityFrameworkCore.Utilities;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Query
@@ -22,5 +23,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         /// <inheritdoc />
         public override QueryContext Create()
             => new MongoDbQueryContext(Dependencies, CreateQueryBuffer, _mongoDbConnection);
+
+        /// <inheritdoc />
+        protected override IQueryBuffer CreateQueryBuffer()
+            => new MongoDbQueryBuffer(Dependencies);
     }
 }

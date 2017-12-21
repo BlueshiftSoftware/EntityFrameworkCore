@@ -121,8 +121,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Serialization
 
             Dictionary<string, Animal> dictionary = TestEntityFixture.Animals.ToDictionary(animal => animal.Name);
             IEnumerable<string> documents = dictionary
-                .OrderBy(kvp => kvp.Value.GetType().Name)
-                .ThenBy(kvp => kvp.Key)
+                .OrderBy(kvp => kvp.Key)
+                .ThenBy(kvp => kvp.Value.Height)
                 .Select(kvp => kvp.Value)
                 .Select(animal => $"\"{animal.Name}\" : {{ \"_id\" : ObjectId(\"{animal.Id}\"), {GetDiscriminator(animal)}, \"Age\" : \"{animal.Age}\", \"Height\" : \"{animal.Height}\", \"Weight\" : \"{animal.Weight}\" }}");
             string expectedDocument =
