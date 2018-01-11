@@ -72,7 +72,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
                     .AddConventions(
                         new CoreConventionSetBuilder(
                             new CoreConventionSetBuilderDependencies(
-                                mockTypeMapper.Object))
+                                mockTypeMapper.Object,
+                                new ConstructorBindingFactory()))
                             .CreateConventionSet()));
             EntityType entityType = model.AddEntityType(typeof(Employee));
             entityType.Builder

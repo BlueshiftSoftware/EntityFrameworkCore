@@ -49,7 +49,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
                 .QuerySourceTracingExpressionVisitorFactory;
             _projectionExpressionVisitorFactory = entityQueryModelVisitorDependencies
                 .ProjectionExpressionVisitorFactory;
-            _filterApplyingExpressionVisitor = new FilterApplyingExpressionVisitor(queryCompilationContext);
+            _filterApplyingExpressionVisitor = new FilterApplyingExpressionVisitor(queryCompilationContext, entityQueryModelVisitorDependencies.QueryModelGenerator);
         }
 
         private IMongoDbLinqOperatorProvider MongoDbLinqOperatorProvider =>

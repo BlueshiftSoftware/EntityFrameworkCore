@@ -43,7 +43,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Update
                     .AddConventions(
                         new CoreConventionSetBuilder(
                             new CoreConventionSetBuilderDependencies(
-                                typeMapper))
+                                typeMapper,
+                                new ConstructorBindingFactory()))
                             .CreateConventionSet()));
             Type entityClrType = entity.GetType();
 

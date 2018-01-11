@@ -40,7 +40,7 @@ namespace Blueshift.MongoDB.Tests.Shared
                     new ProcessStartInfo
                     {
                         FileName = MongoDbConstants.MongoExe,
-                        Arguments = $@"""{MongoDbConstants.MongoUrl}/admin"" --eval ""db.shutdownServer();""",
+                        Arguments = $@"""{MongoDbConstants.MongoUrl}/admin"" --eval ""db.shutdownServer({{ force: true, timeoutSecs: 30 }});""",
                         CreateNoWindow = true,
                         UseShellExecute = false
                     });

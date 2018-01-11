@@ -45,7 +45,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
                     .AddConventions(
                         new CoreConventionSetBuilder(
                             new CoreConventionSetBuilderDependencies(
-                                _mockTypeMapper.Object))
+                                _mockTypeMapper.Object,
+                                new ConstructorBindingFactory()))
                             .CreateConventionSet()))
                 .ForMongoDbFromDatabase("zooDb")
                 .Model
