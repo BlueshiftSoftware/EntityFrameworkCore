@@ -12,7 +12,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.ChangeTracking
             IStateManager stateManager,
             IEntityType entityType,
             object entity,
-            ValueBuffer valueBuffer)
+            in ValueBuffer valueBuffer)
             =>  base.Create(stateManager, entityType, entity);
     }
 }

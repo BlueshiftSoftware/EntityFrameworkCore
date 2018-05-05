@@ -32,6 +32,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
             {
                 { typeof(IMongoClient), new ServiceCharacteristics(ServiceLifetime.Singleton) },
                 { typeof(IMongoDbConnection), new ServiceCharacteristics(ServiceLifetime.Scoped) },
+                { typeof(IMongoDbTypeMappingSource), new ServiceCharacteristics(ServiceLifetime.Singleton) },
                 { typeof(IMongoDbWriteModelFactoryCache), new ServiceCharacteristics(ServiceLifetime.Singleton) },
                 { typeof(IMongoDbWriteModelFactorySelector), new ServiceCharacteristics(ServiceLifetime.Scoped) },
                 { typeof(MongoDbConventionSetBuilderDependencies), new ServiceCharacteristics(ServiceLifetime.Scoped) }
@@ -63,7 +64,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
         {
             TryAdd<IDatabaseProvider, DatabaseProvider<MongoDbOptionsExtension>>();
             TryAdd<IModelValidator, MongoDbModelValidator>();
-            TryAdd<ITypeMapper, MongoDbTypeMapper>();
+            TryAdd<ITypeMappingSource>(serviceProvider => serviceProvider.GetRequiredService<IMongoDbTypeMappingSource>());
+            TryAdd<IMongoDbTypeMappingSource, MongoDbTypeMappingSource>();
             TryAdd<IDatabase, MongoDbDatabase>();
             TryAdd<IDatabaseCreator, MongoDbDatabaseCreator>();
             TryAdd<IValueGeneratorSelector, MongoDbValueGeneratorSelector>();

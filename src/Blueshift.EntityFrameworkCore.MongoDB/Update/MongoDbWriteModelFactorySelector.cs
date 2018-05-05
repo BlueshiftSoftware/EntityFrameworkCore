@@ -62,7 +62,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
                 entityState != EntityState.Modified &&
                 entityState != EntityState.Deleted)
             {
-                throw new InvalidOperationException($"The value provided for {entityState} must be Added, Modified, or Deleted.");
+                throw new InvalidOperationException($"The value provided for entityState must be Added, Modified, or Deleted, but was {entityState}.");
             }
 
             IMongoDbWriteModelFactory<TEntity> mongoDbWriteModelFactory;

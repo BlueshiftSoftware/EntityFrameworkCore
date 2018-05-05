@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netcoreapp2.0;net461</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' != 'Windows_NT' OR '$(CoreOnly)' == 'True'">netcoreapp2.0</TargetFrameworks>
+    <TestGroupName>MongoDb.EFCore.Tests</TestGroupName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +18,7 @@
     <PackageReference Include="Moq" Version="$(MoqPackageVersion)" NoWarn="KRB4002" />
     <PackageReference Include="xunit" Version="$(XunitPackageVersion)" NoWarn="KRB4002" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioPackageVersion)" NoWarn="KRB4002" />
+    <PackageReference Include="xunit.runner.console" Version="$(XunitRunnerVisualstudioPackageVersion)" NoWarn="KRB4002" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,6 +29,12 @@
 
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

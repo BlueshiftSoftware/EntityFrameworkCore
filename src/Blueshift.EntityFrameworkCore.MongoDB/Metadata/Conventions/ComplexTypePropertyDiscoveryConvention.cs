@@ -15,17 +15,17 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
     /// </summary>
     public class ComplexTypePropertyDiscoveryConvention : IEntityTypeAddedConvention, IBaseTypeChangedConvention
     {
-        private readonly ITypeMapper _typeMapper;
+        private readonly ITypeMappingSource _typeMappingSource;
 
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public ComplexTypePropertyDiscoveryConvention([NotNull] ITypeMapper typeMapper)
+        public ComplexTypePropertyDiscoveryConvention([NotNull] ITypeMappingSource typeMappingSource)
         {
-            Check.NotNull(typeMapper, nameof(typeMapper));
+            Check.NotNull(typeMappingSource, nameof(typeMappingSource));
 
-            _typeMapper = typeMapper;
+            _typeMappingSource = typeMappingSource;
         }
 
         /// <summary>
@@ -55,13 +55,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         protected virtual bool IsCandidateComplexTypeProperty([NotNull] PropertyInfo propertyInfo)
-        {
-            Check.NotNull(propertyInfo, nameof(propertyInfo));
-
-            return propertyInfo.IsCandidateProperty()
-                   && !_typeMapper.IsTypeMapped(propertyInfo.PropertyType)
-                   && propertyInfo.PropertyType.IsClass;
-        }
+            => Check.NotNull(propertyInfo, nameof(propertyInfo)).IsCandidateProperty()
+                && _typeMappingSource.FindMapping(propertyInfo) == null
+                && propertyInfo.PropertyType.IsClass;
 
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used

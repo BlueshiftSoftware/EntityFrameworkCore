@@ -133,7 +133,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
             Assert.Equal(TestEntityFixture.Enclosures,
                 queriedAnimals
                     .Select(animal => animal.Enclosure)
-                    .Distinct(EqualityComparer<Enclosure>.Default)
+                    .Distinct(new EnclosureEqualityComparer())
                     .OrderBy(enclosure => enclosure.AnimalEnclosureType)
                     .ThenBy(enclosure => enclosure.Name)
                     .ToList(),

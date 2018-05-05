@@ -21,12 +21,12 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
         private readonly Mock<IMongoDatabase> _mockMongoDatabase;
         private readonly Mock<IMongoClient> _mockMongoClient;
         private readonly Mock<IMongoCollection<Employee>> _mockEmployee;
-        private readonly Mock<ITypeMapper> _mockTypeMapper;
+        private readonly Mock<IMongoDbTypeMappingSource> _mockMongoDbTypeMappingSource;
         private readonly IModel _model;
 
         public MongoDbConnectionTests()
         {
-            _mockTypeMapper = MockTypeMapper();
+            _mockMongoDbTypeMappingSource = MockMongoDbTypeMappingSource();
             _model = GetModel();
             _mockMongoClient = MockMongoClient();
             _mockMongoDatabase = MockMongoDatabase();
@@ -41,12 +41,15 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
                         new CurrentDbContext(
                             new ZooDbContext(
                                 new DbContextOptions<ZooDbContext>())),
-                        _mockTypeMapper.Object))
+                        _mockMongoDbTypeMappingSource.Object))
                     .AddConventions(
                         new CoreConventionSetBuilder(
                             new CoreConventionSetBuilderDependencies(
-                                _mockTypeMapper.Object,
-                                new ConstructorBindingFactory()))
+                                _mockMongoDbTypeMappingSource.Object,
+                                null,
+                                null,
+                                null,
+                                null))
                             .CreateConventionSet()))
                 .ForMongoDbFromDatabase("zooDb")
                 .Model
@@ -83,8 +86,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
         private Mock<IMongoCollection<Employee>> MockEmployee()
             => new Mock<IMongoCollection<Employee>>();
 
-        private Mock<ITypeMapper> MockTypeMapper()
-            => new Mock<ITypeMapper>();
+        private Mock<IMongoDbTypeMappingSource> MockMongoDbTypeMappingSource()
+            => new Mock<IMongoDbTypeMappingSource>();
 
         [Fact]
         public void Get_database_calls_mongo_client_get_database()

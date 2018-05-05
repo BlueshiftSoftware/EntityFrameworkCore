@@ -53,7 +53,13 @@ namespace Blueshift.Identity.MongoDB.Tests
             _identityDbContext.Database.EnsureCreated();
         }
 
-        public virtual void Dispose()
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
         {
             if (_identityDbContext != null)
             {

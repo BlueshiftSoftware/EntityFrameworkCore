@@ -3,13 +3,18 @@ using System.Collections.Generic;
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
 using Blueshift.EntityFrameworkCore.MongoDB.Storage;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using MongoDB.Bson;
+using Moq;
 using Xunit;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
 {
-    public class MongoDbTypeMapperTests
+    public class MongoDbTypeMappingSourceTests
     {
-        private readonly ITypeMapper _typeMapper = new MongoDbTypeMapper();
+        private readonly MongoDbTypeMappingSource _mongoDbTypeMappingSource = new MongoDbTypeMappingSource(
+            new TypeMappingSourceDependencies(
+                Mock.Of<IValueConverterSelector>()));
 
         [Theory]
         [InlineData(typeof(int))]
@@ -33,9 +38,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
         [InlineData(typeof(TimeSpan))]
         [InlineData(typeof(ZooTask))]
         [InlineData(typeof(Specialty))]
+        [InlineData(typeof(ObjectId))]
         public void Primitives_and_complex_types_are_mapped(Type type)
         {
-            Assert.True(_typeMapper.IsTypeMapped(type));
+            Assert.NotNull(_mongoDbTypeMappingSource.FindMapping(type));
         }
 
         [Theory]
@@ -55,6 +61,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
         [InlineData(typeof(IEnumerable<decimal>))]
         [InlineData(typeof(IEnumerable<double>))]
         [InlineData(typeof(IEnumerable<float>))]
+        [InlineData(typeof(IEnumerable<ObjectId>))]
         [InlineData(typeof(IEnumerable<Guid>))]
         [InlineData(typeof(IEnumerable<string>))]
         [InlineData(typeof(IEnumerable<TimeSpan>))]
@@ -64,7 +71,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
         [InlineData(typeof(IDictionary<string, Specialty>))]
         public void Enumerables_of_primitives_and_complex_types_are_mapped(Type type)
         {
-            Assert.True(_typeMapper.IsTypeMapped(type));
+            Assert.NotNull(_mongoDbTypeMappingSource.FindMapping(type));
         }
 
         [Theory]
@@ -77,7 +84,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
         [InlineData(typeof(EurasianOtter))]
         public void Entities_are_not_mapped(Type type)
         {
-            Assert.False(_typeMapper.IsTypeMapped(type));
+            Assert.Null(_mongoDbTypeMappingSource.FindMapping(type));
         }
     }
 }

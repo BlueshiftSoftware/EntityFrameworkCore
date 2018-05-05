@@ -32,7 +32,13 @@ namespace Blueshift.MongoDB.Tests.Shared
             }
         }
 
-        public virtual void Dispose()
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
         {
             if (!IsCiBuild && _mongodProcess != null && !_mongodProcess.HasExited)
             {

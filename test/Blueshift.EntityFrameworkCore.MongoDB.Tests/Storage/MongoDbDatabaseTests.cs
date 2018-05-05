@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore.Update;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
 using MongoDB.Driver;
 using Moq;
@@ -28,17 +29,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
         {
             var queryCompilationContextFactory = Mock.Of<IQueryCompilationContextFactory>();
             var mockMongoDbConnection = new Mock<IMongoDbConnection>();
-            var mockStateManager = new Mock<IStateManager>();
             var mockMongoCollection = new Mock<IMongoCollection<Employee>>();
             var mockValueGenerationManager = new Mock<IValueGenerationManager>();
             var mockInternalEntityEntryNotifier = new Mock<IInternalEntityEntryNotifier>();
-            var mockTypeMapper = new Mock<ITypeMapper>();
-            mockStateManager.SetupGet(stateManager => stateManager.ValueGenerationManager)
-                .Returns(() => mockValueGenerationManager.Object);
-            mockStateManager.SetupGet(stateManager => stateManager.InternalEntityEntryNotifier)
-                .Returns(() => mockInternalEntityEntryNotifier.Object);
+            var mockMongoDbTypeMappingSource = new Mock<IMongoDbTypeMappingSource>();
+
             mockMongoDbConnection.Setup(mockedMongoDbConnection => mockedMongoDbConnection.GetCollection<Employee>())
                 .Returns(() => mockMongoCollection.Object);
+
             mockMongoCollection.Setup(mongoCollection => mongoCollection.BulkWrite(
                     It.IsAny<IEnumerable<WriteModel<Employee>>>(),
                     It.IsAny<BulkWriteOptions>(),
@@ -52,7 +50,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
                         modifiedCount: list.OfType<UpdateOneModel<Employee>>().Count(),
                         processedRequests: list,
                         upserts: new List<BulkWriteUpsert>()));
+
             var databaseDepedencies = new DatabaseDependencies(queryCompilationContextFactory);
+
             IMongoDbWriteModelFactorySelector writeModelFactorySelector =
                 new MongoDbWriteModelFactorySelector(
                     Mock.Of<IValueGeneratorSelector>(),
@@ -68,25 +68,42 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
                         new CurrentDbContext(
                             new ZooDbContext(
                                 new DbContextOptions<ZooDbContext>())),
-                        mockTypeMapper.Object))
+                        mockMongoDbTypeMappingSource.Object))
                     .AddConventions(
                         new CoreConventionSetBuilder(
                             new CoreConventionSetBuilderDependencies(
-                                mockTypeMapper.Object,
-                                new ConstructorBindingFactory()))
+                                mockMongoDbTypeMappingSource.Object,
+                                null,
+                                null,
+                                null,
+                                null))
                             .CreateConventionSet()));
+
             EntityType entityType = model.AddEntityType(typeof(Employee));
             entityType.Builder
                 .GetOrCreateProperties(typeof(Employee).GetTypeInfo().GetProperties(), ConfigurationSource.Convention);
             new EntityTypeBuilder(entityType.Builder)
                 .ForMongoDbFromCollection(collectionName: "employees");
 
-            IReadOnlyList<InternalEntityEntry> entityEntries = new[] { EntityState.Added, EntityState.Deleted, EntityState.Modified }
+            IReadOnlyList<IUpdateEntry> entityEntries = new[] { EntityState.Added, EntityState.Deleted, EntityState.Modified }
                 .Select(entityState =>
                     {
-                        var entityEntry = new InternalClrEntityEntry(mockStateManager.Object, entityType, new Employee());
-                        entityEntry.SetEntityState(entityState, acceptChanges: true);
-                        return entityEntry;
+                        var mockUpdateEntry = new Mock<InternalEntityEntry>(
+                            null,
+                            entityType);
+                        var entity = new Employee();
+
+                        mockUpdateEntry
+                            .SetupGet(updateEntry => updateEntry.EntityState)
+                            .Returns(entityState);
+                        mockUpdateEntry
+                            .SetupGet(updateEntry => updateEntry.EntityType)
+                            .Returns(entityType);
+                        mockUpdateEntry
+                            .SetupGet(updateEntry => updateEntry.Entity)
+                            .Returns(entity);
+
+                        return mockUpdateEntry.Object;
                     })
                 .ToList();
 

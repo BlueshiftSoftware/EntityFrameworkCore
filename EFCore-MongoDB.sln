@@ -8,6 +8,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{FAF9C31C
 		build\dependencies.props = build\dependencies.props
 		build\repo.beforecommon.props = build\repo.beforecommon.props
 		build\repo.props = build\repo.props
+		build\sources.props = build\sources.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Globals", "Globals", "{6841D576-C833-4614-89D8-4CF4DECD1CFA}"

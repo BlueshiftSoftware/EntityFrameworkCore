@@ -21,7 +21,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
         {
             Check.NotNull(propertyBuilder, nameof(propertyBuilder));
 
-            MemberInfo memberInfo = propertyBuilder.Metadata.MemberInfo;
+            MemberInfo memberInfo = propertyBuilder.Metadata.GetIdentifyingMemberInfo();
             return (memberInfo?.IsDefined(typeof(BsonIdAttribute), true) ?? false)
                 ? base.Apply(propertyBuilder, KeyAttribute, memberInfo)
                 : base.Apply(propertyBuilder);
@@ -37,7 +37,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
             {
                 foreach (Property declaredProperty in entityType.GetDeclaredProperties())
                 {
-                    if (declaredProperty.MemberInfo?.IsDefined(typeof(BsonIdAttribute), true) ?? false)
+                    if (declaredProperty.GetIdentifyingMemberInfo()?.IsDefined(typeof(BsonIdAttribute), true) ?? false)
                     {
                         throw new InvalidOperationException(
                             CoreStrings.KeyAttributeOnDerivedEntity(entityType.DisplayName(), declaredProperty.Name));

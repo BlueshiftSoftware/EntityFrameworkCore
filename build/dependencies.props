@@ -7,10 +7,11 @@
     <MicrosoftEntityFrameworkCorePackageVersion>2.1.0-*</MicrosoftEntityFrameworkCorePackageVersion>
     <MicrosoftEntityFrameworkCoreSpecificationTestsPackageVersion>2.1.0-*</MicrosoftEntityFrameworkCoreSpecificationTestsPackageVersion>
     <MicrosoftExtensionsConfigurationPackageVersion>2.1.0-*</MicrosoftExtensionsConfigurationPackageVersion>
+    <MicrosoftNetCompilersPackageVersion>2.8.0</MicrosoftNetCompilersPackageVersion>
     <MicrosoftNETCoreAppPackageVersion>2.0.0</MicrosoftNETCoreAppPackageVersion>
-    <MicrosoftNETTestSdkPackageVersion>15.3.0</MicrosoftNETTestSdkPackageVersion>
+    <MicrosoftNETTestSdkPackageVersion>15.6.1</MicrosoftNETTestSdkPackageVersion>
     <MongoDBDriverPackageVersion>2.4.4-*</MongoDBDriverPackageVersion>
-    <MoqPackageVersion>4.7.145</MoqPackageVersion>
+    <MoqPackageVersion>4.8.2</MoqPackageVersion>
     <NETStandardLibraryPackageVersion>2.0.0</NETStandardLibraryPackageVersion>
     <XunitPackageVersion>2.3.1</XunitPackageVersion>
     <XunitRunnerVisualstudioPackageVersion>2.3.1</XunitRunnerVisualstudioPackageVersion>

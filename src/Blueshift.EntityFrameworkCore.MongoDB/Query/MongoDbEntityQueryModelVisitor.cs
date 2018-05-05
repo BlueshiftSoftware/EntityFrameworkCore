@@ -1,10 +1,12 @@
 using Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Extensions.Internal;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.EntityFrameworkCore.Query.Expressions.Internal;
 using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors;
 using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors.Internal;
 using Microsoft.EntityFrameworkCore.Query.Internal;
@@ -27,9 +29,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
     public class MongoDbEntityQueryModelVisitor : EntityQueryModelVisitor
     {
         private readonly IQueryOptimizer _queryOptimizer;
+        private readonly INavigationRewritingExpressionVisitorFactory _navigationRewritingExpressionVisitorFactory;
         private readonly IQuerySourceTracingExpressionVisitorFactory _querySourceTracingExpressionVisitorFactory;
         private readonly IProjectionExpressionVisitorFactory _projectionExpressionVisitorFactory;
-        private readonly FilterApplyingExpressionVisitor _filterApplyingExpressionVisitor;
+        private readonly ModelExpressionApplyingExpressionVisitor _modelExpressionApplyingExpressionVisitor;
 
         private Stack<IList<INavigation>> _includePaths;
 
@@ -45,11 +48,16 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
             )
         {
             _queryOptimizer = entityQueryModelVisitorDependencies.QueryOptimizer;
+            _navigationRewritingExpressionVisitorFactory = entityQueryModelVisitorDependencies.NavigationRewritingExpressionVisitorFactory;
             _querySourceTracingExpressionVisitorFactory = entityQueryModelVisitorDependencies
                 .QuerySourceTracingExpressionVisitorFactory;
             _projectionExpressionVisitorFactory = entityQueryModelVisitorDependencies
                 .ProjectionExpressionVisitorFactory;
-            _filterApplyingExpressionVisitor = new FilterApplyingExpressionVisitor(queryCompilationContext, entityQueryModelVisitorDependencies.QueryModelGenerator);
+            _modelExpressionApplyingExpressionVisitor
+                 = new ModelExpressionApplyingExpressionVisitor(
+                     queryCompilationContext,
+                     entityQueryModelVisitorDependencies.QueryModelGenerator,
+                     this);
         }
 
         private IMongoDbLinqOperatorProvider MongoDbLinqOperatorProvider =>
@@ -331,6 +339,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         {
             Check.NotNull(queryModel, nameof(queryModel));
 
+            ExtractQueryAnnotations(queryModel);
+
             new MongoDbEagerLoadingExpressionVisitor(QueryCompilationContext, _querySourceTracingExpressionVisitorFactory)
                 .VisitQueryModel(queryModel);
 
@@ -340,9 +350,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
 
             new MongoDbNondeterministicResultCheckingVisitor(QueryCompilationContext.Logger).VisitQueryModel(queryModel);
 
-            // Rewrite includes/navigations
+            OnBeforeNavigationRewrite(queryModel);
 
-            RewriteProjectedCollectionNavigationsToIncludes(queryModel);
+            // Rewrite includes/navigations
 
             var includeCompiler = new MongoDbIncludeCompiler(QueryCompilationContext, _querySourceTracingExpressionVisitorFactory);
 
@@ -353,16 +363,35 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
             queryModel.TransformExpressions(new CollectionNavigationSubqueryInjector(this).Visit);
             queryModel.TransformExpressions(new CollectionNavigationSetOperatorSubqueryInjector(this).Visit);
 
+            var navigationRewritingExpressionVisitor = _navigationRewritingExpressionVisitorFactory.Create(this);
+            navigationRewritingExpressionVisitor.InjectSubqueryToCollectionsInProjection(queryModel);
+
+            var correlatedCollectionFinder = new CorrelatedCollectionFindingExpressionVisitor(this, TrackResults(queryModel));
+
+            if (!queryModel.ResultOperators.Any(r => r is GroupResultOperator))
+            {
+                queryModel.SelectClause.TransformExpressions(correlatedCollectionFinder.Visit);
+            }
+
+            navigationRewritingExpressionVisitor.Rewrite(queryModel, parentQueryModel: null);
+
+            includeCompiler.CompileIncludes(queryModel, TrackResults(queryModel), asyncQuery);
+
+            navigationRewritingExpressionVisitor.Rewrite(queryModel, parentQueryModel: null);
+
+            new MongoDbEntityQsreToKeyAccessConvertingQueryModelVisitor(QueryCompilationContext).VisitQueryModel(queryModel);
+
             includeCompiler.RewriteCollectionQueries();
 
             includeCompiler.LogIgnoredIncludes();
 
-            if (!QueryCompilationContext.IgnoreQueryFilters)
-            {
-                queryModel.TransformExpressions(_filterApplyingExpressionVisitor.Visit);
-            }
+            _modelExpressionApplyingExpressionVisitor.ApplyModelExpressions(queryModel);
 
             // Second pass of optimizations
+
+            ExtractQueryAnnotations(queryModel);
+
+            navigationRewritingExpressionVisitor.Rewrite(queryModel, parentQueryModel: null);
 
             _queryOptimizer.Optimize(QueryCompilationContext, queryModel);
 
@@ -485,6 +514,125 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
             //}
 
             return transparentIdentifier.Outer;
+        }
+
+        private class MongoDbEntityQsreToKeyAccessConvertingQueryModelVisitor : QueryModelVisitorBase
+        {
+            private QueryCompilationContext _queryCompilationContext;
+
+            public MongoDbEntityQsreToKeyAccessConvertingQueryModelVisitor(QueryCompilationContext queryCompilationContext)
+            {
+                _queryCompilationContext = queryCompilationContext;
+            }
+
+            public override void VisitQueryModel(QueryModel queryModel)
+            {
+                queryModel.TransformExpressions(
+                    new TransformingQueryModelExpressionVisitor<MongoDbEntityQsreToKeyAccessConvertingQueryModelVisitor>(this).Visit);
+
+                base.VisitQueryModel(queryModel);
+            }
+
+            public override void VisitOrderByClause(OrderByClause orderByClause, QueryModel queryModel, int index)
+            {
+                var newOrderings = new List<Ordering>();
+
+                var changed = false;
+                foreach (var ordering in orderByClause.Orderings)
+                {
+                    if (ordering.Expression is QuerySourceReferenceExpression qsre
+                        && TryGetEntityPrimaryKeys(qsre.ReferencedQuerySource, out var keyProperties))
+                    {
+                        changed = true;
+                        foreach (var keyProperty in keyProperties)
+                        {
+                            newOrderings.Add(new Ordering(qsre.CreateEFPropertyExpression(keyProperty), ordering.OrderingDirection));
+                        }
+                    }
+                    else
+                    {
+                        newOrderings.Add(ordering);
+                    }
+                }
+
+                if (changed)
+                {
+                    orderByClause.Orderings.Clear();
+                    foreach (var newOrdering in newOrderings)
+                    {
+                        orderByClause.Orderings.Add(newOrdering);
+                    }
+                }
+
+                base.VisitOrderByClause(orderByClause, queryModel, index);
+            }
+
+            public override void VisitJoinClause(JoinClause joinClause, QueryModel queryModel, int index)
+            {
+#pragma warning disable IDE0019 // Use pattern matching
+                var outerKeyQsre = joinClause.OuterKeySelector as QuerySourceReferenceExpression;
+#pragma warning restore IDE0019 // Use pattern matching
+
+                var innerKeyQsre = joinClause.InnerKeySelector as QuerySourceReferenceExpression;
+                var innerKeySubquery = joinClause.InnerKeySelector as SubQueryExpression;
+
+                // if inner key is a subquery (i.e. it contains a navigation) we can only perform the optimization if the key is not composite
+                // otherwise we would have to clone the entire subquery for each key property in order be able to fully translate the key selector
+                if (outerKeyQsre != null
+                    && TryGetEntityPrimaryKeys(outerKeyQsre.ReferencedQuerySource, out var keyProperties)
+                    && (innerKeyQsre != null || (keyProperties.Count == 1 && IsNavigationSubquery(innerKeySubquery))))
+                {
+                    joinClause.OuterKeySelector = outerKeyQsre.CreateKeyAccessExpression(keyProperties);
+
+                    if (innerKeyQsre != null)
+                    {
+                        joinClause.InnerKeySelector = innerKeyQsre.CreateKeyAccessExpression(keyProperties);
+                    }
+                    else
+                    {
+                        var innerSubquerySelectorQsre = (QuerySourceReferenceExpression)innerKeySubquery.QueryModel.SelectClause.Selector;
+                        innerKeySubquery.QueryModel.SelectClause.Selector = innerSubquerySelectorQsre.CreateKeyAccessExpression(keyProperties);
+                        joinClause.InnerKeySelector = new SubQueryExpression(innerKeySubquery.QueryModel);
+                    }
+                }
+
+                base.VisitJoinClause(joinClause, queryModel, index);
+            }
+
+            public override void VisitGroupJoinClause(GroupJoinClause groupJoinClause, QueryModel queryModel, int index)
+            {
+                VisitJoinClause(groupJoinClause.JoinClause, queryModel, index);
+
+                base.VisitGroupJoinClause(groupJoinClause, queryModel, index);
+            }
+
+            private static bool IsNavigationSubquery(SubQueryExpression subQueryExpression)
+                => subQueryExpression != null
+                ? subQueryExpression.QueryModel.BodyClauses.OfType<WhereClause>().Where(c => c.Predicate is NullSafeEqualExpression).Any()
+                    && subQueryExpression.QueryModel.SelectClause.Selector is QuerySourceReferenceExpression selectorQsre
+                    && subQueryExpression.QueryModel.ResultOperators.Count == 1
+                    && subQueryExpression.QueryModel.ResultOperators[0] is FirstResultOperator firstResultOperator
+                    && firstResultOperator.ReturnDefaultWhenEmpty
+                : false;
+
+            private bool TryGetEntityPrimaryKeys(IQuerySource querySource, out IReadOnlyList<IProperty> keyProperties)
+            {
+                var entityType
+                    = _queryCompilationContext.FindEntityType(querySource)
+                      ?? _queryCompilationContext.Model
+                          .FindEntityType(querySource.ItemType);
+
+                if (entityType != null)
+                {
+                    keyProperties = entityType.FindPrimaryKey().Properties;
+
+                    return true;
+                }
+
+                keyProperties = new List<IProperty>();
+
+                return false;
+            }
         }
     }
 }
