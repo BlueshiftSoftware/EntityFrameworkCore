@@ -1,5 +1,6 @@
 language: csharp
 sudo: false
+dotnet: 2.1.2
 dist: trusty
 env:
   global:
