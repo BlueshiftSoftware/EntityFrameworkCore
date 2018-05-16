@@ -36,5 +36,4 @@ for:
     - sh: chmod +x ./run.sh
     - sh: ./run.sh default-build
 image:
-- Ubuntu
 - Visual Studio 2017
