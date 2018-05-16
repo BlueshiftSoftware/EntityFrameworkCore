@@ -33,7 +33,9 @@ for:
     only:
       - image: Ubuntu
   build_script:
-    - sh: run.sh default-build
+    - sh: >-
+        chmod +x ./run.sh
+        ./run.sh default-build
 image:
 - Ubuntu
 - Visual Studio 2017
