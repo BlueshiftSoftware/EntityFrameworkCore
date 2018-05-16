@@ -32,8 +32,8 @@ for:
   matrix:
     only:
       - image: Ubuntu
-    build_script:
-      - run.sh default-build
+  build_script:
+    - run.sh default-build
 image:
 - Ubuntu
 - Visual Studio 2017
