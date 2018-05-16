@@ -27,13 +27,5 @@ deploy:
     artifact: 'artifacts\build\*.nupkg'
     on:
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-for:
--
-  matrix:
-    only:
-      - image: Ubuntu
-  build_script:
-    - sh: chmod +x ./run.sh
-    - sh: ./run.sh default-build
 image:
 - Visual Studio 2017
