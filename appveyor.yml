@@ -1,7 +1,5 @@
 init:
   - git config --global core.autocrlf true
-build_script:
-  - ps: .\run.ps1 default-build
 clone_depth: 1
 test: off
 services:
@@ -26,6 +24,12 @@ for:
     build_script:
       - sh: chmod +x ./run.sh
       - sh: ./run.sh default-build
+  -
+    matrix:
+      only:
+        - image: Visual Studio 2017
+    build_script:
+      - ps: .\run.ps1 default-build
 artifacts:
   - path: 'artifacts\build\*.nupkg'
     name: MyGet
