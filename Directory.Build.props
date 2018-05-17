@@ -1,6 +1,7 @@
 ﻿<Project>
   <Import Project="version.props" />
   <Import Project="build/dependencies.props" />
+  <Import Project="build/sources.props" />
 
   <PropertyGroup>
     <BuildYear>$([System.DateTime]::Now.ToString('yyyy'))</BuildYear>
@@ -18,14 +19,10 @@
     <Product>Blueshift Software MongoDB Provider for Entity Framework Core</Product>
     <DebugType Condition="'$(Configuration)' == 'Debug' AND '$(OS)' == 'Windows_NT'">full</DebugType>
     <LangVersion>7.2</LangVersion>
-    <NoWarn>CS8032;$(NoWarn)</NoWarn>
+    <NoWarn>$(NoWarn);CS8032;</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="**\*.rd.xml" />    
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Net.Compilers" Version="$(MicrosoftNetCompilersPackageVersion)" NoWarn="KRB4002" PrivateAssets="ALL" />
   </ItemGroup>
 </Project>
