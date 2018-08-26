@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Threading;
-using Blueshift.MongoDB.Tests.Shared;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Blueshift.Identity.MongoDB.Tests
@@ -13,10 +11,10 @@ namespace Blueshift.Identity.MongoDB.Tests
 
         private readonly IUserLockoutStore<MongoDbIdentityUser> _mongoDbUserLockoutStore;
 
-        public MongoDbUserLockoutStoreTests(MongoDbFixture mongoDbFixture)
-            : base(mongoDbFixture)
+        public MongoDbUserLockoutStoreTests(MongoDbIdentityFixture mongoDbIdentityFixture)
+            : base(mongoDbIdentityFixture)
         {
-            _mongoDbUserLockoutStore = ServiceProvider.GetRequiredService<IUserLockoutStore<MongoDbIdentityUser>>();
+            _mongoDbUserLockoutStore = mongoDbIdentityFixture.GetService<IUserLockoutStore<MongoDbIdentityUser>>();
         }
 
         protected override MongoDbIdentityUser CreateUser()

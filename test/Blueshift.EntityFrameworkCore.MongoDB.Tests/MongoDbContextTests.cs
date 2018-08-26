@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
-using Blueshift.MongoDB.Tests.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Xunit;
@@ -13,11 +12,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
 {
     public class MongoDbContextTests : MongoDbContextTestBase
     {
-        public MongoDbContextTests(MongoDbFixture mongoDbFixture)
-            : base(mongoDbFixture)
-        {
-        }
-
         [Fact]
         public void Can_query_from_mongodb()
         {

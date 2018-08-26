@@ -24,7 +24,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Blueshift.EntityFrameworkCore.MongoDB.SampleDomain\Blueshift.EntityFrameworkCore.MongoDB.SampleDomain.csproj" />
     <ProjectReference Include="..\..\src\Blueshift.EntityFrameworkCore.MongoDB\Blueshift.EntityFrameworkCore.MongoDB.csproj" />
-    <ProjectReference Include="..\..\src\Blueshift.MongoDB.Tests.Shared\Blueshift.MongoDB.Tests.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

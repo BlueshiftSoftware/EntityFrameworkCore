@@ -1,23 +1,22 @@
 ﻿using System;
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
-using Blueshift.MongoDB.Tests.Shared;
-using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
 {
-    public abstract class MongoDbContextTestBase : IClassFixture<MongoDbFixture>, IDisposable
+    public abstract class MongoDbContextTestBase : IDisposable
     {
+        private const string MongoUrl = "mongodb://localhost:27017";
+
         protected IServiceProvider ServiceProvider;
         protected ZooDbContext ZooDbContext;
 
-        protected MongoDbContextTestBase([UsedImplicitly] MongoDbFixture mongoDbFixture)
+        protected MongoDbContextTestBase()
         {
             ServiceProvider = new ServiceCollection()
                 .AddDbContext<ZooDbContext>(options => options
-                    .UseMongoDb(connectionString: MongoDbConstants.MongoUrl)
+                    .UseMongoDb(MongoUrl)
                     .EnableSensitiveDataLogging(true))
                 .BuildServiceProvider();
             ZooDbContext = ServiceProvider.GetService<ZooDbContext>();

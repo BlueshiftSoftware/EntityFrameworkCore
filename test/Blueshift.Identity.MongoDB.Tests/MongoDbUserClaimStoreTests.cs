@@ -1,9 +1,7 @@
 ﻿using System.Linq;
 using System.Security.Claims;
 using System.Threading;
-using Blueshift.MongoDB.Tests.Shared;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Blueshift.Identity.MongoDB.Tests
@@ -23,10 +21,10 @@ namespace Blueshift.Identity.MongoDB.Tests
 
         private readonly IUserClaimStore<MongoDbIdentityUser> _mongoDbUserClaimStore;
 
-        public MongoDbUserClaimStoreTests(MongoDbFixture mongoDbFixture)
-            : base(mongoDbFixture)
+        public MongoDbUserClaimStoreTests(MongoDbIdentityFixture mongoDbIdentityFixture)
+            : base(mongoDbIdentityFixture)
         {
-            _mongoDbUserClaimStore = ServiceProvider.GetRequiredService<IUserClaimStore<MongoDbIdentityUser>>();
+            _mongoDbUserClaimStore = mongoDbIdentityFixture.GetService<IUserClaimStore<MongoDbIdentityUser>>();
         }
 
         protected override MongoDbIdentityUser CreateUser()

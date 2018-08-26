@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Blueshift.MongoDB.Tests.Shared;
-using JetBrains.Annotations;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Blueshift.Identity.MongoDB.Tests
 {
     [Collection("MongoDB.Identity.Tests")]
-    public abstract class MongoDbIdentityStoreTestBase : IDisposable
+    public abstract class MongoDbIdentityStoreTestBase
     {
         protected static readonly string RoleName = "TestRole";
         protected static readonly string RoleNameNormalized = RoleName.ToUpper();
@@ -30,42 +25,13 @@ namespace Blueshift.Identity.MongoDB.Tests
 
         protected static IEqualityComparer<MongoDbIdentityClaim> IdentityClaimComparer = new MongoDbIdentityClaimComparer();
 
-        protected IServiceProvider ServiceProvider;
-        private IdentityMongoDbContext _identityDbContext;
         private readonly IUserStore<MongoDbIdentityUser> _userStore;
         private readonly IRoleStore<MongoDbIdentityRole> _roleStore;
 
-        protected MongoDbIdentityStoreTestBase([UsedImplicitly] MongoDbFixture mongoDbFixture)
+        protected MongoDbIdentityStoreTestBase(MongoDbIdentityFixture mongoDbIdentityFixture)
         {
-            ServiceProvider = new ServiceCollection()
-                .AddDbContext<IdentityMongoDbContext>(options => options
-                    .UseMongoDb(
-                        connectionString: MongoDbConstants.MongoUrl,
-                        mongoDbOptionsAction: optionsBuilder => optionsBuilder.UseDatabase("__test_identities"))
-                    .EnableSensitiveDataLogging(true))
-                .AddIdentity<MongoDbIdentityUser, MongoDbIdentityRole>()
-                .AddEntityFrameworkMongoDbStores<IdentityMongoDbContext>()
-                .Services
-                .BuildServiceProvider();
-            _identityDbContext = ServiceProvider.GetService<IdentityMongoDbContext>();
-            _userStore = ServiceProvider.GetRequiredService<IUserStore<MongoDbIdentityUser>>();
-            _roleStore = ServiceProvider.GetRequiredService<IRoleStore<MongoDbIdentityRole>>();
-            _identityDbContext.Database.EnsureCreated();
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_identityDbContext != null)
-            {
-                _identityDbContext.Database.EnsureDeleted();
-                _identityDbContext = null;
-            }
+            _userStore = mongoDbIdentityFixture.GetService<IUserStore<MongoDbIdentityUser>>();
+            _roleStore = mongoDbIdentityFixture.GetService<IRoleStore<MongoDbIdentityRole>>();
         }
 
         protected virtual MongoDbIdentityRole CreateRole()
