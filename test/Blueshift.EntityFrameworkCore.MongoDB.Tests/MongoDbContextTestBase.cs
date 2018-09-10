@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +11,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         private const string MongoUrl = "mongodb://localhost:27017";
 
         protected IServiceProvider ServiceProvider;
-        protected ZooDbContext ZooDbContext;
 
         protected MongoDbContextTestBase()
         {
@@ -19,17 +19,30 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                     .UseMongoDb(MongoUrl)
                     .EnableSensitiveDataLogging(true))
                 .BuildServiceProvider();
-            ZooDbContext = ServiceProvider.GetService<ZooDbContext>();
-            ZooDbContext.Database.EnsureCreated();
+
+            ExecuteUnitOfWork(zooDbContext => zooDbContext.Database.EnsureCreated());
         }
 
         public void Dispose()
         {
-            if (ZooDbContext != null)
+            ExecuteUnitOfWork(zooDbContext => zooDbContext.Database.EnsureDeleted());
+        }
+
+        protected void ExecuteUnitOfWork(Action<ZooDbContext> unitOfWork)
+        {
+            using (IServiceScope serviceScope = ServiceProvider.CreateScope())
             {
-                ZooDbContext.Database.EnsureDeleted();
-                ZooDbContext.Dispose();
-                ZooDbContext = null;
+                ZooDbContext zooDbContext = serviceScope.ServiceProvider.GetService<ZooDbContext>();
+                unitOfWork(zooDbContext);
+            }
+        }
+
+        protected async Task ExecuteUnitOfWorkAsync(Func<ZooDbContext, Task> unitOfWork)
+        {
+            using (IServiceScope serviceScope = ServiceProvider.CreateScope())
+            {
+                ZooDbContext zooDbContext = serviceScope.ServiceProvider.GetService<ZooDbContext>();
+                await unitOfWork(zooDbContext);
             }
         }
     }

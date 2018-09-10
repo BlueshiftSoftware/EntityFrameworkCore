@@ -30,8 +30,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
             var queryCompilationContextFactory = Mock.Of<IQueryCompilationContextFactory>();
             var mockMongoDbConnection = new Mock<IMongoDbConnection>();
             var mockMongoCollection = new Mock<IMongoCollection<Employee>>();
-            var mockValueGenerationManager = new Mock<IValueGenerationManager>();
-            var mockInternalEntityEntryNotifier = new Mock<IInternalEntityEntryNotifier>();
             var mockMongoDbTypeMappingSource = new Mock<IMongoDbTypeMappingSource>();
 
             mockMongoDbConnection.Setup(mockedMongoDbConnection => mockedMongoDbConnection.GetCollection<Employee>())
@@ -79,9 +77,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
                                 null))
                             .CreateConventionSet()));
 
+            EntityType zooEntityType = model.AddEntityType(typeof(ZooEntity));
+            zooEntityType.Builder
+                .GetOrCreateProperties(typeof(ZooEntity).GetTypeInfo().GetProperties(), ConfigurationSource.Explicit);
             EntityType entityType = model.AddEntityType(typeof(Employee));
             entityType.Builder
-                .GetOrCreateProperties(typeof(Employee).GetTypeInfo().GetProperties(), ConfigurationSource.Convention);
+                .HasBaseType(zooEntityType, ConfigurationSource.Explicit)
+                .GetOrCreateProperties(typeof(Employee).GetTypeInfo().GetProperties(), ConfigurationSource.Explicit);
+
             new EntityTypeBuilder(entityType.Builder)
                 .ForMongoDbFromCollection(collectionName: "employees");
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Utilities;
@@ -7,15 +8,27 @@ using MongoDB.Bson;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration
 {
-    /// <summary>
-    ///     Selects value generators to be used to generate values for properties of entities.
-    ///     This type is typically used by database providers (and other extensions). It
-    ///     is generally not used in application code.
-    /// </summary>
+    /// <inheritdoc />
     public class MongoDbValueGeneratorSelector : ValueGeneratorSelector
     {
+        private readonly IDictionary<Type, Func<ValueGenerator>> _valueGeneratorMap =
+            new Dictionary<Type, Func<ValueGenerator>>
+            {
+                [typeof(ObjectId)] = () => new ObjectIdValueGenerator(),
+                [typeof(short)] = () => new IntegerValueGenerator<short>(),
+                [typeof(int)] = () => new IntegerValueGenerator<int>(),
+                [typeof(long)] = () => new IntegerValueGenerator<long>(),
+            };
+
+        private readonly IDictionary<Type, Func<ValueGenerator>> _shadowKeyGeneratorMap =
+            new Dictionary<Type, Func<ValueGenerator>>
+            {
+                [typeof(int)] = () => new HashCodeValueGenerator()
+            };
+
+        /// <inheritdoc />
         /// <summary>
-        /// Initializes a new instance of the <see cref="MongoDbValueGeneratorSelector"/> class.
+        /// Initializes a new instance of the <see cref="T:Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration.MongoDbValueGeneratorSelector" /> class.
         /// </summary>
         /// <param name="dependencies">Parameter object containing dependencies for this service.</param>
         public MongoDbValueGeneratorSelector([NotNull] ValueGeneratorSelectorDependencies dependencies)
@@ -23,6 +36,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration
         {
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Creates a new value generator for the given property.
         /// </summary>
@@ -33,14 +47,22 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration
         ///     declared entity type on property
         /// </param>
         /// <returns>The newly created value generator.</returns>
-        public override ValueGenerator Create(IProperty property,
+        public override ValueGenerator Create(
+            IProperty property,
             IEntityType entityType)
         {
             Check.NotNull(property, nameof(property));
             Check.NotNull(entityType, nameof(entityType));
 
-            return property.ClrType.UnwrapNullableType() == typeof(ObjectId)
-                ? new ObjectIdValueGenerator()
+            IDictionary<Type, Func<ValueGenerator>> valueGeneratorCreator = property.IsShadowProperty
+                ? _shadowKeyGeneratorMap
+                : _valueGeneratorMap;
+
+            return valueGeneratorCreator
+                .TryGetValue(
+                    property.ClrType.UnwrapNullableType(),
+                    out Func<ValueGenerator> valueGeneratorFactory)
+                ? valueGeneratorFactory()
                 : base.Create(property, entityType);
         }
     }

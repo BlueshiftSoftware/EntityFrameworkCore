@@ -6,6 +6,7 @@ using Blueshift.EntityFrameworkCore.MongoDB.Metadata;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Utilities;
@@ -13,11 +14,13 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
 {
+    /// <inheritdoc />
     /// <summary>
     ///     A validator that enforces rules for all MongoDb provider.
     /// </summary>
     public class MongoDbModelValidator : ModelValidator
     {
+        /// <inheritdoc />
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbModelValidator"/> class.
         /// </summary>
@@ -28,6 +31,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
         {
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Validates a model, throwing an exception if any errors are found.
         /// </summary>
@@ -39,6 +43,79 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
             EnsureKnownTypes(model);
             EnsureDistinctCollectionNames(model);
             ValidateDerivedTypes(model);
+        }
+
+        /// <inheritdoc />
+        protected override void ValidateNoShadowKeys(IModel model)
+        {
+            Check.NotNull(model, nameof(model));
+
+            IEnumerable<IEntityType> nonComplexEntityTypes = model
+                .GetEntityTypes()
+                .Where(entityType => entityType.ClrType != null && !entityType.MongoDb().IsComplexType);
+
+            foreach (var entityType in nonComplexEntityTypes)
+            {
+                foreach (var key in entityType.GetDeclaredKeys())
+                {
+                    if (key.Properties.Any(p => p.IsShadowProperty)
+                        && key is Key concreteKey
+                        && ConfigurationSource.Convention.Overrides(concreteKey.GetConfigurationSource())
+                        && !key.IsPrimaryKey())
+                    {
+                        var referencingFk = key.GetReferencingForeignKeys().FirstOrDefault();
+
+                        if (referencingFk != null)
+                        {
+                            throw new InvalidOperationException(
+                                CoreStrings.ReferencedShadowKey(
+                                    referencingFk.DeclaringEntityType.DisplayName() +
+                                    (referencingFk.DependentToPrincipal == null
+                                        ? ""
+                                        : "." + referencingFk.DependentToPrincipal.Name),
+                                    entityType.DisplayName() +
+                                    (referencingFk.PrincipalToDependent == null
+                                        ? ""
+                                        : "." + referencingFk.PrincipalToDependent.Name),
+                                    Property.Format(referencingFk.Properties, includeTypes: true),
+                                    Property.Format(entityType.FindPrimaryKey().Properties, includeTypes: true)));
+                        }
+                    }
+                }
+            }        }
+
+        /// <inheritdoc />
+        protected override void ValidateOwnership(IModel model)
+        {
+            Check.NotNull(model, nameof(model));
+
+            foreach (IEntityType entityType in model.GetEntityTypes())
+            {
+                List<IForeignKey> ownerships = entityType.GetForeignKeys().Where(fk => fk.IsOwnership).ToList();
+                if (ownerships.Count == 0
+                    && entityType.HasClrType()
+                        ? model.ShouldBeOwnedType(entityType.ClrType)
+                        : model.ShouldBeOwnedType(entityType.Name))
+                {
+                    throw new InvalidOperationException(CoreStrings.OwnerlessOwnedType(entityType.DisplayName()));
+                }
+
+                foreach (IForeignKey ownership in ownerships)
+                {
+                    IEnumerable<IForeignKey> foreignKeys = entityType.GetDeclaredForeignKeys()
+                        .Where(fk => !fk.IsOwnership && fk.PrincipalToDependent != null);
+
+                    foreach (IForeignKey foreignKey in foreignKeys)
+                    {
+                        throw new InvalidOperationException(
+                            CoreStrings.InverseToOwnedType(
+                                foreignKey.PrincipalEntityType.DisplayName(),
+                                foreignKey.PrincipalToDependent.Name,
+                                entityType.DisplayName(),
+                                ownership.PrincipalEntityType.DisplayName()));
+                    }
+                }
+            }
         }
 
         /// <summary>

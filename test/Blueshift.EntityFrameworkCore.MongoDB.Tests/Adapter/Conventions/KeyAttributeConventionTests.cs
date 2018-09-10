@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Blueshift.EntityFrameworkCore.MongoDB.Adapter.Conventions;
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
@@ -9,22 +10,36 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Conventions
 {
     public class KeyAttributeConventionTests
     {
+        [Fact]
+        public void Should_set_id_member_when_key_attribute_present()
+        {
+            MemberInfo memberInfo = typeof(ZooEntity)
+                .GetTypeInfo()
+                .GetProperty(nameof(ZooEntity.Id));
+            Assert.NotNull(memberInfo);
+            Assert.True(memberInfo.IsDefined(typeof(KeyAttribute), false));
+            var keyAttributeConvention = new KeyAttributeConvention();
+            var bsonClasspMap = new BsonClassMap<ZooEntity>();
+            BsonMemberMap bsonMemberMap = bsonClasspMap.MapMember(memberInfo);
+            keyAttributeConvention.Apply(bsonMemberMap);
+            Assert.Same(bsonMemberMap, bsonClasspMap.IdMemberMap);
+        }
+
         [Theory]
-        [InlineData(nameof(Employee.Id), true)]
-        [InlineData(nameof(Employee.FirstName), false)]
-        [InlineData(nameof(Employee.Age), false)]
-        public void Sets_id_member_when_key_attribute_present(string memberName, bool keyExpected)
+        [InlineData(nameof(Employee.FirstName))]
+        [InlineData(nameof(Employee.Age))]
+        public void Should_not_set_id_member_when_key_attribute_present(string memberName)
         {
             MemberInfo memberInfo = typeof(Employee)
                 .GetTypeInfo()
                 .GetProperty(memberName);
             Assert.NotNull(memberInfo);
-            Assert.Equal(keyExpected, memberInfo.IsDefined(typeof(KeyAttribute), false));
+            Assert.False(memberInfo.IsDefined(typeof(KeyAttribute), false));
             var keyAttributeConvention = new KeyAttributeConvention();
             var bsonClasspMap = new BsonClassMap<Employee>();
             BsonMemberMap bsonMemberMap = bsonClasspMap.MapMember(memberInfo);
             keyAttributeConvention.Apply(bsonMemberMap);
-            Assert.Equal(keyExpected, bsonClasspMap.IdMemberMap == bsonMemberMap);
+            Assert.NotSame(bsonMemberMap, bsonClasspMap.IdMemberMap);
         }
     }
 }

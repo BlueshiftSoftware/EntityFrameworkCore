@@ -46,6 +46,13 @@ namespace Microsoft.EntityFrameworkCore
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
+        public static MongoDbNavigationAnnotations MongoDb([NotNull] this INavigation navigation)
+            => new MongoDbNavigationAnnotations(Check.NotNull(navigation, nameof(navigation)));
+
+        /// <summary>
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
         public static MongoDbModelAnnotations MongoDb([NotNull] this InternalModelBuilder internalModelBuilder)
             => MongoDb(Check.NotNull(internalModelBuilder, nameof(internalModelBuilder)).Metadata);
 

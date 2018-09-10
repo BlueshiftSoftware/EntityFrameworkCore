@@ -10,6 +10,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
 {
+    /// <inheritdoc />
     /// <summary>
     ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
     ///     directly from your code. This API may change or be removed in future releases.
@@ -28,6 +29,13 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
                 .GetCustomAttributes<BsonKnownTypesAttribute>(false)
                 .SelectMany(bsonKnownTypeAttribute => bsonKnownTypeAttribute.KnownTypes)
                 .ToList();
+
+            MongoDbEntityTypeAnnotations annotations = entityTypeBuilder.MongoDb();
+            if (!annotations.DiscriminatorIsRequired)
+            {
+                annotations.DiscriminatorIsRequired = baseEntityType.IsAbstract();
+            }
+
             if (knownTypes != null)
             {
                 InternalModelBuilder modelBuilder = entityTypeBuilder.ModelBuilder;

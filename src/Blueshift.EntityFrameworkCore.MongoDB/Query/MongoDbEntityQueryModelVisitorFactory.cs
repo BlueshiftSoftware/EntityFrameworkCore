@@ -4,31 +4,31 @@ using Microsoft.EntityFrameworkCore.Utilities;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Query
 {
-    /// <summary>
-    ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
-    /// </summary>
+    /// <inheritdoc />
     public class MongoDbEntityQueryModelVisitorFactory : EntityQueryModelVisitorFactory
     {
-        /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
+        /// <inheritdoc />
         public MongoDbEntityQueryModelVisitorFactory(
-            [NotNull] EntityQueryModelVisitorDependencies entityQueryModelVisitorDependencies)
+            [NotNull] EntityQueryModelVisitorDependencies entityQueryModelVisitorDependencies,
+            [NotNull] MongoDbEntityQueryModelVisitorDependencies mongoDbEntityQueryModelVisitorDependencies)
             : base(Check.NotNull(entityQueryModelVisitorDependencies, nameof(entityQueryModelVisitorDependencies)))
         {
+            MongoDbDependencies
+                = Check.NotNull(mongoDbEntityQueryModelVisitorDependencies, nameof(mongoDbEntityQueryModelVisitorDependencies));
         }
 
         /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        /// Depedencies used to create a <see cref="MongoDbEntityQueryModelVisitor"/>.
         /// </summary>
+        public MongoDbEntityQueryModelVisitorDependencies MongoDbDependencies { get; }
+
+        /// <inheritdoc />
         public override EntityQueryModelVisitor Create(
             QueryCompilationContext queryCompilationContext,
             EntityQueryModelVisitor parentEntityQueryModelVisitor)
             => new MongoDbEntityQueryModelVisitor(
                 Dependencies,
-                Check.NotNull(queryCompilationContext, nameof(queryCompilationContext)));
+                Check.NotNull(queryCompilationContext, nameof(queryCompilationContext)),
+                MongoDbDependencies);
     }
 }

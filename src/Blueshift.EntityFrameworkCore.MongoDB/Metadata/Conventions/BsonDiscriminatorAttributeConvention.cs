@@ -1,5 +1,4 @@
-﻿using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Utilities;
@@ -7,16 +6,10 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
 {
-    /// <summary>
-    ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
-    /// </summary>
+    /// <inheritdoc />
     public class BsonDiscriminatorAttributeConvention : EntityTypeAttributeConvention<BsonDiscriminatorAttribute>
     {
-        /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
+        /// <inheritdoc />
         public override InternalEntityTypeBuilder Apply(InternalEntityTypeBuilder entityTypeBuilder,
             BsonDiscriminatorAttribute attribute)
         {
@@ -27,7 +20,12 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
             {
                 annotations.Discriminator = attribute.Discriminator;
             }
-            annotations.DiscriminatorIsRequired = attribute.Required;
+
+            if (!annotations.DiscriminatorIsRequired)
+            {
+                annotations.DiscriminatorIsRequired = attribute.Required;
+            }
+
             annotations.IsRootType = attribute.RootClass;
             return entityTypeBuilder;
         }

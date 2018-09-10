@@ -37,14 +37,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
         [InlineData(typeof(string))]
         [InlineData(typeof(TimeSpan))]
         [InlineData(typeof(ZooTask))]
-        [InlineData(typeof(Specialty))]
         [InlineData(typeof(ObjectId))]
-        public void Primitives_and_complex_types_are_mapped(Type type)
-        {
-            Assert.NotNull(_mongoDbTypeMappingSource.FindMapping(type));
-        }
-
-        [Theory]
         [InlineData(typeof(IEnumerable<int>))]
         [InlineData(typeof(IEnumerable<long>))]
         [InlineData(typeof(IEnumerable<short>))]
@@ -66,10 +59,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
         [InlineData(typeof(IEnumerable<string>))]
         [InlineData(typeof(IEnumerable<TimeSpan>))]
         [InlineData(typeof(IEnumerable<ZooTask>))]
-        [InlineData(typeof(IEnumerable<Specialty>))]
         [InlineData(typeof(IDictionary<string, ZooTask>))]
-        [InlineData(typeof(IDictionary<string, Specialty>))]
-        public void Enumerables_of_primitives_and_complex_types_are_mapped(Type type)
+        public void Primitives_and_enumerables_of_primitives_are_mapped(Type type)
         {
             Assert.NotNull(_mongoDbTypeMappingSource.FindMapping(type));
         }
@@ -82,7 +73,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
         [InlineData(typeof(Otter))]
         [InlineData(typeof(SeaOtter))]
         [InlineData(typeof(EurasianOtter))]
-        public void Entities_are_not_mapped(Type type)
+        [InlineData(typeof(Specialty))]
+        [InlineData(typeof(IEnumerable<Specialty>))]
+        [InlineData(typeof(IDictionary<string, Specialty>))]
+        public void Entities_and_complex_types_are_not_mapped(Type type)
         {
             Assert.Null(_mongoDbTypeMappingSource.FindMapping(type));
         }

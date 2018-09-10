@@ -18,37 +18,38 @@ namespace MongoDB.Bson.Serialization
         /// Modifies an instance of <see cref="IBsonSerializer"/> to only use the supplied members when serializing instances.
         /// </summary>
         /// <param name="bsonSerializer">The <see cref="IBsonSerializer"/> to modify.</param>
-        /// <param name="denormalizedMembers">An <see cref="IEnumerable{T}"/> of <see cref="BsonMemberMap"/> that lists the members
+        /// <param name="denormalizedMemberNames">An <see cref="IEnumerable{T}"/> of <see cref="string"/> that lists the members
         /// required for serialization.</param>
-        /// <returns>A new instance of <see cref="IBsonSerializer"/> that serializes the information in <paramref name="denormalizedMembers"/>.</returns>
-        public static IBsonSerializer AsNavigationBsonSerializer(
+        /// <returns>A new instance of <see cref="IBsonSerializer"/> that serializes the information in <paramref name="denormalizedMemberNames"/>.</returns>
+        public static IBsonSerializer AsDenormalizingBsonClassMapSerializer(
             [NotNull] this IBsonSerializer bsonSerializer,
-            [CanBeNull] IEnumerable<BsonMemberMap> denormalizedMembers = null)
+            [CanBeNull] IEnumerable<string> denormalizedMemberNames = null)
         {
             TypeInfo typeInfo = Check.NotNull(bsonSerializer, nameof(bsonSerializer)).GetType().GetTypeInfo();
 
-            var childSerializerConfigurable = bsonSerializer as IChildSerializerConfigurable;
-            if (childSerializerConfigurable != null)
+            if (bsonSerializer is IChildSerializerConfigurable childSerializerConfigurable)
             {
                 bsonSerializer = childSerializerConfigurable.WithChildSerializer(
-                    childSerializerConfigurable.ChildSerializer.AsNavigationBsonSerializer(denormalizedMembers));
+                    childSerializerConfigurable.ChildSerializer.AsDenormalizingBsonClassMapSerializer(denormalizedMemberNames));
             }
             else if (typeInfo.TryGetImplementationType(typeof(ReadOnlyCollectionSerializer<>),
-                           out Type readOnlyCollectionSerializerType)
-                       || typeInfo.TryGetImplementationType(typeof(ReadOnlyCollectionSubclassSerializer<,>),
-                           out readOnlyCollectionSerializerType))
+                         out Type readOnlyCollectionSerializerType)
+                     || typeInfo.TryGetImplementationType(typeof(ReadOnlyCollectionSubclassSerializer<,>),
+                         out readOnlyCollectionSerializerType))
             {
                 bsonSerializer = (IBsonSerializer) Activator.CreateInstance(readOnlyCollectionSerializerType,
                     ((IBsonSerializer) readOnlyCollectionSerializerType
                         .GetProperty(nameof(EnumerableSerializerBase<object[]>.ItemSerializer))
                         .GetValue(bsonSerializer))
-                    .AsNavigationBsonSerializer(denormalizedMembers));
+                    .AsDenormalizingBsonClassMapSerializer(denormalizedMemberNames));
             }
             else
             {
-                bsonSerializer = (IBsonSerializer)Activator.CreateInstance(
-                    typeof(NavigationBsonSerializer<>).MakeGenericType(bsonSerializer.ValueType),
-                    denormalizedMembers);
+                BsonClassMap bsonClassMap = BsonClassMap.LookupClassMap(bsonSerializer.ValueType);
+                bsonSerializer = (IBsonSerializer) Activator.CreateInstance(
+                    typeof(DenormalizingBsonClassMapSerializer<>).MakeGenericType(bsonSerializer.ValueType),
+                    bsonClassMap,
+                    denormalizedMemberNames);
             }
 
             return bsonSerializer;

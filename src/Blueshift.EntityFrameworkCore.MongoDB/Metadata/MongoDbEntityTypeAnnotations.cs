@@ -78,6 +78,16 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
+        public virtual bool IsComplexType
+        {
+            get => GetAnnotation<bool?>(MongoDbAnnotationNames.IsComplexType) ?? false;
+            set => SetAnnotation(MongoDbAnnotationNames.IsComplexType, value);
+        }
+
+        /// <summary>
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
         public virtual bool IsDerivedType
         {
             get => GetAnnotation<bool?>(MongoDbAnnotationNames.IsDerivedType) ?? false;

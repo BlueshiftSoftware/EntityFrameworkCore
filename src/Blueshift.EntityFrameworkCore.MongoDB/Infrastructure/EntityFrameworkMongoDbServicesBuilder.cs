@@ -21,8 +21,9 @@ using MongoDB.Driver;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
 {
+    /// <inheritdoc />
     /// <summary>
-    ///     A builder API that populates an <see cref="IServiceCollection"/> with a set of EntityFrameworkCore
+    ///     A builder API that populates an <see cref="IServiceCollection" /> with a set of EntityFrameworkCore
     ///     provider dependencies for MongoDb.
     /// </summary>
     public class EntityFrameworkMongoDbServicesBuilder : EntityFrameworkServicesBuilder
@@ -35,6 +36,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
                 { typeof(IMongoDbTypeMappingSource), new ServiceCharacteristics(ServiceLifetime.Singleton) },
                 { typeof(IMongoDbWriteModelFactoryCache), new ServiceCharacteristics(ServiceLifetime.Singleton) },
                 { typeof(IMongoDbWriteModelFactorySelector), new ServiceCharacteristics(ServiceLifetime.Scoped) },
+                { typeof(IMongoDbDenormalizedCollectionCompensatingVisitorFactory), new ServiceCharacteristics(ServiceLifetime.Scoped) },
+                { typeof(MongoDbEntityQueryModelVisitorDependencies), new ServiceCharacteristics(ServiceLifetime.Scoped) },
                 { typeof(MongoDbConventionSetBuilderDependencies), new ServiceCharacteristics(ServiceLifetime.Scoped) }
             };
 
@@ -71,25 +74,30 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
             TryAdd<IValueGeneratorSelector, MongoDbValueGeneratorSelector>();
             TryAdd<IConventionSetBuilder, MongoDbConventionSetBuilder>();
             TryAdd<IQueryContextFactory, MongoDbQueryContextFactory>();
-            TryAdd<IQueryCompilationContextFactory, MongoDbQueryCompilationContextFactory>();
             TryAdd<IEntityQueryableExpressionVisitorFactory, MongoDbEntityQueryableExpressionVisitorFactory>();
             TryAdd<IEntityQueryModelVisitorFactory, MongoDbEntityQueryModelVisitorFactory>();
             TryAdd<IMongoDbWriteModelFactoryCache, MongoDbWriteModelFactoryCache>();
             TryAdd<IMongoDbWriteModelFactorySelector, MongoDbWriteModelFactorySelector>();
             TryAdd<IInternalEntityEntryFactory, MongoDbInternalEntityEntryFactory>();
             TryAdd<IMemberAccessBindingExpressionVisitorFactory, MongoDbMemberAccessBindingExpressionVisitorFactory>();
+            TryAdd<INavigationRewritingExpressionVisitorFactory, MongoDbNavigationRewritingExpressionVisitorFactory>();
+            TryAdd<IStateManager, MongoDbStateManager>();
             TryAddProviderSpecificServices(serviceCollectionMap =>
             {
                 serviceCollectionMap.TryAddScoped<IMongoDbConnection, MongoDbConnection>();
                 serviceCollectionMap.TryAddScoped(serviceProvider =>
                 {
-                    var extension = serviceProvider.GetRequiredService<IDbContextOptions>().FindExtension<MongoDbOptionsExtension>();
+                    MongoDbOptionsExtension extension = serviceProvider
+                        .GetRequiredService<IDbContextOptions>()
+                        .FindExtension<MongoDbOptionsExtension>();
                     return extension?.MongoClient ?? new MongoClient();
                 });
+                serviceCollectionMap.TryAddScoped<IMongoDbDenormalizedCollectionCompensatingVisitorFactory, MongoDbDenormalizedCollectionCompensatingVisitorFactory>();
             });
 
             ServiceCollectionMap.GetInfrastructure()
-                .AddDependencyScoped<MongoDbConventionSetBuilderDependencies>();
+                .AddDependencyScoped<MongoDbConventionSetBuilderDependencies>()
+                .AddDependencyScoped<MongoDbEntityQueryModelVisitorDependencies>();
 
             return base.TryAddCoreServices();
         }

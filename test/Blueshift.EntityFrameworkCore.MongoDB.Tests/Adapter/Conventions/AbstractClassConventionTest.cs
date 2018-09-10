@@ -20,7 +20,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Conventions
         public void Sets_is_root_class_and_discriminator_required_true_for_abstract_type(Type type)
         {
             var classMap = new BsonClassMap(type);
-            var abstractClassMapConvention = new AbstractClassConvention();
+            var abstractClassMapConvention = new AbstractBaseClassConvention();
             abstractClassMapConvention.Apply(classMap);
             Assert.Equal(type.GetTypeInfo().IsAbstract, classMap.DiscriminatorIsRequired);
         }

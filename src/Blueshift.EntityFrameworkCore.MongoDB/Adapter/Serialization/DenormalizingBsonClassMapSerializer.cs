@@ -10,24 +10,29 @@ using MongoDB.Bson.Serialization.Serializers;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter.Serialization
 {
+    /// <inheritdoc />
     /// <summary>
     /// A serializer for writing navigation properties used by MongoDB.
     /// </summary>
-    public class NavigationBsonSerializer<TClass> : BsonClassMapSerializer<TClass>
+    public class DenormalizingBsonClassMapSerializer<TClass> : BsonClassMapSerializer<TClass>
     {
-        private readonly BsonClassMap _classMap;
+        private readonly BsonClassMap<TClass> _classMap;
 
+        /// <inheritdoc />
         /// <summary>
-        /// Initializes a new instance of the <see cref="NavigationBsonSerializer{TClass}"/> class.
+        /// Initializes a new instance of the <see cref="DenormalizingBsonClassMapSerializer{TClass}"/> class.
         /// </summary>
-        /// <param name="denormalizedMemberMaps">Optional. An <see cref="IEnumerable{T}"/> of <see cref="BsonMemberMap"/> referencing the properties
+        /// <param name="bsonClassMap">The <see cref="BsonClassMap{TClass}"/> to serialize.</param>
+        /// <param name="denormalizedMemberNames">Optional. An <see cref="IEnumerable{T}"/> of <see cref="string"/> referencing the members
         /// to be denormalized by this serializer.</param>
-        public NavigationBsonSerializer(
-            [CanBeNull] IEnumerable<BsonMemberMap> denormalizedMemberMaps = null)
-            : base(BsonClassMap.LookupClassMap(typeof(TClass)))
+        public DenormalizingBsonClassMapSerializer(
+            [NotNull] BsonClassMap<TClass> bsonClassMap,
+            [CanBeNull] IEnumerable<string> denormalizedMemberNames = null)
+            : base(bsonClassMap)
         {
-            _classMap = BsonClassMap.LookupClassMap(typeof(TClass));
-            DenormalizedMemberMaps = (denormalizedMemberMaps ?? new BsonMemberMap[0])
+            _classMap = bsonClassMap;
+            DenormalizedMemberMaps = (denormalizedMemberNames ?? new string[0])
+                .Select(bsonClassMap.GetMemberMap)
                 .Except(new[] { _classMap.IdMemberMap })
                 .OrderBy(bsonMemberMap => bsonMemberMap.MemberName)
                 .ToList();

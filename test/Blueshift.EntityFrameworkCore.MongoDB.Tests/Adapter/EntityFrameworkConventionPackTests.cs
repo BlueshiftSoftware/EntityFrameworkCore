@@ -10,9 +10,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter
     public class EntityFrameworkConventionPackTests
     {
         [Theory]
-        [InlineData(typeof(AbstractClassConvention))]
+        [InlineData(typeof(AbstractBaseClassConvention))]
         [InlineData(typeof(KeyAttributeConvention))]
-        [InlineData(typeof(NavigationMemberMapConvention))]
+        [InlineData(typeof(NavigationSrializationMemberMapConvention))]
         [InlineData(typeof(NotMappedAttributeConvention))]
         public void Singleton_contains_default_convention_set(Type conventionType)
         {

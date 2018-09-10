@@ -70,5 +70,21 @@ namespace System.Collections.Generic
             list.Add(item);
             return list;
         }
+
+        /// <summary>
+        /// Removes all items that match <paramref name="predicate"/> from the given <paramref name="list"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of items contained in <paramref name="list"/>.</typeparam>
+        /// <param name="list">The <see cref="IList{T}"/> from which items will be removed.</param>
+        /// <param name="predicate">A <see cref="Func{T1,T2}"/> to test for elements to remove.</param>
+        /// <returns>The modified <paramref name="list"/>, such that calls can be chained.</returns>
+        public static IList<T> Without<T>([NotNull] this IList<T> list, Func<T, bool> predicate)
+        {
+            Check.NotNull(list, nameof(list))
+                .Where(predicate)
+                .ToList()
+                .ForEach(item => list.Remove(item));
+            return list;
+        }
     }
 }

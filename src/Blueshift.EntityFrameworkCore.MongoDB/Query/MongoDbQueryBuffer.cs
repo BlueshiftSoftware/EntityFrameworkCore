@@ -1,9 +1,12 @@
-﻿using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.Internal;
+using Microsoft.EntityFrameworkCore.Utilities;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Query
 {
@@ -18,18 +21,45 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         }
 
         /// <inheritdoc />
-        public override object GetPropertyValue(object entity, IProperty property)
+        public override void IncludeCollection<TEntity, TRelated, TElement>(
+            int includeId,
+            INavigation navigation,
+            INavigation inverseNavigation,
+            IEntityType targetEntityType,
+            IClrCollectionAccessor clrCollectionAccessor,
+            IClrPropertySetter inverseClrPropertySetter,
+            bool tracking,
+            TEntity entity,
+            Func<IEnumerable<TRelated>> relatedEntitiesFactory,
+            Func<TEntity, TRelated, bool> joinPredicate)
         {
-            if (property.IsShadowProperty && property.IsForeignKey())
+            Check.NotNull(clrCollectionAccessor, nameof(clrCollectionAccessor));
+            Check.NotNull(inverseNavigation, nameof(inverseNavigation));
+            Check.NotNull(inverseClrPropertySetter, nameof(inverseClrPropertySetter));
+
+            ICollection<TRelated> collection = (ICollection<TRelated>) clrCollectionAccessor
+                .GetOrCreate(entity);
+
+            IClrPropertyGetter primaryKeyPropertyGetter = inverseNavigation
+                .DeclaringEntityType
+                .FindPrimaryKey()
+                .Properties
+                .Single()
+                .GetGetter();
+
+            IEnumerable<(TRelated, TRelated)> relatedEntities = relatedEntitiesFactory()
+                .Join(collection,
+                    related => primaryKeyPropertyGetter.GetClrValue(related),
+                    related => primaryKeyPropertyGetter.GetClrValue(related),
+                    (related, original) => (related, original))
+                .ToList();
+
+            foreach ((TRelated related, TRelated original) in relatedEntities)
             {
-                IForeignKey foreignKey = property.AsProperty().ForeignKeys[0];
-                INavigation localProperty = property.DeclaringEntityType == foreignKey.PrincipalEntityType
-                    ? foreignKey.PrincipalToDependent
-                    : foreignKey.DependentToPrincipal;
-                entity = localProperty.GetGetter().GetClrValue(entity);
-                property = foreignKey.PrincipalKey.Properties[0];
+                collection.Remove(original);
+                collection.Add(related);
+                inverseClrPropertySetter.SetClrValue(related, entity);
             }
-            return property.GetGetter().GetClrValue(entity);
         }
     }
 }

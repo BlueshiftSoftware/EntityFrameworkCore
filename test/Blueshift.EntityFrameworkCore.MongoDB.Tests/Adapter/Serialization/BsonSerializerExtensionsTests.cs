@@ -12,8 +12,15 @@ using Xunit;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Serialization
 {
-    public class BsonSerializerExtensionsTests
+    public class BsonSerializerExtensionsTests : IClassFixture<ZooEntityFixture>
     {
+        private readonly ZooEntities _zooEntities;
+
+        public BsonSerializerExtensionsTests(ZooEntityFixture zooEntityFixture)
+        {
+            _zooEntities = zooEntityFixture.Entities;
+        }
+
         private static readonly IDiscriminatorConvention DiscriminatorConvention =
             BsonSerializer.LookupDiscriminatorConvention(typeof(Animal));
 
@@ -27,12 +34,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Serialization
             nameof(Animal.Weight)
         };
 
-        private static readonly IEnumerable<BsonMemberMap> DenormalizedMemberMaps
-            = BsonClassMap.LookupClassMap(typeof(Animal))
-                .AllMemberMaps
-                .Where(bsonMemberMap => DenormalizedMemberNames.Contains(bsonMemberMap.MemberName))
-                .ToList();
-
         private static void VerifyChildSerialier(IBsonSerializer bsonSerializer)
         {
             var childSerializerConfigurable = bsonSerializer as IChildSerializerConfigurable;
@@ -41,7 +42,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Serialization
                 childSerializerConfigurable = (IChildSerializerConfigurable)childSerializerConfigurable.ChildSerializer;
             }
             var navigationBsonDocumentSerializer =
-                childSerializerConfigurable?.ChildSerializer as NavigationBsonSerializer<Animal>;
+                childSerializerConfigurable?.ChildSerializer as DenormalizingBsonClassMapSerializer<Animal>;
             Assert.NotNull(navigationBsonDocumentSerializer);
             IEnumerable<string> denormalizedMemberNames = navigationBsonDocumentSerializer.DenormalizedMemberMaps
                 .Select(bsonMemberMap => bsonMemberMap.MemberName)
@@ -60,14 +61,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Serialization
         {
             IBsonSerializer defaultSerializer = BsonSerializer.LookupSerializer(enumerableType);
             IBsonSerializer bsonSerializer = defaultSerializer
-                .AsNavigationBsonSerializer(DenormalizedMemberMaps);
+                .AsDenormalizingBsonClassMapSerializer(DenormalizedMemberNames);
             Assert.NotNull(bsonSerializer);
             Assert.IsType(defaultSerializer.GetType(), bsonSerializer);
             VerifyChildSerialier(bsonSerializer);
 
             var originalEnumerable = (IEnumerable<Animal>)(enumerableType == typeof(SortedSet<Animal>)
-                ? Activator.CreateInstance(enumerableType, TestEntityFixture.Animals, new AnimalComparer())
-                : Activator.CreateInstance(enumerableType, TestEntityFixture.Animals));
+                ? Activator.CreateInstance(enumerableType, _zooEntities.Animals, new AnimalComparer())
+                : Activator.CreateInstance(enumerableType, _zooEntities.Animals));
             if (enumerableType == typeof(Stack<Animal>))
             {
                 originalEnumerable = originalEnumerable.Reverse();
@@ -78,8 +79,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Serialization
                 $"[{string.Join(", ", documents)}]";
 
             var testEnumerable = (IEnumerable<Animal>)(enumerableType == typeof(SortedSet<Animal>)
-                ? Activator.CreateInstance(enumerableType, TestEntityFixture.Animals, new AnimalComparer())
-                : Activator.CreateInstance(enumerableType, TestEntityFixture.Animals));
+                ? Activator.CreateInstance(enumerableType, _zooEntities.Animals, new AnimalComparer())
+                : Activator.CreateInstance(enumerableType, _zooEntities.Animals));
 
             Assert.Equal(expectedDocument, testEnumerable.ToJson(enumerableType, serializer: bsonSerializer));
         }
@@ -93,12 +94,12 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Serialization
         {
             IBsonSerializer defaultSerializer = BsonSerializer.LookupSerializer(enumerableInterface);
             IBsonSerializer bsonSerializer = defaultSerializer
-                .AsNavigationBsonSerializer(DenormalizedMemberMaps);
+                .AsDenormalizingBsonClassMapSerializer(DenormalizedMemberNames);
             Assert.NotNull(bsonSerializer);
             Assert.IsType(defaultSerializer.GetType(), bsonSerializer);
             VerifyChildSerialier(bsonSerializer);
 
-            var enumerable = (IEnumerable<Animal>)Activator.CreateInstance(concreteType, TestEntityFixture.Animals);
+            var enumerable = (IEnumerable<Animal>)Activator.CreateInstance(concreteType, _zooEntities.Animals);
             IEnumerable<string> documents = enumerable
                 .Select(animal => $"{{ \"_id\" : ObjectId(\"{animal.Id}\"), {GetDiscriminator(animal)}, \"Age\" : \"{animal.Age}\", \"Height\" : \"{animal.Height}\", \"Weight\" : \"{animal.Weight}\" }}");
             string expectedDocument =
@@ -114,12 +115,12 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Serialization
         {
             IBsonSerializer defaultSerializer = BsonSerializer.LookupSerializer(type);
             IBsonSerializer bsonSerializer = defaultSerializer
-                .AsNavigationBsonSerializer(DenormalizedMemberMaps);
+                .AsDenormalizingBsonClassMapSerializer(DenormalizedMemberNames);
             Assert.NotNull(bsonSerializer);
             Assert.IsType(defaultSerializer.GetType(), bsonSerializer);
             VerifyChildSerialier(bsonSerializer);
 
-            Dictionary<string, Animal> dictionary = TestEntityFixture.Animals.ToDictionary(animal => animal.Name);
+            Dictionary<string, Animal> dictionary = _zooEntities.Animals.ToDictionary(animal => animal.Name);
             IEnumerable<string> documents = dictionary
                 .OrderBy(kvp => kvp.Key)
                 .ThenBy(kvp => kvp.Value.Height)
@@ -139,7 +140,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Serialization
         {
             IBsonSerializer defaultSerializer = BsonSerializer.LookupSerializer(type);
             IBsonSerializer bsonSerializer = defaultSerializer
-                .AsNavigationBsonSerializer(DenormalizedMemberMaps);
+                .AsDenormalizingBsonClassMapSerializer(DenormalizedMemberNames);
             Assert.NotNull(bsonSerializer);
             Assert.IsType(defaultSerializer.GetType(), bsonSerializer);
             VerifyChildSerialier(bsonSerializer);
@@ -150,12 +151,12 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Serialization
         {
             IBsonSerializer defaultSerializer = BsonSerializer.LookupSerializer(typeof(ReadOnlyCollection<Animal>));
             var bsonSerializer = (ReadOnlyCollectionSerializer<Animal>)defaultSerializer
-                .AsNavigationBsonSerializer(DenormalizedMemberMaps);
+                .AsDenormalizingBsonClassMapSerializer(DenormalizedMemberNames);
             Assert.NotNull(bsonSerializer);
             Assert.IsType(defaultSerializer.GetType(), bsonSerializer);
-            Assert.IsType<NavigationBsonSerializer<Animal>>(bsonSerializer.ItemSerializer);
+            Assert.IsType<DenormalizingBsonClassMapSerializer<Animal>>(bsonSerializer.ItemSerializer);
 
-            var readOnlyCollection = new ReadOnlyCollection<Animal>(TestEntityFixture.Animals.ToList());
+            var readOnlyCollection = new ReadOnlyCollection<Animal>(_zooEntities.Animals.ToList());
             IEnumerable<string> documents = readOnlyCollection
                 .Select(animal => $"{{ \"_id\" : ObjectId(\"{animal.Id}\"), {GetDiscriminator(animal)}, \"Age\" : \"{animal.Age}\", \"Height\" : \"{animal.Height}\", \"Weight\" : \"{animal.Weight}\" }}");
             string expectedDocument =
@@ -169,12 +170,12 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Serialization
         {
             IBsonSerializer defaultSerializer = BsonSerializer.LookupSerializer(typeof(ReadOnlyObservableCollection<Animal>));
             var bsonSerializer = (ReadOnlyCollectionSubclassSerializer< ReadOnlyObservableCollection<Animal>, Animal>)defaultSerializer
-                .AsNavigationBsonSerializer(DenormalizedMemberMaps);
+                .AsDenormalizingBsonClassMapSerializer(DenormalizedMemberNames);
             Assert.NotNull(bsonSerializer);
             Assert.IsType(defaultSerializer.GetType(), bsonSerializer);
-            Assert.IsType<NavigationBsonSerializer<Animal>>(bsonSerializer.ItemSerializer);
+            Assert.IsType<DenormalizingBsonClassMapSerializer<Animal>>(bsonSerializer.ItemSerializer);
 
-            var observableCollection = new ObservableCollection<Animal>(TestEntityFixture.Animals.ToList());
+            var observableCollection = new ObservableCollection<Animal>(_zooEntities.Animals.ToList());
             var readOnlyObservableCollection = new ReadOnlyObservableCollection<Animal>(observableCollection);
             IEnumerable<string> documents = readOnlyObservableCollection
                 .Select(animal => $"{{ \"_id\" : ObjectId(\"{animal.Id}\"), {GetDiscriminator(animal)}, \"Age\" : \"{animal.Age}\", \"Height\" : \"{animal.Height}\", \"Weight\" : \"{animal.Weight}\" }}");

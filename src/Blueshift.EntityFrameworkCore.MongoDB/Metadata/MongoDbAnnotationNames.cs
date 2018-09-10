@@ -48,6 +48,12 @@
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
+        public const string IsComplexType = Prefix + nameof(IsComplexType);
+
+        /// <summary>
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
         public const string IsDerivedType = Prefix + nameof(IsDerivedType);
 
         /// <summary>
@@ -61,5 +67,11 @@
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         public const string Namespace = Prefix + nameof(Namespace);
+
+        /// <summary>
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
+        public const string NavigationName = Prefix + nameof(NavigationName);
     }
 }

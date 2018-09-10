@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Blueshift.EntityFrameworkCore.MongoDB.Annotations;
@@ -47,16 +48,26 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
         }
     }
 
+    public abstract class ZooEntity
+    {
+        // When using attribute-driven data modeling, either [BsonId] or [Key]
+        // is required for the primary key field; either will work with the
+        // MongoDb C# driver EFCore adapter
+        // [BsonId]
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public ObjectId Id { get; [UsedImplicitly] private set; }
+    }
+
     [BsonKnownTypes(typeof(Tiger), typeof(PolarBear), typeof(Otter))]
     [BsonDiscriminator(RootClass = true)]
-    public abstract class Animal
+    public abstract class Animal : ZooEntity
     {
-        [BsonId, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public ObjectId Id { get; [UsedImplicitly] private set; }
-
         public string Name { get; set; }
+
         public decimal Age { get; set; }
+
         public decimal Height { get; set; }
+
         public decimal Weight { get; set; }
 
         [ConcurrencyCheck, DatabaseGenerated(DatabaseGeneratedOption.Computed)]
@@ -82,20 +93,22 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
     [BsonDiscriminator("Lutra lutra")]
     public class EurasianOtter : Otter { }
 
-    public class Employee
+    public class Employee : ZooEntity
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public ObjectId Id { get; [UsedImplicitly] private set; }
         public string FirstName { get; set; }
+
         public string LastName { get; set; }
 
-        [BsonIgnore]
+        [BsonElement]
         public string FullName => string.IsNullOrWhiteSpace(FirstName)
             ? LastName
             : $"{LastName}, {FirstName}";
 
         public decimal Age { get; set; }
         public IList<Specialty> Specialties { get; set; } = new List<Specialty>();
+
+        [BsonIgnore]
+        public string Ignored => $"This string should never show up in the database.";
     }
 
     public enum ZooTask
@@ -109,19 +122,39 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
     public class Specialty
     {
         public string AnimalType { get; set; }
+
         public ZooTask Task { get; set; }
     }
 
-    public class Enclosure
+    public class Enclosure : ZooEntity
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public ObjectId Id { get; [UsedImplicitly] private set; }
-
         public string Name { get; set; }
 
         public string AnimalEnclosureType { get; set; }
 
         [Denormalize(nameof(Animal.Name))]
-        public IList<Animal> Animals { get; } = new List<Animal>();
+        public IList<Animal> Animals { get; [UsedImplicitly] private set; } = new List<Animal>();
+
+        public Schedule WeeklySchedule { get; set; }
+
+    }
+
+    public class Schedule
+    {
+        [Denormalize(nameof(Animal.Name))]
+        public IList<ZooAssignment> Assignments { get; [UsedImplicitly] private set; } = new List<ZooAssignment>();
+
+        [Denormalize(nameof(Employee.FirstName), nameof(Employee.LastName))]
+        public Employee Approver { get; set; }
+    }
+
+    public class ZooAssignment
+    {
+        public TimeSpan Offset { get; set; }
+
+        public ZooTask Task { get; set; }
+
+        [Denormalize(nameof(Employee.FirstName), nameof(Employee.LastName))]
+        public Employee Assignee { get; set; }
     }
 }

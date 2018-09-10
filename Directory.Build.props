@@ -20,6 +20,9 @@
     <DebugType Condition="'$(Configuration)' == 'Debug' AND '$(OS)' == 'Windows_NT'">full</DebugType>
     <LangVersion>7.2</LangVersion>
     <NoWarn>$(NoWarn);CS8032;</NoWarn>
+
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>$(MSBuildProjectName)</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
