@@ -1,7 +1,10 @@
-# MongoDb for Entity Framework Core
-Welcome to the MongoDb Provider for EntityFrameworkCore!
+# Document Database Providers for Entity Framework Core
+
+Welcome to the home of Document Database (NoSQL) Providers for EntityFrameworkCore!
 
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/iip86emc94ncp0ao?svg=true&style=flat-square)](https://ci.appveyor.com/project/crhairr/entityframeworkcore-mongodb/) [![Travis CI Build Status](https://travis-ci.org/BlueshiftSoftware/EntityFrameworkCore.svg?branch=develop&label=travis-ci&style=flat-square)](https://travis-ci.org/BlueshiftSoftware/EntityFrameworkCore)
+
+This repository currently only contains a MongoDB provider for EF Core. However, there are plans in the current roadmap to expand this with further NoSQL provider offerings.
 
 MongoDb is a highly popular No-SQL database solution for storing structured, non-relational document data. This provider enables applications built with EntityFrameworkCore to use MongoDb instances as a backing data store.
 
