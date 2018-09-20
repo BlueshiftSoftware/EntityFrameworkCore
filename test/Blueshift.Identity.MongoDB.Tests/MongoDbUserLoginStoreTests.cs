@@ -57,7 +57,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         public async void Can_find_by_login_async()
         {
             var user = await CreateUserInDatabase();
-            Assert.Equal(user, await _mongoDbUserLoginStore.FindByLoginAsync(ProviderName, ProviderKey, new CancellationToken()), UserComparer);
+            Assert.Equal(user, await _mongoDbUserLoginStore.FindByLoginAsync(ProviderName, ProviderKey, new CancellationToken()), new MongoDbIdentityUserComparer());
         }
 
         [Fact]

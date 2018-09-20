@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore.Extensions.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors.Internal;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Utilities;
 using Remotion.Linq.Clauses;
 
@@ -19,7 +18,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
     public class MongoDbMemberAccessBindingExpressionVisitor : MemberAccessBindingExpressionVisitor
     {
         private readonly IModel _model;
-        private readonly MongoDbEntityQueryModelVisitor _mongoDbEntityQueryModelVisitor;
 
         /// <inheritdoc />
         public MongoDbMemberAccessBindingExpressionVisitor(
@@ -31,8 +29,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                 Check.NotNull(mongoDbEntityQueryModelVisitor, nameof(mongoDbEntityQueryModelVisitor)),
                 inProjection)
         {
-            _mongoDbEntityQueryModelVisitor = mongoDbEntityQueryModelVisitor;
-            _model = _mongoDbEntityQueryModelVisitor.QueryCompilationContext.Model;
+            _model = mongoDbEntityQueryModelVisitor.QueryCompilationContext.Model;
         }
 
         /// <summary>
@@ -57,7 +54,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                 Expression targetExpression = newArguments[0];
 
                 IEntityType entityType = _model
-                    .FindEntityType(targetExpression.Type.FullName);
+                    .FindEntityType(targetExpression.Type);
                 IProperty property = entityType
                     .FindProperty((string)((ConstantExpression)newArguments[1]).Value);
                 PropertyInfo propertyInfo = property.PropertyInfo;
@@ -68,6 +65,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                     INavigation navigation = foreignKey.PrincipalEntityType == entityType
                         ? foreignKey.PrincipalToDependent
                         : foreignKey.DependentToPrincipal;
+
                     targetExpression = Expression.MakeMemberAccess(targetExpression, navigation.PropertyInfo);
 
                     IEntityType targetEntityType = navigation.GetTargetType();

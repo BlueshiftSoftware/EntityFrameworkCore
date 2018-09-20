@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Xunit;
@@ -14,16 +13,6 @@ namespace Blueshift.Identity.MongoDB.Tests
 
         protected static readonly string UserName = "user.name@domain.com";
         protected static readonly string UserNameNormalized = UserName.ToUpper();
-
-        protected static IEqualityComparer<MongoDbIdentityRole> RoleComparer = new MongoDbIdentityRoleComparer();
-
-        protected static IEqualityComparer<MongoDbIdentityUser> UserComparer = new MongoDbIdentityUserComparer();
-
-        protected static IEqualityComparer<MongoDbIdentityUserLogin> UserLoginComparer = new MongoDbIdentityUserLoginComparer();
-
-        protected static IEqualityComparer<MongoDbIdentityUserToken> UserTokenComparer = new MongoDbIdentityUserTokenComparer();
-
-        protected static IEqualityComparer<MongoDbIdentityClaim> IdentityClaimComparer = new MongoDbIdentityClaimComparer();
 
         private readonly IUserStore<MongoDbIdentityUser> _userStore;
         private readonly IRoleStore<MongoDbIdentityRole> _roleStore;

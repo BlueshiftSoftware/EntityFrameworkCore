@@ -32,14 +32,14 @@ namespace Blueshift.Identity.MongoDB.Tests
         public async void Can_find_by_id_async()
         {
             var user = await CreateUserInDatabase();
-            Assert.Equal(user, await _mongoDbUserStore.FindByIdAsync(user.Id.ToString(), new CancellationToken()), UserComparer);
+            Assert.Equal(user, await _mongoDbUserStore.FindByIdAsync(user.Id.ToString(), new CancellationToken()), new MongoDbIdentityUserComparer());
         }
 
         [Fact]
         public async void Can_find_by_name_async()
         {
             var user = await CreateUserInDatabase();
-            Assert.Equal(user, await _mongoDbUserStore.FindByNameAsync(user.NormalizedUserName, new CancellationToken()), UserComparer);
+            Assert.Equal(user, await _mongoDbUserStore.FindByNameAsync(user.NormalizedUserName, new CancellationToken()), new MongoDbIdentityUserComparer());
         }
 
         [Fact]
@@ -90,7 +90,7 @@ namespace Blueshift.Identity.MongoDB.Tests
             user.UserName = newUserName;
             user.NormalizedUserName = newNormalizedUserName;
             Assert.Equal(IdentityResult.Success, await _mongoDbUserStore.UpdateAsync(user, new CancellationToken()));
-            Assert.Equal(user, await _mongoDbUserStore.FindByNameAsync(newNormalizedUserName, new CancellationToken()), UserComparer);
+            Assert.Equal(user, await _mongoDbUserStore.FindByNameAsync(newNormalizedUserName, new CancellationToken()), new MongoDbIdentityUserComparer());
         }
     }
 }

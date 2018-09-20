@@ -1,11 +1,8 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors;
 using Microsoft.EntityFrameworkCore.Query.Internal;
@@ -39,30 +36,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
             _mongoDbDenormalizedCollectionCompensatingVisitorFactory
                 = Check.NotNull(mongoDbEntityQueryModelVisitorDependencies, nameof(mongoDbEntityQueryModelVisitorDependencies))
                     .MongoDbDenormalizedCollectionCompensatingVisitorFactory;
-        }
-
-        /// <inheritdoc />
-        public override void VisitAdditionalFromClause(AdditionalFromClause fromClause, QueryModel queryModel, int index)
-        {
-            base.VisitAdditionalFromClause(fromClause, queryModel, index);
-        }
-
-        /// <inheritdoc />
-        public override void VisitMainFromClause(MainFromClause fromClause, QueryModel queryModel)
-        {
-            base.VisitMainFromClause(fromClause, queryModel);
-        }
-
-        /// <inheritdoc />
-        public override void VisitJoinClause(JoinClause joinClause, QueryModel queryModel, GroupJoinClause groupJoinClause)
-        {
-            base.VisitJoinClause(joinClause, queryModel, groupJoinClause);
-        }
-
-        /// <inheritdoc />
-        public override void VisitGroupJoinClause(GroupJoinClause groupJoinClause, QueryModel queryModel, int index)
-        {
-            base.VisitGroupJoinClause(groupJoinClause, queryModel, index);
         }
 
         /// <inheritdoc />
@@ -110,6 +83,18 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
                     .Visit(methodCallExpression);
             }
             return expression;
+        }
+
+        /// <summary>
+        ///     Translates a re-linq query model expression into a compiled query expression.
+        /// </summary>
+        /// <param name="expression"> The re-linq query model expression. </param>
+        /// <param name="querySource"> The query source. </param>
+        /// <param name="inProjection"> True when the expression is a projector. </param>
+        /// <returns>A compiled query expression fragment.</returns>
+        public override Expression ReplaceClauseReferences(Expression expression, IQuerySource querySource = null, bool inProjection = false)
+        {
+            return base.ReplaceClauseReferences(expression, querySource, inProjection);
         }
     }
 }

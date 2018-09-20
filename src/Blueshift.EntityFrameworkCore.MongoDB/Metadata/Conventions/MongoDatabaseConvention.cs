@@ -58,6 +58,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
         }
 
         private string GetDefaultDatabaseName()
-            => MongoDbUtilities.ToLowerCamelCase(Regex.Replace(_dbContext.GetType().Name, "(?:Mongo)?(?:Db)?Context$", ""));
+            => MongoDbUtilities.ToLowerCamelCase(Regex.Replace(_dbContext.GetType().Name, "(?:Mongo)?(?:Db)?(?:Context)?$", ""));
     }
 }

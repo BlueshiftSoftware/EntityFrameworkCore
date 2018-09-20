@@ -83,7 +83,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         public async void Can_find_by_email_async()
         {
             var user = await CreateUserInDatabase();
-            Assert.Equal(user, await _mongoDbUserEmailStore.FindByEmailAsync(EmailAddressNormalized, new CancellationToken()), UserComparer);
+            Assert.Equal(user, await _mongoDbUserEmailStore.FindByEmailAsync(EmailAddressNormalized, new CancellationToken()), new MongoDbIdentityUserComparer());
             Assert.Null(await _mongoDbUserEmailStore.FindByEmailAsync("DNE@EMAIL.COM", new CancellationToken()));
         }
     }

@@ -32,14 +32,14 @@ namespace Blueshift.Identity.MongoDB.Tests
         public async void Can_find_by_id_async()
         {
             var role = await CreateRoleInDatabase();
-            Assert.Equal(role, await _mongoDbRoleStore.FindByIdAsync(role.Id.ToString(), new CancellationToken()), RoleComparer);
+            Assert.Equal(role, await _mongoDbRoleStore.FindByIdAsync(role.Id.ToString(), new CancellationToken()), new MongoDbIdentityRoleComparer());
         }
 
         [Fact]
         public async void Can_find_by_name_async()
         {
             var role = await CreateRoleInDatabase();
-            Assert.Equal(role, await _mongoDbRoleStore.FindByNameAsync(role.NormalizedRoleName, new CancellationToken()), RoleComparer);
+            Assert.Equal(role, await _mongoDbRoleStore.FindByNameAsync(role.NormalizedRoleName, new CancellationToken()), new MongoDbIdentityRoleComparer());
         }
 
         [Fact]
@@ -90,7 +90,7 @@ namespace Blueshift.Identity.MongoDB.Tests
             role.RoleName = newRoleName;
             role.NormalizedRoleName = newNormalizedRoleName;
             Assert.Equal(IdentityResult.Success, await _mongoDbRoleStore.UpdateAsync(role, new CancellationToken()));
-            Assert.Equal(role, await _mongoDbRoleStore.FindByNameAsync(newNormalizedRoleName, new CancellationToken()), RoleComparer);
+            Assert.Equal(role, await _mongoDbRoleStore.FindByNameAsync(newNormalizedRoleName, new CancellationToken()), new MongoDbIdentityRoleComparer());
         }
     }
 }

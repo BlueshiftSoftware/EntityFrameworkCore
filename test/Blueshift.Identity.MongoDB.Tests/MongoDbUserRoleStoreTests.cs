@@ -74,7 +74,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         public async void Can_get_users_in_role_async()
         {
             var user = await CreateUserInDatabase();
-            Assert.Equal(user, (await _mongoDbUserRoleStore.GetUsersInRoleAsync(NormalizedRoleName2, new CancellationToken())).Single(), UserComparer);
+            Assert.Equal(user, (await _mongoDbUserRoleStore.GetUsersInRoleAsync(NormalizedRoleName2, new CancellationToken())).Single(), new MongoDbIdentityUserComparer());
         }
 
         [Fact]

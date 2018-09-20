@@ -56,8 +56,8 @@ namespace Blueshift.Identity.MongoDB.Tests
         public async void Can_get_users_for_claim_async()
         {
             var user = await CreateUserInDatabase();
-            Assert.Equal(user, (await _mongoDbUserClaimStore.GetUsersForClaimAsync(Claim1, new CancellationToken())).Single(), UserComparer);
-            Assert.Equal(user, (await _mongoDbUserClaimStore.GetUsersForClaimAsync(Claim2, new CancellationToken())).Single(), UserComparer);
+            Assert.Equal(user, (await _mongoDbUserClaimStore.GetUsersForClaimAsync(Claim1, new CancellationToken())).Single(), new MongoDbIdentityUserComparer());
+            Assert.Equal(user, (await _mongoDbUserClaimStore.GetUsersForClaimAsync(Claim2, new CancellationToken())).Single(), new MongoDbIdentityUserComparer());
             Assert.Empty(await _mongoDbUserClaimStore.GetUsersForClaimAsync(Claim3, new CancellationToken()));
         }
 
