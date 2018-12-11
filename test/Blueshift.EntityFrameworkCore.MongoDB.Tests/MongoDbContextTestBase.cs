@@ -45,5 +45,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                 await unitOfWork(zooDbContext);
             }
         }
+
+        protected async Task<TResult> ExecuteUnitOfWorkAsync<TResult>(Func<ZooDbContext, Task<TResult>> unitOfWork)
+        {
+            using (IServiceScope serviceScope = ServiceProvider.CreateScope())
+            {
+                ZooDbContext zooDbContext = serviceScope.ServiceProvider.GetService<ZooDbContext>();
+                return await unitOfWork(zooDbContext);
+            }
+        }
     }
 }

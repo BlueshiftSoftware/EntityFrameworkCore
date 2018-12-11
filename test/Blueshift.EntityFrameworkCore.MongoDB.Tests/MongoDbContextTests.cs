@@ -143,9 +143,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
 
             await ExecuteUnitOfWorkAsync(async zooDbContext =>
             {
-                Assert.Equal(_zooEntities.TaigaMasuta, await zooDbContext.Employees
-                    .SingleAsync(searchedEmployee => searchedEmployee.Specialties
-                        .Any(speciality => speciality.Task == ZooTask.Feeding)), new EmployeeEqualityComparer());
+                Assert.Equal(
+                    _zooEntities.TaigaMasuta,
+                    await zooDbContext.Employees
+                        .SingleAsync(searchedEmployee => searchedEmployee.Specialties
+                            .Any(speciality => speciality.Task == ZooTask.Feeding)), new EmployeeEqualityComparer());
             });
         }
 
@@ -191,7 +193,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                     await zooDbContext.Animals.OfType<EurasianOtter>().SingleAsync(),
                     new AnimalEqualityComparer());
             });
-
 
             await ExecuteUnitOfWorkAsync(async zooDbContext =>
             {
@@ -440,6 +441,73 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         {
             assignment.Assignee = assignee;
             return assignment;
+        }
+
+        [Fact]
+        public async Task Concurrent_query()
+        {
+            await ExecuteUnitOfWorkAsync(async zooDbContext =>
+            {
+                zooDbContext.Employees.AddRange(_zooEntities.Employees);
+                Assert.Equal(
+                    _zooEntities.Employees.Count,
+                    await zooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
+            });
+
+            Employee[] employees = await ExecuteUnitOfWorkAsync(
+                async zooDbContext =>
+                {
+                    IEnumerable<Task<Employee>> tasks = Enumerable
+                        .Range(0, 20)
+                        .Select(index => zooDbContext.Employees
+                            .OrderBy(employee => employee.Age)
+                            .LastOrDefaultAsync(e => e.Age <= index + 25));
+                    return await Task.WhenAll(tasks);
+                });
+
+            IEnumerable<Employee> expectedEmployees = Enumerable
+                .Range(0, 20)
+                .Select(index => _zooEntities.Employees
+                    .OrderBy(employee => employee.Age)
+                    .Last(e => e.Age <= index + 25));
+
+            Assert.All(employees, Assert.NotNull);
+            Assert.Equal(expectedEmployees, employees, new EmployeeEqualityComparer());
+        }
+        [Fact]
+        public async Task Can_query_multiple_concurrent_items_from_large_data_set()
+        {
+            IList<Employee> tigerFodderEmployees = Enumerable
+                .Range(1, 100000)
+                .Select(index => new Employee
+                {
+                    Age = 34.7M,
+                    FirstName = "Fodder",
+                    LastName = index.ToString()
+                })
+                .ToList();
+
+            await ExecuteUnitOfWorkAsync(async zooDbContext =>
+            {
+                zooDbContext.Employees.AddRange(tigerFodderEmployees);
+                Assert.Equal(
+                    tigerFodderEmployees.Count,
+                    await zooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
+            });
+
+            Employee[] employees = await ExecuteUnitOfWorkAsync(async zooDbContext =>
+            {
+                IList<Task<Employee>> tasks = Enumerable
+                    .Range(1, 100)
+                    .Select(index =>
+                        zooDbContext.Employees
+                            .FirstOrDefaultAsync(e => e.LastName == (index * 1000).ToString())
+                    )
+                    .ToList();
+                return await Task.WhenAll(tasks);
+            });
+
+            Assert.All(employees, Assert.NotNull);
         }
     }
 }

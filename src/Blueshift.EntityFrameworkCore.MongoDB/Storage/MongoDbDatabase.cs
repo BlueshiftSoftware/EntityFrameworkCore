@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -26,13 +25,13 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
     /// </summary>
     public class MongoDbDatabase : Database
     {
-        private static readonly MethodInfo GenericSaveChanges = typeof(MongoDbDatabase).GetTypeInfo()
-            .GetMethod(nameof(SaveChanges), BindingFlags.NonPublic | BindingFlags.Instance)
-            .GetGenericMethodDefinition();
+        private static readonly MethodInfo GenericUpdateEntries = 
+            MethodHelper.GetGenericMethodDefinition(
+                (MongoDbDatabase mongoDbDatabase) => mongoDbDatabase.UpdateEntries<object>(null));
 
-        private static readonly MethodInfo GenericSaveChangesAsync = typeof(MongoDbDatabase).GetTypeInfo()
-            .GetMethod(nameof(SaveChangesAsync), BindingFlags.NonPublic | BindingFlags.Instance)
-            .GetGenericMethodDefinition();
+        private static readonly MethodInfo GenericUpdateEntriesAsync
+            = MethodHelper.GetGenericMethodDefinition(
+                (MongoDbDatabase mongoDbDatabase) => mongoDbDatabase.UpdateEntriesAsync<object>(null, CancellationToken.None));
 
         private readonly IMongoDbConnection _mongoDbConnection;
         private readonly IMongoDbWriteModelFactorySelector _mongoDbWriteModelFactorySelector;
@@ -62,7 +61,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
         public override int SaveChanges(IReadOnlyList<IUpdateEntry> entries)
             => Check.NotNull(entries, nameof(entries))
                 .ToLookup(entry => GetCollectionEntityType(entry.EntityType))
-                .Sum(grouping => (int)GenericSaveChanges.MakeGenericMethod(grouping.Key.ClrType)
+                .Sum(grouping => (int)GenericUpdateEntries.MakeGenericMethod(grouping.Key.ClrType)
                     .Invoke(this, new object[] { grouping }));
 
         private IEntityType GetCollectionEntityType(IEntityType entityType)
@@ -76,14 +75,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
             return entityType;
         }
 
-        private int SaveChanges<TEntity>(IEnumerable<IUpdateEntry> entries)
+        private int UpdateEntries<TEntity>(IEnumerable<IUpdateEntry> entries)
         {
             IEnumerable<WriteModel<TEntity>> writeModels = entries
                 .Select(entry => _mongoDbWriteModelFactorySelector.Select<TEntity>(entry).CreateWriteModel(entry))
                 .ToList();
             BulkWriteResult result = _mongoDbConnection.GetCollection<TEntity>()
                 .BulkWrite(writeModels);
-            return (int)(result.DeletedCount + result.InsertedCount + result.ModifiedCount);
+            return (int) (result.DeletedCount + result.InsertedCount + result.ModifiedCount);
         }
 
         /// <summary>
@@ -95,28 +94,34 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
         ///     A <see cref="Task{TResult}"/> representing the state of the operation. The result contains the number
         ///     of entries that were persisted to the database.
         /// </returns>
-        public override async Task<int> SaveChangesAsync(IReadOnlyList<IUpdateEntry> entries,
-            CancellationToken cancellationToken = new CancellationToken())
+        public override async Task<int> SaveChangesAsync(
+            IReadOnlyList<IUpdateEntry> entries,
+            CancellationToken cancellationToken = default)
         {
             IEnumerable<Task<int>> tasks = Check.NotNull(entries, nameof(entries))
                 .ToLookup(entry => GetCollectionEntityType(entry.EntityType))
-                .Select(grouping => InvokeSaveChangesAsync(grouping, cancellationToken));
-            return await Task.WhenAll()
-                .ContinueWith(allTask => tasks.Sum(task => task.Result), cancellationToken);
+                .Select(async grouping => await InvokeUpdateEntriesAsync(grouping, cancellationToken))
+                .ToList();
+            int[] totals = await Task.WhenAll(tasks);
+            return totals.Sum();
         }
 
-        private async Task<int> InvokeSaveChangesAsync(IGrouping<IEntityType, IUpdateEntry> entryGrouping, CancellationToken cancellationToken)
-            => await (Task<int>)GenericSaveChangesAsync.MakeGenericMethod(entryGrouping.Key.ClrType)
+        private Task<int> InvokeUpdateEntriesAsync(IGrouping<IEntityType, IUpdateEntry> entryGrouping, CancellationToken cancellationToken)
+            => (Task<int>)GenericUpdateEntriesAsync.MakeGenericMethod(entryGrouping.Key.ClrType)
                 .Invoke(this, new object[] {entryGrouping, cancellationToken});
 
-        private async Task<int> SaveChangesAsync<TEntity>(IEnumerable<IUpdateEntry> entries, CancellationToken cancellationToken)
+        private async Task<int> UpdateEntriesAsync<TEntity>(
+            IEnumerable<IUpdateEntry> entries,
+            CancellationToken cancellationToken)
         {
             IEnumerable<WriteModel<TEntity>> writeModels = entries
                 .Select(entry => _mongoDbWriteModelFactorySelector.Select<TEntity>(entry).CreateWriteModel(entry))
                 .ToList();
             BulkWriteResult result = await _mongoDbConnection.GetCollection<TEntity>()
-                .BulkWriteAsync(writeModels, options: null, cancellationToken: cancellationToken);
-            return (int)(result.DeletedCount + result.InsertedCount + result.ModifiedCount);
+                .BulkWriteAsync(writeModels,
+                    options: null,
+                    cancellationToken: cancellationToken);
+            return (int) (result.DeletedCount + result.InsertedCount + result.ModifiedCount);
         }
 
         /// <inheritdoc />
