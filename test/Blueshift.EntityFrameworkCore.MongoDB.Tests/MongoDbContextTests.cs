@@ -68,12 +68,12 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                     await zooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
             });
 
-            ExecuteUnitOfWork(zooDbContext =>
+            await ExecuteUnitOfWorkAsync(async zooDbContext =>
             {
-                IList<Animal> queriedEntities = zooDbContext.Animals
+                IList<Animal> queriedEntities = await zooDbContext.Animals
                     .OrderBy(animal => animal.Name)
                     .ThenBy(animal => animal.Height)
-                    .ToList();
+                    .ToListAsync();
                 Assert.Equal(_zooEntities.Animals,
                     queriedEntities,
                     new AnimalEqualityComparer());
