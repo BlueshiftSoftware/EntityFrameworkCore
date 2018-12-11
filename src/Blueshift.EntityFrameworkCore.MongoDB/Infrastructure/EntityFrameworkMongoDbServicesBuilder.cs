@@ -31,7 +31,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
         private static readonly IDictionary<Type, ServiceCharacteristics> RelationalServices
             = new Dictionary<Type, ServiceCharacteristics>
             {
-                { typeof(IMongoClient), new ServiceCharacteristics(ServiceLifetime.Singleton) },
+                { typeof(IMongoClient), new ServiceCharacteristics(ServiceLifetime.Scoped) },
                 { typeof(IMongoDbConnection), new ServiceCharacteristics(ServiceLifetime.Scoped) },
                 { typeof(IMongoDbTypeMappingSource), new ServiceCharacteristics(ServiceLifetime.Singleton) },
                 { typeof(IMongoDbWriteModelFactoryCache), new ServiceCharacteristics(ServiceLifetime.Singleton) },
@@ -84,7 +84,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
             TryAdd<IStateManager, MongoDbStateManager>();
             TryAddProviderSpecificServices(serviceCollectionMap =>
             {
-                serviceCollectionMap.TryAddScoped<IMongoDbConnection, MongoDbConnection>();
                 serviceCollectionMap.TryAddScoped(serviceProvider =>
                 {
                     MongoDbOptionsExtension extension = serviceProvider
@@ -92,6 +91,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
                         .FindExtension<MongoDbOptionsExtension>();
                     return extension?.MongoClient ?? new MongoClient();
                 });
+                serviceCollectionMap.TryAddScoped<IMongoDbConnection, MongoDbConnection>();
                 serviceCollectionMap.TryAddScoped<IMongoDbDenormalizedCollectionCompensatingVisitorFactory, MongoDbDenormalizedCollectionCompensatingVisitorFactory>();
             });
 

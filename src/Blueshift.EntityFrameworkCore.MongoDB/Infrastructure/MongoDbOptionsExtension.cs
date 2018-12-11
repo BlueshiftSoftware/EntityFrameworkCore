@@ -39,9 +39,7 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
         {
             get => MongoUrl?.ToString();
             [param: NotNull] set
-            {
-                MongoUrl = MongoUrl.Create(Check.NotEmpty(value, nameof(ConnectionString)));
-            }
+                => MongoUrl = MongoUrl.Create(Check.NotEmpty(value, nameof(ConnectionString)));
         }
 
         /// <summary>
@@ -52,9 +50,7 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
         {
             get => _mongoClient;
             [param: NotNull] set
-            {
-                _mongoClient = Check.NotNull(value, nameof(MongoClient));
-            }
+                => _mongoClient = Check.NotNull(value, nameof(MongoClient));
         }
 
         /// <summary>
@@ -63,11 +59,9 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
         /// </summary>
         public virtual MongoClientSettings MongoClientSettings
         {
-            get => MongoClient?.Settings;
+            get => _mongoClient?.Settings;
             [param: NotNull] set
-            {
-                MongoClient = new MongoClient(Check.NotNull(value, nameof(MongoClientSettings)).Clone());
-            }
+                => _mongoClient = new MongoClient(Check.NotNull(value, nameof(MongoClientSettings)).Clone());
         }
 
         /// <summary>
@@ -80,9 +74,7 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
                 ? null
                 : MongoUrl.Create($"mongodb://{string.Join(",", _mongoClient.Settings.Servers.Select(server => $"{server.Host}:{server.Port}"))}");
             [param: NotNull] set
-            {
-                MongoClientSettings = MongoClientSettings.FromUrl(Check.NotNull(value, nameof(MongoUrl)));
-            }
+                => MongoClientSettings = MongoClientSettings.FromUrl(Check.NotNull(value, nameof(MongoUrl)));
         }
 
         /// <summary>

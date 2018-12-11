@@ -84,17 +84,5 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
             }
             return expression;
         }
-
-        /// <summary>
-        ///     Translates a re-linq query model expression into a compiled query expression.
-        /// </summary>
-        /// <param name="expression"> The re-linq query model expression. </param>
-        /// <param name="querySource"> The query source. </param>
-        /// <param name="inProjection"> True when the expression is a projector. </param>
-        /// <returns>A compiled query expression fragment.</returns>
-        public override Expression ReplaceClauseReferences(Expression expression, IQuerySource querySource = null, bool inProjection = false)
-        {
-            return base.ReplaceClauseReferences(expression, querySource, inProjection);
-        }
     }
 }
