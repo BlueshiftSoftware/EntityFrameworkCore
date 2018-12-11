@@ -475,6 +475,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
             Assert.Equal(expectedEmployees, employees, new EmployeeEqualityComparer());
         }
         [Fact]
+        [Fact(Skip = "This test is a performance test and take a long time to execute.")]
         public async Task Can_query_multiple_concurrent_items_from_large_data_set()
         {
             IList<Employee> tigerFodderEmployees = Enumerable
