@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Xunit;
 
@@ -52,7 +53,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_add_to_role_async()
+        public async Task Can_add_to_role_async()
         {
             var user = CreateUser();
             await _mongoDbUserRoleStore.AddToRoleAsync(user, NormalizedRoleName1, new CancellationToken());
@@ -62,7 +63,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_get_roles_async()
+        public async Task Can_get_roles_async()
         {
             var user = CreateUser();
             var roles = await _mongoDbUserRoleStore.GetRolesAsync(user, new CancellationToken());
@@ -71,14 +72,14 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_get_users_in_role_async()
+        public async Task Can_get_users_in_role_async()
         {
             var user = await CreateUserInDatabase();
             Assert.Equal(user, (await _mongoDbUserRoleStore.GetUsersInRoleAsync(NormalizedRoleName2, new CancellationToken())).Single(), new MongoDbIdentityUserComparer());
         }
 
         [Fact]
-        public async void Can_remove_from_role_async()
+        public async Task Can_remove_from_role_async()
         {
             var user = CreateUser();
             await _mongoDbUserRoleStore.RemoveFromRoleAsync(user, NormalizedRoleName2, new CancellationToken());

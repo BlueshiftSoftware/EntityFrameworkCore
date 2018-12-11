@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Xunit;
 
@@ -39,7 +40,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_get_token_async()
+        public async Task Can_get_token_async()
         {
             var user = CreateUser();
             Assert.Equal(Token1Value, await _mongoDbUserAuthenticationTokenStore.GetTokenAsync(user, "Google", Token1Name, new CancellationToken()), StringComparer.Ordinal);
@@ -49,7 +50,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_set_token_async()
+        public async Task Can_set_token_async()
         {
             var user = CreateUser();
             string newTokenValue = nameof(newTokenValue);
@@ -62,7 +63,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_remove_token_async()
+        public async Task Can_remove_token_async()
         {
             var user = CreateUser();
             await _mongoDbUserAuthenticationTokenStore.RemoveTokenAsync(user, "Google", Token1Name, new CancellationToken());

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Xunit;
 
@@ -26,14 +27,14 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_get_phone_number_async()
+        public async Task Can_get_phone_number_async()
         {
             var user = CreateUser();
             Assert.Equal(PhoneNumber, await _mongoDbUserPhoneNumberStore.GetPhoneNumberAsync(user, new CancellationToken()));
         }
 
         [Fact]
-        public async void Can_set_phone_number_async()
+        public async Task Can_set_phone_number_async()
         {
             var user = CreateUser();
             string newPhoneNumber = "+1.987.654.3210";
@@ -42,7 +43,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_check_phone_number_confirmed_async()
+        public async Task Can_check_phone_number_confirmed_async()
         {
             var user = CreateUser();
             user.PhoneNumberConfirmed = false;
@@ -52,7 +53,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_set_phone_number_confirmed_async()
+        public async Task Can_set_phone_number_confirmed_async()
         {
             var user = CreateUser();
             await _mongoDbUserPhoneNumberStore.SetPhoneNumberConfirmedAsync(user, false, new CancellationToken());

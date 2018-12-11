@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Xunit;
 
@@ -35,14 +36,14 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_get_authenticator_key_async()
+        public async Task Can_get_authenticator_key_async()
         {
             var user = CreateUser();
             Assert.Equal(AuthenticatorKey, await _mongoDbUserAuthenticatorKeyStore.GetAuthenticatorKeyAsync(user, new CancellationToken()), StringComparer.Ordinal);
         }
 
         [Fact]
-        public async void Can_set_token_async()
+        public async Task Can_set_token_async()
         {
             var user = CreateUser();
             var newAuthenticatorKey = new Guid().ToString();

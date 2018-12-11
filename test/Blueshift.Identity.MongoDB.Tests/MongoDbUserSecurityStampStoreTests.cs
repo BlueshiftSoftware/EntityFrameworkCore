@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Xunit;
 
@@ -25,14 +26,14 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_get_security_stamp_async()
+        public async Task Can_get_security_stamp_async()
         {
             var user = CreateUser();
             Assert.Equal(SecurityStamp, await _mongoDbUserSecurityStampStore.GetSecurityStampAsync(user, new CancellationToken()), StringComparer.Ordinal);
         }
 
         [Fact]
-        public async void Can_set_security_stamp_async()
+        public async Task Can_set_security_stamp_async()
         {
             var user = CreateUser();
             string newSecurityStamp = new Guid().ToString();

@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Security.Claims;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Xunit;
 
@@ -36,7 +37,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_add_claim_async()
+        public async Task Can_add_claim_async()
         {
             var user = CreateUser();
             await _mongoDbUserClaimStore.AddClaimsAsync(user, new[] { Claim3 }, new CancellationToken());
@@ -45,7 +46,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_get_claims_async()
+        public async Task Can_get_claims_async()
         {
             var user = CreateUser();
             var claims = new [] { Claim1, Claim2 };
@@ -53,7 +54,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_get_users_for_claim_async()
+        public async Task Can_get_users_for_claim_async()
         {
             var user = await CreateUserInDatabase();
             Assert.Equal(user, (await _mongoDbUserClaimStore.GetUsersForClaimAsync(Claim1, new CancellationToken())).Single(), new MongoDbIdentityUserComparer());
@@ -62,7 +63,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_remove_claims_async()
+        public async Task Can_remove_claims_async()
         {
             var user = CreateUser();
             var claimsToRemove = new [] { Claim1, Claim2 };
@@ -71,7 +72,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_replace_claims_async()
+        public async Task Can_replace_claims_async()
         {
             var user = CreateUser();
             var newClaims = new [] { Claim3, Claim2 };

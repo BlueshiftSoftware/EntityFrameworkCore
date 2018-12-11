@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Xunit;
 
@@ -33,7 +34,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_add_login_async()
+        public async Task Can_add_login_async()
         {
             var user = CreateUser();
             var userLoginInfo = new UserLoginInfo("Google", "1234567890abcdef", "Google+");
@@ -46,7 +47,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_remove_login_async()
+        public async Task Can_remove_login_async()
         {
             var user = CreateUser();
             await _mongoDbUserLoginStore.RemoveLoginAsync(user, ProviderName, ProviderKey, new CancellationToken());
@@ -54,14 +55,14 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_find_by_login_async()
+        public async Task Can_find_by_login_async()
         {
             var user = await CreateUserInDatabase();
             Assert.Equal(user, await _mongoDbUserLoginStore.FindByLoginAsync(ProviderName, ProviderKey, new CancellationToken()), new MongoDbIdentityUserComparer());
         }
 
         [Fact]
-        public async void Can_get_logins_async()
+        public async Task Can_get_logins_async()
         {
             var user = CreateUser();
             var login = (await _mongoDbUserLoginStore.GetLoginsAsync(user, new CancellationToken())).Single();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Xunit;
 
@@ -25,14 +26,14 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_get_access_failed_count_async()
+        public async Task Can_get_access_failed_count_async()
         {
             var user = CreateUser();
             Assert.Equal(user.AccessFailedCount, await _mongoDbUserLockoutStore.GetAccessFailedCountAsync(user, new CancellationToken()));
         }
 
         [Fact]
-        public async void Can_check_lockout_enabled_async()
+        public async Task Can_check_lockout_enabled_async()
         {
             var user = CreateUser();
             user.LockoutEnabled = false;
@@ -42,7 +43,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_set_lockout_enabled_async()
+        public async Task Can_set_lockout_enabled_async()
         {
             var user = CreateUser();
             await _mongoDbUserLockoutStore.SetLockoutEnabledAsync(user, false, new CancellationToken());
@@ -52,14 +53,14 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_get_lockout_end_date_async()
+        public async Task Can_get_lockout_end_date_async()
         {
             var user = CreateUser();
             Assert.Equal(user.LockoutEnd, await _mongoDbUserLockoutStore.GetLockoutEndDateAsync(user, new CancellationToken()));
         }
 
         [Fact]
-        public async void Can_set_lockout_end_date_async()
+        public async Task Can_set_lockout_end_date_async()
         {
             var user = CreateUser();
             var lockoutEndDate = DateTime.Now.AddDays(3);
@@ -68,7 +69,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_reset_access_failed_count_async()
+        public async Task Can_reset_access_failed_count_async()
         {
             var user = CreateUser();
             user.AccessFailedCount = 10;

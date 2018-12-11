@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Xunit;
 
@@ -25,14 +26,14 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_get_password_hash_async()
+        public async Task Can_get_password_hash_async()
         {
             var user = CreateUser();
             Assert.Equal(PasswordHash, await _mongoDbUserPasswordStore.GetPasswordHashAsync(user, new CancellationToken()), StringComparer.Ordinal);
         }
 
         [Fact]
-        public async void Can_set_password_hash_async()
+        public async Task Can_set_password_hash_async()
         {
             var user = CreateUser();
             var newPassword = new Guid().ToString();
@@ -41,7 +42,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_check_has_password_async()
+        public async Task Can_check_has_password_async()
         {
             var user = CreateUser();
             Assert.True(await _mongoDbUserPasswordStore.HasPasswordAsync(user, new CancellationToken()));

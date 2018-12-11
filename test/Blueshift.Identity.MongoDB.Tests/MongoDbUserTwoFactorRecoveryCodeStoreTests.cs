@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Xunit;
 
@@ -44,7 +45,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         [InlineData(RecoveryCode1)]
         [InlineData(RecoveryCode2)]
         [InlineData(RecoveryCode3)]
-        public async void Can_redeem_codes_exactly_once_async(string recoveryCode)
+        public async Task Can_redeem_codes_exactly_once_async(string recoveryCode)
         {
             var user = CreateUser();
             Assert.True(await _mongoDbUserTwoFactorRecoveryCodeStore.RedeemCodeAsync(user, recoveryCode, new CancellationToken()));
@@ -52,7 +53,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_replace_codes_async()
+        public async Task Can_replace_codes_async()
         {
             var user = CreateUser();
             var newRecoveryCodes = new [] { "New Code 1", "New Code 2", "New Code 3" };

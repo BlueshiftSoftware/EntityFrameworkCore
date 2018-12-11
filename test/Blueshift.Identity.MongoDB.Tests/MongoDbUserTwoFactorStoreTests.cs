@@ -1,4 +1,5 @@
 ﻿using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Xunit;
 
@@ -15,7 +16,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_check_two_factor_enabled_async()
+        public async Task Can_check_two_factor_enabled_async()
         {
             var user = CreateUser();
             user.TwoFactorEnabled = false;
@@ -25,7 +26,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_set_two_factor_enabled_async()
+        public async Task Can_set_two_factor_enabled_async()
         {
             var user = CreateUser();
             await _mongoDbUserTwoFactorStore.SetTwoFactorEnabledAsync(user, false, new CancellationToken());

@@ -109,7 +109,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         }
 
         [Fact]
-        public async void Concurrency_field_prevents_updates()
+        public async Task Concurrency_field_prevents_updates()
         {
             await ExecuteUnitOfWorkAsync(async zooDbContext =>
             {
@@ -150,7 +150,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_query_polymorphic_sub_types()
+        public async Task Can_query_polymorphic_sub_types()
         {
             await ExecuteUnitOfWorkAsync(async zooDbContext =>
             {
@@ -301,36 +301,44 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
             });
         }
 
-        //[Fact]
-        //public async Task Can_include_owned_collection()
-        //{
-        //    await ExecuteUnitOfWorkAsync(async zooDbContext =>
-        //    {
-        //        zooDbContext.Enclosures.AddRange(_zooEntities.Enclosures);
-        //        Assert.Equal(
-        //            _zooEntities.Entities.Count,
-        //            await zooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
-        //    });
+        [Fact(Skip = "IncludeCompiler does not currently support DI or being independently overriden.")]
+        public async Task Can_include_owned_collection()
+        {
+            // IncludeCompiler uses the entity metadata to generate the underlying join clauses,
+            // however it currently does not properly support being injected through DI, being created
+            // by a factory, or being independently overriden without also having to override several
+            // other query-generation-related classes. This makes it virtually impossible to generate
+            // the correct MongoDb-side query syntax for supporting Join and GroupJoin statements
+            // against owned collections where the ownership requires a level of indirection to get to
+            // the foreign key.
 
-        //    await ExecuteUnitOfWorkAsync(async zooDbContext =>
-        //    {
-        //        IEnumerable<Enclosure> queriedEnclosures = await zooDbContext.Enclosures
-        //            .Include(enclosure => enclosure.Animals)
-        //            .Include(enclosure => enclosure.WeeklySchedule.Assignments)
-        //            .ThenInclude(zooAssignment => zooAssignment.Assignee)
-        //            .OrderBy(enclosure => enclosure.AnimalEnclosureType)
-        //            .ThenBy(enclosure => enclosure.Name)
-        //            .ToListAsync();
-        //        Assert.Equal(_zooEntities.Enclosures,
-        //            queriedEnclosures,
-        //            new EnclosureEqualityComparer()
-        //                .WithAnimalEqualityComparer(animalEqualityComparer => animalEqualityComparer
-        //                    .WithEnclosureEqualityComparer())
-        //                .ConfigureWeeklyScheduleEqualityComparer(
-        //                    scheduleEqualityComparer => scheduleEqualityComparer.ConfigureZooAssignmentEqualityComparer(
-        //                        zooAssignmentEqualityComparer => zooAssignmentEqualityComparer.WithEmployeeEqualityComparer())));
-        //    });
-        //}
+            await ExecuteUnitOfWorkAsync(async zooDbContext =>
+            {
+                zooDbContext.Enclosures.AddRange(_zooEntities.Enclosures);
+                Assert.Equal(
+                    _zooEntities.Entities.Count,
+                    await zooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
+            });
+
+            await ExecuteUnitOfWorkAsync(async zooDbContext =>
+            {
+                IEnumerable<Enclosure> queriedEnclosures = await zooDbContext.Enclosures
+                    .Include(enclosure => enclosure.Animals)
+                    .Include(enclosure => enclosure.WeeklySchedule.Assignments)
+                    .ThenInclude(zooAssignment => zooAssignment.Assignee)
+                    .OrderBy(enclosure => enclosure.AnimalEnclosureType)
+                    .ThenBy(enclosure => enclosure.Name)
+                    .ToListAsync();
+                Assert.Equal(_zooEntities.Enclosures,
+                    queriedEnclosures,
+                    new EnclosureEqualityComparer()
+                        .WithAnimalEqualityComparer(animalEqualityComparer => animalEqualityComparer
+                            .WithEnclosureEqualityComparer())
+                        .ConfigureWeeklyScheduleEqualityComparer(
+                            scheduleEqualityComparer => scheduleEqualityComparer.ConfigureZooAssignmentEqualityComparer(
+                                zooAssignmentEqualityComparer => zooAssignmentEqualityComparer.WithEmployeeEqualityComparer())));
+            });
+        }
 
         [Fact]
         public async Task Can_include_owned_reference()

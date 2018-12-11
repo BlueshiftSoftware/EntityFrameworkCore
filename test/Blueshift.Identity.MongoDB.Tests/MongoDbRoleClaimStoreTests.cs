@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Xunit;
 
@@ -35,7 +36,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_add_claim_async()
+        public async Task Can_add_claim_async()
         {
             var role = CreateRole();
             await _mongoDbRoleClaimStore.AddClaimAsync(role, Claim3);
@@ -44,7 +45,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_get_claims_async()
+        public async Task Can_get_claims_async()
         {
             var role = CreateRole();
             var claims = new [] { Claim1, Claim2 };
@@ -52,7 +53,7 @@ namespace Blueshift.Identity.MongoDB.Tests
         }
 
         [Fact]
-        public async void Can_remove_claims_async()
+        public async Task Can_remove_claims_async()
         {
             var role = CreateRole();
             await _mongoDbRoleClaimStore.RemoveClaimAsync(role, Claim1);
