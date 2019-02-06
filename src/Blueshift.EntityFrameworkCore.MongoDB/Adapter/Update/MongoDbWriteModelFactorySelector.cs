@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Utilities;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
 using MongoDB.Driver;
 
-namespace Blueshift.EntityFrameworkCore.MongoDB.Update
+namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter.Update
 {
     /// <summary>
     /// Selects an instance of <see cref="IMongoDbWriteModelFactory{TEntity}"/> for a given <see cref="EntityType"/>.
@@ -45,24 +45,17 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
                 updateEntry.EntityState,
                 Create<TEntity>);
 
-        /// <summary>
-        /// Creates a new instance of <see cref="IMongoDbWriteModelFactory{TEntity}"/> for the given <paramref name="entityType"/>
-        /// and <paramref name="entityState"/>.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of entity for which to create a <see cref="IMongoDbWriteModelFactory{TEntity}"/> instance.</typeparam>
-        /// <param name="entityType"></param>
-        /// <param name="entityState"></param>
-        /// <returns></returns>
-        public IMongoDbWriteModelFactory<TEntity> Create<TEntity>(
+        private IMongoDbWriteModelFactory<TEntity> Create<TEntity>(
             [NotNull] IEntityType entityType,
             EntityState entityState)
         {
             Check.NotNull(entityType, nameof(entityType));
             if (entityState != EntityState.Added &&
                 entityState != EntityState.Modified &&
+                entityState != EntityState.Unchanged &&
                 entityState != EntityState.Deleted)
             {
-                throw new InvalidOperationException($"The value provided for entityState must be Added, Modified, or Deleted, but was {entityState}.");
+                throw new InvalidOperationException($"The value provided for entityState must be Added, Modified, Unchanged, or Deleted, but was {entityState}.");
             }
 
             IMongoDbWriteModelFactory<TEntity> mongoDbWriteModelFactory;
@@ -71,11 +64,13 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
                 case EntityState.Added:
                     mongoDbWriteModelFactory = new InsertOneModelFactory<TEntity>(_valueGeneratorSelector, entityType);
                     break;
-                case EntityState.Modified:
-                    mongoDbWriteModelFactory = new UpdateOneModelFactory<TEntity>(_valueGeneratorSelector, entityType);
-                    break;
-                default:
+
+                case EntityState.Deleted:
                     mongoDbWriteModelFactory = new DeleteOneModelFactory<TEntity>(_valueGeneratorSelector, entityType);
+                    break;
+
+                default:
+                    mongoDbWriteModelFactory = new ReplaceOneModelFactory<TEntity>(_valueGeneratorSelector, entityType);
                     break;
             }
             return mongoDbWriteModelFactory;

@@ -1,9 +1,10 @@
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Utilities;
 
 // ReSharper disable once CheckNamespace
-namespace Microsoft.EntityFrameworkCore
+namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
 {
     /// <summary>
     ///     <para>

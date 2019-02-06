@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Update;
 using MongoDB.Driver;
 
-namespace Blueshift.EntityFrameworkCore.MongoDB.Update
+namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter.Update
 {
     /// <summary>
     /// Interface for selecting an instance of <see cref="IMongoDbWriteModelFactory{TEntity}"/>.

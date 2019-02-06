@@ -16,7 +16,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.ValueGeneration
             EntityType entityType = model.AddEntityType(typeof(Employee));
             Property property = entityType.AddProperty(typeof(Employee)
                 .GetTypeInfo()
-                .GetProperty(nameof(Employee.Id)));
+                .GetProperty(nameof(Employee.EmployeeId)));
 
             var valueGeneratorCacheDependencies = new ValueGeneratorCacheDependencies();
             var valueGeneratorCache = new ValueGeneratorCache(valueGeneratorCacheDependencies);

@@ -22,4 +22,35 @@
     <PackageReference Include="MongoDB.Driver" Version="$(MongoDBDriverPackageVersion)" NoWarn="KRB4002" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Properties\DocumentDbStrings.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DocumentDbStrings.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\DocumentDbStrings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DocumentDbStrings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\DocumentDbStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>DocumentDbStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\DocumentDbStrings.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>DocumentDbStrings.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
 </Project>

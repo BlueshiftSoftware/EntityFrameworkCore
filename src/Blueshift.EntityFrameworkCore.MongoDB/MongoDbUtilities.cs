@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Utilities;
 
 // ReSharper disable once CheckNamespace
-namespace Blueshift.EntityFrameworkCore
+namespace Blueshift.EntityFrameworkCore.MongoDB
 {
     /// <summary>
     /// A set of utilities to assist with MongoDb values.
@@ -36,5 +39,37 @@ namespace Blueshift.EntityFrameworkCore
                 match => string.Equals(a: "y", b: match.Value, comparisonType: StringComparison.OrdinalIgnoreCase)
                     ? "ies"
                     : $"{match.Value}s");
+
+        /// <summary>
+        /// Determines whether or not the current <see cref="IEntityType"/> represents a MongoDB root document.
+        /// </summary>
+        /// <param name="entityType">The current <see cref="IEntityType"/>.</param>
+        /// <returns><c>true</c> if <paramref name="entityType"/> represents a root document; or <c>false</c>.</returns>
+        public static bool IsDocumentRootEntityType(this IEntityType entityType)
+        {
+            Check.NotNull(entityType, nameof(entityType));
+            while (entityType.MongoDb().IsDerivedType && entityType.BaseType != null)
+            {
+                entityType = entityType.BaseType;
+            }
+            return !entityType.IsOwned();
+        }
+
+        /// <summary>
+        /// Gets the <see cref="IEntityType"/> that represents the least-derived, non-abstract base representation of a given class.
+        /// </summary>
+        /// <param name="entityType">The <see cref="IEntityType"/> to start from.</param>
+        /// <returns>The least-derived, non-abstract root document type for <paramref name="entityType"/>.</returns>
+        public static IEntityType GetMongoDbCollectionEntityType(this IEntityType entityType)
+        {
+            Check.NotOwned(entityType, nameof(entityType));
+
+            while (entityType.MongoDb().IsDerivedType && entityType.BaseType != null)
+            {
+                entityType = entityType.BaseType;
+            }
+
+            return entityType;
+        }
     }
 }

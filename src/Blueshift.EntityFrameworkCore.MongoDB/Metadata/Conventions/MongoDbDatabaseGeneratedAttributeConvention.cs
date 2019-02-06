@@ -1,21 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
-using Microsoft.EntityFrameworkCore;
+using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
 {
-    /// <summary>
-    ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
-    /// </summary>
+    /// <inheritdoc />
     public class MongoDbDatabaseGeneratedAttributeConvention : DatabaseGeneratedAttributeConvention
     {
-        /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
+        /// <inheritdoc />
         public override InternalPropertyBuilder Apply(
             InternalPropertyBuilder propertyBuilder,
             DatabaseGeneratedAttribute attribute,

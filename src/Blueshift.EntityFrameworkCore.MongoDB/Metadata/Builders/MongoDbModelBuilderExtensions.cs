@@ -1,7 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Utilities;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Utilities;
 
 // ReSharper disable once CheckNamespace
-namespace Microsoft.EntityFrameworkCore
+namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
 {
     /// <summary>
     ///     MongoDb-specific extension methods for <see cref="ModelBuilder" />.

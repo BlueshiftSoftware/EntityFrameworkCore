@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -19,46 +20,57 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.ChangeTracking
                 stateManager,
                 entityType,
                 entity,
-                valueBuffer.IsEmpty && CreateValueBuffer(entityType, entity, out ValueBuffer repairedValueBuffer)
-                    ? repairedValueBuffer
+                valueBuffer.IsEmpty
+                    ? CreateValueBuffer(entityType, entity)
                     : valueBuffer);
 
-        private bool CreateValueBuffer(IEntityType entityType, object entity, out ValueBuffer valueBuffer)
-        {
-            int propertyCount = entityType.PropertyCount(),
-                relationshipPropertyCount = entityType.RelationshipPropertyCount(),
-                totalCount = propertyCount + relationshipPropertyCount;
+        /// <inheritdoc />
+        public override InternalEntityEntry Create(
+            IStateManager stateManager,
+            IEntityType entityType,
+            object entity)
+            => Create(stateManager, entityType, entity, ValueBuffer.Empty);
 
-            valueBuffer = new ValueBuffer(new object[totalCount], 0);
+        private ValueBuffer CreateValueBuffer(IEntityType entityType, object entity)
+        {
+            object[] values = new object[entityType.PropertyCount()];
 
             foreach (IProperty property in entityType.GetProperties())
             {                
-                valueBuffer[property.GetIndex()] = GetPropertyValue(entity, property);
+                values[property.GetIndex()] = GetPropertyValue(entity, property);
             }
 
-            foreach (INavigation navigation in entityType.GetNavigations())
-            {
-                valueBuffer[propertyCount + navigation.GetRelationshipIndex()] = navigation.GetGetter().GetClrValue(entity);
-            }
-
-            return true;
+            return new ValueBuffer(values);
         }
 
         private object GetPropertyValue(object entity, IProperty property)
         {
             if (property.IsShadowProperty && property.IsForeignKey())
             {
-                IForeignKey foreignKey = property.AsProperty().ForeignKeys[0];
+                IForeignKey foreignKey = property.AsProperty().ForeignKeys.First();
                 INavigation navigationProperty = property.DeclaringEntityType == foreignKey.PrincipalEntityType
+                                                 && !foreignKey.IsSelfPrimaryKeyReferencing()
                     ? foreignKey.PrincipalToDependent
                     : foreignKey.DependentToPrincipal;
-                entity = navigationProperty.GetGetter().GetClrValue(entity);
-                property = foreignKey.PrincipalKey.Properties[0];
+
+                if (navigationProperty != null)
+                {
+                    entity = navigationProperty.GetGetter().GetClrValue(entity);
+
+                    IEntityType targetEntityType = navigationProperty.GetTargetType();
+                    property = targetEntityType.FindPrimaryKey().Properties.Single();
+                }
+                else
+                {
+                    entity = null;
+                }
             }
 
-            return property.IsShadowProperty
-                ? entity.GetHashCode()
-                : property.GetGetter().GetClrValue(entity);
+            return entity == null
+                ? null
+                : property.IsShadowProperty
+                    ? entity.GetHashCode()
+                    : property.GetGetter().GetClrValue(entity);
         }
     }
 }

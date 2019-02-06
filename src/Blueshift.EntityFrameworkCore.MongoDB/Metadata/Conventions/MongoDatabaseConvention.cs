@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
 using System.Text.RegularExpressions;
 using Blueshift.EntityFrameworkCore.MongoDB.Annotations;
+using Blueshift.EntityFrameworkCore.MongoDB.Infrastructure;
+using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;

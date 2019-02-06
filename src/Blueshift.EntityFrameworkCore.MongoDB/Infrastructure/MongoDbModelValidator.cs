@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Blueshift.EntityFrameworkCore.MongoDB.Metadata;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +9,6 @@ using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Utilities;
-using MongoDB.Bson.Serialization.Attributes;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
 {
@@ -40,10 +38,28 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
         {
             base.Validate(Check.NotNull(model, nameof(model)));
 
-            EnsureKnownTypes(model);
             EnsureDistinctCollectionNames(model);
             ValidateDerivedTypes(model);
         }
+
+        ///// <inheritdoc />
+        //protected override void ValidateNonNullPrimaryKeys(IModel model)
+        //{
+        //    Check.NotNull(model, nameof(model));
+
+        //    var nonOwnedDocumentWithoutPk = model
+        //        .GetEntityTypes()
+        //        .FirstOrDefault(entityType => !entityType.IsQueryType
+        //                                      && !entityType.IsOwned()
+        //                                      && entityType.BaseType == null
+        //                                      && entityType.FindPrimaryKey() == null);
+
+        //    if (nonOwnedDocumentWithoutPk != null)
+        //    {
+        //        throw new InvalidOperationException(
+        //            CoreStrings.EntityRequiresKey(nonOwnedDocumentWithoutPk.DisplayName()));
+        //    }
+        //}
 
         /// <inheritdoc />
         protected override void ValidateNoShadowKeys(IModel model)
@@ -52,7 +68,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
 
             IEnumerable<IEntityType> nonComplexEntityTypes = model
                 .GetEntityTypes()
-                .Where(entityType => entityType.ClrType != null && !entityType.MongoDb().IsComplexType);
+                .Where(entityType => entityType.ClrType != null && !entityType.IsOwned());
 
             foreach (var entityType in nonComplexEntityTypes)
             {
@@ -82,7 +98,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
                         }
                     }
                 }
-            }        }
+            }
+        }
 
         /// <inheritdoc />
         protected override void ValidateOwnership(IModel model)
@@ -93,9 +110,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
             {
                 List<IForeignKey> ownerships = entityType.GetForeignKeys().Where(fk => fk.IsOwnership).ToList();
                 if (ownerships.Count == 0
-                    && entityType.HasClrType()
+                    && (entityType.HasClrType()
                         ? model.ShouldBeOwnedType(entityType.ClrType)
-                        : model.ShouldBeOwnedType(entityType.Name))
+                        : model.ShouldBeOwnedType(entityType.Name)))
                 {
                     throw new InvalidOperationException(CoreStrings.OwnerlessOwnedType(entityType.DisplayName()));
                 }
@@ -138,34 +155,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
             foreach (var tuple in duplicateCollectionNames)
             {
                 throw new InvalidOperationException($"Duplicate collection name \"{tuple.CollectionName}\" defined on entity type \"{tuple.DisplayName}\".");
-            }
-        }
-
-        /// <summary>
-        /// Ensures that derived entity types declared in <see cref="BsonKnownTypesAttribute"/> are registered for each
-        /// <see cref="EntityType"/> in the given <see cref="Model"/>.
-        /// </summary>
-        /// <param name="model">The <see cref="Model"/> to be ensured.</param>
-        protected virtual void EnsureKnownTypes([NotNull] IModel model)
-        {
-            var unregisteredTypes = Check.NotNull(model, nameof(model))
-                .GetEntityTypes()
-                .Where(entityType => entityType.HasClrType()
-                    && entityType.ClrType.GetTypeInfo().IsDefined(typeof(BsonKnownTypesAttribute), false))
-                .SelectMany(entityType => entityType.ClrType.GetTypeInfo()
-                    .GetCustomAttributes<BsonKnownTypesAttribute>(false)
-                    .SelectMany(bsonKnownTypesAttribute => bsonKnownTypesAttribute.KnownTypes)
-                    .Select(derivedType =>  new
-                    {
-                        BaseType = entityType.ClrType,
-                        DerivedType = derivedType
-                    }))
-                .Where(tuple => model.FindEntityType(tuple.DerivedType.Name) == null)
-                .ToList();
-            foreach (var pair in unregisteredTypes)
-            {
-                if (!pair.BaseType.GetTypeInfo().IsAssignableFrom(pair.DerivedType))
-                    throw new InvalidOperationException($"Known type {pair.DerivedType} declared on base type {pair.BaseType} does not inherit from base type.");
             }
         }
 

@@ -30,7 +30,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Serialization
             var animalNavigationSerializer = new DenormalizingBsonClassMapSerializer<Animal>(animalClassMap);
             Tiger tigger = _zooEntities.Tigger;
             string tiggerJson = tigger.ToJson(typeof(Animal), serializer: animalNavigationSerializer);
-            Assert.Equal($"{{ \"_id\" : ObjectId(\"{tigger.Id}\"), \"_t\" : [\"Animal\", \"panthera tigris\"] }}", tiggerJson);
+            Assert.Equal($"{{ \"_id\" : ObjectId(\"{tigger.AnimalId}\"), \"_t\" : [\"Animal\", \"panthera tigris\"] }}", tiggerJson);
             Assert.DoesNotContain($"\"Name\": \"${tigger.Name}\"", tiggerJson);
             Assert.DoesNotContain($"\"Age\": \"${tigger.Age}\"", tiggerJson);
             Assert.DoesNotContain($"\"Height\": \"${tigger.Height}\"", tiggerJson);
@@ -44,7 +44,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Serialization
             var animalNavigationSerializer = new DenormalizingBsonClassMapSerializer<Animal>(animalClassMap, DenormalizedMemberNames);
             Animal tigger = _zooEntities.Tigger;
             string tiggerJson = tigger.ToJson(typeof(Animal), serializer: animalNavigationSerializer);
-            Assert.Equal($"{{ \"_id\" : ObjectId(\"{tigger.Id}\"), \"_t\" : [\"Animal\", \"panthera tigris\"], \"Age\" : \"{tigger.Age}\", \"Height\" : \"{tigger.Height}\", \"Weight\" : \"{tigger.Weight}\" }}", tiggerJson);
+            Assert.Equal($"{{ \"_id\" : ObjectId(\"{tigger.AnimalId}\"), \"_t\" : [\"Animal\", \"panthera tigris\"], \"Age\" : \"{tigger.Age}\", \"Height\" : \"{tigger.Height}\", \"Weight\" : \"{tigger.Weight}\" }}", tiggerJson);
             Assert.DoesNotContain($"\"Name\": \"${tigger.Name}\"", tiggerJson);
         }
 
@@ -82,7 +82,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Serialization
             }
             Assert.NotNull(animal);
             Assert.IsType<Tiger>(animal);
-            Assert.Equal(tigger.Id, animal.Id);
+            Assert.Equal(tigger.AnimalId, animal.AnimalId);
             Assert.Null(animal.Name);
             Assert.Equal(0, animal.Age);
             Assert.Equal(0, animal.Height);

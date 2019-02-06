@@ -2,14 +2,16 @@
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using Blueshift.EntityFrameworkCore.MongoDB.Adapter.Update;
 using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders;
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
 using Blueshift.EntityFrameworkCore.MongoDB.Storage;
-using Blueshift.EntityFrameworkCore.MongoDB.Update;
+using Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Query;
@@ -29,31 +31,34 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
         {
             var queryCompilationContextFactory = Mock.Of<IQueryCompilationContextFactory>();
             var mockMongoDbConnection = new Mock<IMongoDbConnection>();
-            var mockMongoCollection = new Mock<IMongoCollection<Employee>>();
+            var mockMongoCollection = new Mock<IMongoCollection<Animal>>();
             var mockMongoDbTypeMappingSource = new Mock<IMongoDbTypeMappingSource>();
 
-            mockMongoDbConnection.Setup(mockedMongoDbConnection => mockedMongoDbConnection.GetCollection<Employee>())
-                .Returns(() => mockMongoCollection.Object);
-
             mockMongoCollection.Setup(mongoCollection => mongoCollection.BulkWrite(
-                    It.IsAny<IEnumerable<WriteModel<Employee>>>(),
+                    It.IsAny<IEnumerable<WriteModel<Animal>>>(),
                     It.IsAny<BulkWriteOptions>(),
                     It.IsAny<CancellationToken>()))
-                .Returns((IEnumerable<WriteModel<Employee>> list, BulkWriteOptions options, CancellationToken token)
-                    => new BulkWriteResult<Employee>.Acknowledged(
+                .Returns((IEnumerable<WriteModel<Animal>> list, BulkWriteOptions options, CancellationToken token)
+                    => new BulkWriteResult<Animal>.Acknowledged(
                         list.Count(),
                         matchedCount: 0,
-                        deletedCount: list.OfType<DeleteOneModel<Employee>>().Count(),
-                        insertedCount: list.OfType<InsertOneModel<Employee>>().Count(),
-                        modifiedCount: list.OfType<UpdateOneModel<Employee>>().Count(),
+                        deletedCount: list.OfType<DeleteOneModel<Animal>>().Count(),
+                        insertedCount: list.OfType<InsertOneModel<Animal>>().Count(),
+                        modifiedCount: list.OfType<ReplaceOneModel<Animal>>().Count(),
                         processedRequests: list,
                         upserts: new List<BulkWriteUpsert>()));
+
+            mockMongoDbConnection.Setup(mockedMongoDbConnection => mockedMongoDbConnection.GetCollection<Animal>())
+                .Returns(() => mockMongoCollection.Object);
 
             var databaseDepedencies = new DatabaseDependencies(queryCompilationContextFactory);
 
             IMongoDbWriteModelFactorySelector writeModelFactorySelector =
                 new MongoDbWriteModelFactorySelector(
-                    Mock.Of<IValueGeneratorSelector>(),
+                    new MongoDbValueGeneratorSelector(
+                        new ValueGeneratorSelectorDependencies(
+                            new ValueGeneratorCache(
+                                new ValueGeneratorCacheDependencies()))), 
                     new MongoDbWriteModelFactoryCache());
             var mongoDbDatabase = new MongoDbDatabase(
                 databaseDepedencies,
@@ -62,49 +67,48 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
 
             var model = new Model(
                 new MongoDbConventionSetBuilder(
-                    new MongoDbConventionSetBuilderDependencies(
-                        new CurrentDbContext(
-                            new ZooDbContext(
-                                new DbContextOptions<ZooDbContext>())),
-                        mockMongoDbTypeMappingSource.Object))
+                        new MongoDbConventionSetBuilderDependencies(
+                            new CurrentDbContext(
+                                new ZooDbContext(
+                                    new DbContextOptions<ZooDbContext>())),
+                            mockMongoDbTypeMappingSource.Object,
+                            Mock.Of<IMemberClassifier>(),
+                            Mock.Of<IDiagnosticsLogger<DbLoggerCategory.Model>>()))
                     .AddConventions(
                         new CoreConventionSetBuilder(
-                            new CoreConventionSetBuilderDependencies(
-                                mockMongoDbTypeMappingSource.Object,
-                                null,
-                                null,
-                                null,
-                                null))
+                                new CoreConventionSetBuilderDependencies(
+                                    mockMongoDbTypeMappingSource.Object,
+                                    null,
+                                    null,
+                                    null,
+                                    null))
                             .CreateConventionSet()));
 
-            EntityType zooEntityType = model.AddEntityType(typeof(ZooEntity));
-            zooEntityType.Builder
-                .GetOrCreateProperties(typeof(ZooEntity).GetTypeInfo().GetProperties(), ConfigurationSource.Explicit);
-            EntityType entityType = model.AddEntityType(typeof(Employee));
-            entityType.Builder
-                .HasBaseType(zooEntityType, ConfigurationSource.Explicit)
-                .GetOrCreateProperties(typeof(Employee).GetTypeInfo().GetProperties(), ConfigurationSource.Explicit);
-
-            new EntityTypeBuilder(entityType.Builder)
-                .ForMongoDbFromCollection(collectionName: "employees");
+            EntityType animalEntityType = model.AddEntityType(typeof(Animal));
+            animalEntityType.Builder
+                .GetOrCreateProperties(typeof(Animal).GetTypeInfo().GetProperties(), ConfigurationSource.Explicit);
+            EntityType tigerEntityType = model.GetOrAddEntityType(typeof(Tiger));
 
             IReadOnlyList<IUpdateEntry> entityEntries = new[] { EntityState.Added, EntityState.Deleted, EntityState.Modified }
                 .Select(entityState =>
                     {
+                        var entity = new Tiger();
                         var mockUpdateEntry = new Mock<InternalEntityEntry>(
                             null,
-                            entityType);
-                        var entity = new Employee();
+                            tigerEntityType);
 
                         mockUpdateEntry
                             .SetupGet(updateEntry => updateEntry.EntityState)
                             .Returns(entityState);
                         mockUpdateEntry
                             .SetupGet(updateEntry => updateEntry.EntityType)
-                            .Returns(entityType);
+                            .Returns(tigerEntityType);
                         mockUpdateEntry
                             .SetupGet(updateEntry => updateEntry.Entity)
                             .Returns(entity);
+                        mockUpdateEntry
+                            .Setup(updateEntry => updateEntry.ToEntityEntry())
+                            .Returns(new EntityEntry(mockUpdateEntry.Object));
 
                         return mockUpdateEntry.Object;
                     })

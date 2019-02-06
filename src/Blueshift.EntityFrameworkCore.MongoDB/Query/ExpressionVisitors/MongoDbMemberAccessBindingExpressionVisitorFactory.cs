@@ -19,7 +19,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                 queryModelVisitor is MongoDbEntityQueryModelVisitor mongoDbEntityQueryModelVisitor
                     ? mongoDbEntityQueryModelVisitor
                     : throw new ArgumentException(
-                        "EntityQueryModelVisitor must be an instance of MongoDbEntityQueryModelVisitor.",
+                        @"EntityQueryModelVisitor must be an instance of MongoDbEntityQueryModelVisitor.",
                         nameof(queryModelVisitor)),
                 inProjection);
     }

@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using Blueshift.EntityFrameworkCore.MongoDB.Adapter.Serialization;
-using Blueshift.EntityFrameworkCore.MongoDB.Annotations;
 using Microsoft.EntityFrameworkCore.Utilities;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Attributes;

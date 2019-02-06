@@ -1,7 +1,7 @@
-﻿using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
 {
@@ -44,12 +44,5 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
         /// <typeparam name="TEntity">The type of entity stored in the collection.</typeparam>
         /// <returns>The <see cref="IMongoCollection{TEntity}"/> instance that can store <typeparamref name="TEntity"/>.</returns>
         IMongoCollection<TEntity> GetCollection<TEntity>();
-
-        /// <summary>
-        ///     Gets a <see cref="IQueryable{TEntity}"/> that can be used to query instances of <typeparamref name="TEntity"/>.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of entity to query.</typeparam>
-        /// <returns>An <see cref="IQueryable{TEntity}"/> that can query <typeparamref name="TEntity"/> values from the MongoDB instance.</returns>
-        IQueryable<TEntity> Query<TEntity>();
     }
 }

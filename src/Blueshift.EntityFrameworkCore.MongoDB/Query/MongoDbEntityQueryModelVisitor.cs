@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Query;
@@ -83,6 +84,27 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
                     .Visit(methodCallExpression);
             }
             return expression;
+        }
+
+        /// <inheritdoc />
+        protected override Expression CallCreateTransparentIdentifier(
+            Type transparentIdentifierType,
+            Expression outerExpression,
+            Expression innerExpression)
+        {
+            ConstructorInfo constructorInfo = transparentIdentifierType.GetConstructor(
+                BindingFlags.NonPublic | BindingFlags.Instance,
+                null,
+                new []
+                {
+                    outerExpression.Type,
+                    innerExpression.Type
+                },
+                Array.Empty<ParameterModifier>());
+            return Expression.New(
+                constructorInfo,
+                outerExpression,
+                innerExpression);
         }
     }
 }

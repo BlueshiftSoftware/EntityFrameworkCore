@@ -62,7 +62,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                 if (property.IsShadowProperty && property.IsForeignKey())
                 {
                     IForeignKey foreignKey = property.AsProperty().ForeignKeys.Single();
-                    INavigation navigation = foreignKey.PrincipalEntityType == entityType
+                    INavigation navigation = foreignKey.PrincipalEntityType == entityType 
+                                             && !foreignKey.IsSelfPrimaryKeyReferencing()
                         ? foreignKey.PrincipalToDependent
                         : foreignKey.DependentToPrincipal;
 

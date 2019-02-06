@@ -1,12 +1,15 @@
 using System.Linq;
 using System.Text;
+using Blueshift.EntityFrameworkCore.MongoDB.DependencyInjection;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 
 // ReSharper disable once CheckNamespace
-namespace Microsoft.EntityFrameworkCore.Infrastructure
+namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
 {
     /// <summary>
     /// This API supports the Entity Framework Core infrastructure and is not intended to be used

@@ -1,12 +1,12 @@
-﻿using Blueshift.EntityFrameworkCore.MongoDB.Metadata;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Utilities;
 
 // ReSharper disable once CheckNamespace
-namespace Microsoft.EntityFrameworkCore
+namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
 {
     /// <summary>
     ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
@@ -41,13 +41,6 @@ namespace Microsoft.EntityFrameworkCore
         /// </summary>
         public static MongoDbEntityTypeAnnotations MongoDb([NotNull] this IMutableEntityType mutableEntityType)
             => new MongoDbEntityTypeAnnotations(Check.NotNull(mutableEntityType, nameof(mutableEntityType)));
-
-        /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        public static MongoDbNavigationAnnotations MongoDb([NotNull] this INavigation navigation)
-            => new MongoDbNavigationAnnotations(Check.NotNull(navigation, nameof(navigation)));
 
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used

@@ -18,7 +18,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         }
 
         /// <summary>
-        /// Depedencies used to create a <see cref="MongoDbEntityQueryModelVisitor"/>.
+        /// Dependencies used to create a <see cref="MongoDbEntityQueryModelVisitor"/>.
         /// </summary>
         public MongoDbEntityQueryModelVisitorDependencies MongoDbDependencies { get; }
 

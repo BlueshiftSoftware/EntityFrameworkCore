@@ -1,7 +1,6 @@
 ﻿using System;
-using Microsoft.EntityFrameworkCore;
+using Blueshift.EntityFrameworkCore.MongoDB.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Driver;
 
 namespace Blueshift.Identity.MongoDB.Tests
 {

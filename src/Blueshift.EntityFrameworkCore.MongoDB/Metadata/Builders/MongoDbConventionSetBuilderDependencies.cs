@@ -1,7 +1,9 @@
 ﻿using Blueshift.EntityFrameworkCore.MongoDB.Storage;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Utilities;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
@@ -30,12 +32,18 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
         /// </summary>
         /// <param name="currentDbContext">Indirection to the current <see cref="DbContext" /> instance.</param>
         /// <param name="mongoDbTypeMappingSource">Maps .NET types to their corresponding database provider types.</param>
+        /// <param name="memberClassifier">Determines the property types for candidate navigation properties.</param>
+        /// <param name="modelLogger">Traces the process of building a <see cref="Model"/>.</param>
         public MongoDbConventionSetBuilderDependencies(
             [NotNull] ICurrentDbContext currentDbContext,
-            [NotNull] IMongoDbTypeMappingSource mongoDbTypeMappingSource)
+            [NotNull] IMongoDbTypeMappingSource mongoDbTypeMappingSource,
+            [NotNull] IMemberClassifier memberClassifier,
+            [NotNull] IDiagnosticsLogger<DbLoggerCategory.Model> modelLogger)
         {
             CurrentDbContext = Check.NotNull(currentDbContext, nameof(currentDbContext));
             MongoDbTypeMapperSource = Check.NotNull(mongoDbTypeMappingSource, nameof(mongoDbTypeMappingSource));
+            MemberClassifier = Check.NotNull(memberClassifier, nameof(memberClassifier));
+            ModelLogger = Check.NotNull(modelLogger, nameof(modelLogger));
         }
 
         /// <summary>
@@ -47,5 +55,15 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
         /// Maps .NET types to their corresponding database provider types.
         /// </summary>
         public IMongoDbTypeMappingSource MongoDbTypeMapperSource { get; }
+
+        /// <summary>
+        /// The <see cref="IMemberClassifier"/> to use to determine the property types for candidate navigation properties.
+        /// </summary>
+        public IMemberClassifier MemberClassifier { get; set; }
+
+        /// <summary>
+        /// The <see cref="IDiagnosticsLogger{TLoggerCategory}"/> used for tracing the process of building a <see cref="Model"/>.
+        /// </summary>
+        public IDiagnosticsLogger<DbLoggerCategory.Model> ModelLogger { get; set; }
     }
 }

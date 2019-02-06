@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using Blueshift.EntityFrameworkCore.MongoDB.ChangeTracking;
+using Blueshift.EntityFrameworkCore.MongoDB.Adapter.Update;
 using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders;
 using Blueshift.EntityFrameworkCore.MongoDB.Query;
+using Blueshift.EntityFrameworkCore.MongoDB.Query.Expressions;
 using Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors;
 using Blueshift.EntityFrameworkCore.MongoDB.Storage;
-using Blueshift.EntityFrameworkCore.MongoDB.Update;
 using Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Query;
@@ -34,9 +33,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
                 { typeof(IMongoClient), new ServiceCharacteristics(ServiceLifetime.Scoped) },
                 { typeof(IMongoDbConnection), new ServiceCharacteristics(ServiceLifetime.Scoped) },
                 { typeof(IMongoDbTypeMappingSource), new ServiceCharacteristics(ServiceLifetime.Singleton) },
-                { typeof(IMongoDbWriteModelFactoryCache), new ServiceCharacteristics(ServiceLifetime.Singleton) },
-                { typeof(IMongoDbWriteModelFactorySelector), new ServiceCharacteristics(ServiceLifetime.Scoped) },
-                { typeof(IMongoDbDenormalizedCollectionCompensatingVisitorFactory), new ServiceCharacteristics(ServiceLifetime.Scoped) },
                 { typeof(MongoDbEntityQueryModelVisitorDependencies), new ServiceCharacteristics(ServiceLifetime.Scoped) },
                 { typeof(MongoDbConventionSetBuilderDependencies), new ServiceCharacteristics(ServiceLifetime.Scoped) }
             };
@@ -76,12 +72,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
             TryAdd<IQueryContextFactory, MongoDbQueryContextFactory>();
             TryAdd<IEntityQueryableExpressionVisitorFactory, MongoDbEntityQueryableExpressionVisitorFactory>();
             TryAdd<IEntityQueryModelVisitorFactory, MongoDbEntityQueryModelVisitorFactory>();
-            TryAdd<IMongoDbWriteModelFactoryCache, MongoDbWriteModelFactoryCache>();
-            TryAdd<IMongoDbWriteModelFactorySelector, MongoDbWriteModelFactorySelector>();
-            TryAdd<IInternalEntityEntryFactory, MongoDbInternalEntityEntryFactory>();
             TryAdd<IMemberAccessBindingExpressionVisitorFactory, MongoDbMemberAccessBindingExpressionVisitorFactory>();
             TryAdd<INavigationRewritingExpressionVisitorFactory, MongoDbNavigationRewritingExpressionVisitorFactory>();
-            TryAdd<IStateManager, MongoDbStateManager>();
+
             TryAddProviderSpecificServices(serviceCollectionMap =>
             {
                 serviceCollectionMap.TryAddScoped(serviceProvider =>
@@ -93,6 +86,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
                 });
                 serviceCollectionMap.TryAddScoped<IMongoDbConnection, MongoDbConnection>();
                 serviceCollectionMap.TryAddScoped<IMongoDbDenormalizedCollectionCompensatingVisitorFactory, MongoDbDenormalizedCollectionCompensatingVisitorFactory>();
+                serviceCollectionMap.TryAddScoped<IDocumentQueryExpressionFactory, MongoDbDocumentQueryExpressionFactory>();
+                serviceCollectionMap.TryAddScoped<IMongoDbWriteModelFactoryCache, MongoDbWriteModelFactoryCache>();
+                serviceCollectionMap.TryAddScoped<IMongoDbWriteModelFactorySelector, MongoDbWriteModelFactorySelector>();
+                serviceCollectionMap.TryAddScoped<IEntityLoadInfoFactory, EntityLoadInfoFactory>();
+                serviceCollectionMap.TryAddScoped<IValueBufferFactory, ValueBufferFactory>();
             });
 
             ServiceCollectionMap.GetInfrastructure()

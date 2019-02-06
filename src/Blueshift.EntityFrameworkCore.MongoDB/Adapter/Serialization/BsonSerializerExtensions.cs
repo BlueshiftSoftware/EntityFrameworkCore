@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Blueshift.EntityFrameworkCore.MongoDB.Adapter.Serialization;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Utilities;
+using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 
 // ReSharper disable once CheckNamespace
-namespace MongoDB.Bson.Serialization
+namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter.Serialization
 {
     /// <summary>
     /// Provides extended functionality to <see cref="IBsonSerializer"/>.

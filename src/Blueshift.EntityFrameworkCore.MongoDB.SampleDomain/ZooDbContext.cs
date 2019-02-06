@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Blueshift.EntityFrameworkCore.MongoDB.Annotations;
+using Blueshift.EntityFrameworkCore.MongoDB.Infrastructure;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
@@ -48,20 +49,16 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
         }
     }
 
-    public abstract class ZooEntity
+    [BsonKnownTypes(typeof(Tiger), typeof(PolarBear), typeof(Otter))]
+    [BsonDiscriminator(RootClass = true)]
+    public abstract class Animal
     {
         // When using attribute-driven data modeling, either [BsonId] or [Key]
         // is required for the primary key field; either will work with the
         // MongoDb C# driver EFCore adapter
-        // [BsonId]
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public ObjectId Id { get; [UsedImplicitly] private set; }
-    }
+        public ObjectId AnimalId { get; [UsedImplicitly] private set; }
 
-    [BsonKnownTypes(typeof(Tiger), typeof(PolarBear), typeof(Otter))]
-    [BsonDiscriminator(RootClass = true)]
-    public abstract class Animal : ZooEntity
-    {
         public string Name { get; set; }
 
         public decimal Age { get; set; }
@@ -93,8 +90,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
     [BsonDiscriminator("Lutra lutra")]
     public class EurasianOtter : Otter { }
 
-    public class Employee : ZooEntity
+    public class Employee
     {
+        // When using attribute-driven data modeling, either [BsonId] or [Key]
+        // is required for the primary key field; either will work with the
+        // MongoDb C# driver EFCore adapter
+        [BsonId, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public ObjectId EmployeeId { get; [UsedImplicitly] private set; }
+
         public string FirstName { get; set; }
 
         public string LastName { get; set; }
@@ -105,10 +108,15 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
             : $"{LastName}, {FirstName}";
 
         public decimal Age { get; set; }
+
         public IList<Specialty> Specialties { get; set; } = new List<Specialty>();
 
         [BsonIgnore]
         public string Ignored => $"This string should never show up in the database.";
+
+        public Employee Manager { get; set; }
+
+        public IList<Employee> DirectReports { get; set; } = new List<Employee>();
     }
 
     public enum ZooTask
@@ -119,6 +127,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
         TourGuide
     }
 
+    [Owned]
     public class Specialty
     {
         public string AnimalType { get; set; }
@@ -126,8 +135,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
         public ZooTask Task { get; set; }
     }
 
-    public class Enclosure : ZooEntity
+    public class Enclosure
     {
+        // When using attribute-driven data modeling, either [BsonId] or [Key]
+        // is required for the primary key field; either will work with the
+        // MongoDb C# driver EFCore adapter
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public ObjectId EnclosureId { get; [UsedImplicitly] private set; }
+
         public string Name { get; set; }
 
         public string AnimalEnclosureType { get; set; }
@@ -139,9 +154,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
 
     }
 
+    [Owned]
     public class Schedule
     {
-        [Denormalize(nameof(Animal.Name))]
         public IList<ZooAssignment> Assignments { get; [UsedImplicitly] private set; } = new List<ZooAssignment>();
 
         [Denormalize(nameof(Employee.FirstName), nameof(Employee.LastName))]

@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
+﻿using Blueshift.EntityFrameworkCore.MongoDB.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
 {
