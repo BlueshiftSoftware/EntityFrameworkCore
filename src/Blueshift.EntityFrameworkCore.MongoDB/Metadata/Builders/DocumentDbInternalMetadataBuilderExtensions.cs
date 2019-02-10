@@ -1,62 +1,64 @@
 ﻿using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Utilities;
 
-namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata
+namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
 {
     /// <summary>
     ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
     ///     directly from your code. This API may change or be removed in future releases.
     /// </summary>
-    public class MongoDbAnnotations<TAnnotatable>
-        where TAnnotatable : IAnnotatable
+    public static class DocumentInternalMetadataBuilderExtensions
     {
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        protected MongoDbAnnotations([NotNull] TAnnotatable metadata)
-        {
-            Annotatable = Check.Is<IMutableAnnotatable>(metadata, nameof(metadata));
-            Metadata = Check.NotNull(metadata, nameof(metadata));
-        }
+        public static DocumentEntityTypeAnnotations Document([NotNull] this InternalEntityTypeBuilder internalEntityTypeBuilder)
+            => Check.NotNull(internalEntityTypeBuilder, nameof(internalEntityTypeBuilder)).Metadata.Document();
 
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public virtual TAnnotatable Metadata { get; }
+        public static DocumentEntityTypeAnnotations Document([NotNull] this EntityTypeBuilder entityTypeBuilder)
+            => Check.NotNull(entityTypeBuilder, nameof(entityTypeBuilder)).Metadata.Document();
 
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        protected virtual IMutableAnnotatable Annotatable { get; }
+        public static DocumentEntityTypeAnnotations Document([NotNull] this EntityType entityType)
+            => Check.NotNull<IEntityType>(entityType, nameof(entityType)).Document();
 
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public virtual T GetAnnotation<T>([CanBeNull] string annotationName)
-            => (T)Annotatable[Check.NullButNotEmpty(annotationName, nameof(annotationName))];
+        public static DocumentEntityTypeAnnotations Document([NotNull] this IEntityType entityType)
+            => new DocumentEntityTypeAnnotations(Check.NotNull(entityType, nameof(entityType)));
 
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public virtual bool SetAnnotation<T>([NotNull] string annotationName, [CanBeNull] T value)
-        {
-            Check.NotEmpty(annotationName, nameof(annotationName));
-            Annotatable[annotationName] = value;
-            return true;
-        }
+        public static DocumentKeyAnnotations Document([NotNull] this InternalKeyBuilder internalKeyBuilder)
+            => Check.NotNull(internalKeyBuilder, nameof(internalKeyBuilder)).Metadata.Document();
 
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public virtual bool CanSetAnnotation([NotNull] string annotationName, [CanBeNull] object value)
-            => true;
+        public static DocumentKeyAnnotations Document([NotNull] this Key key)
+            => Check.NotNull<IKey>(key, nameof(key)).Document();
+
+        /// <summary>
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
+        public static DocumentKeyAnnotations Document([NotNull] this IKey key)
+            => new DocumentKeyAnnotations(Check.NotNull(key, nameof(key)));
     }
 }

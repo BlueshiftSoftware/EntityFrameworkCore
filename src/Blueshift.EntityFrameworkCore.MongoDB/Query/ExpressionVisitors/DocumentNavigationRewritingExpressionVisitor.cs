@@ -27,11 +27,11 @@ using Remotion.Linq.Clauses.ResultOperators;
 namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
 {
     /// <inheritdoc />
-    public class MongoDbNavigationRewritingExpressionVisitor : NavigationRewritingExpressionVisitor
+    public class DocumentNavigationRewritingExpressionVisitor : NavigationRewritingExpressionVisitor
     {
         private readonly EntityQueryModelVisitor _queryModelVisitor;
         private readonly NavigationJoins _navigationJoins = new NavigationJoins();
-        private readonly MongoDbNavigationRewritingQueryModelVisitor _mongoDbNavigationRewritingQueryModelVisitor;
+        private readonly DocumentNavigationRewritingQueryModelVisitor _documentNavigationRewritingQueryModelVisitor;
         private QueryModel _queryModel;
         private QueryModel _parentQueryModel;
 
@@ -201,13 +201,13 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
         }
 
         /// <inheritdoc />
-        public MongoDbNavigationRewritingExpressionVisitor([NotNull] EntityQueryModelVisitor queryModelVisitor)
+        public DocumentNavigationRewritingExpressionVisitor([NotNull] EntityQueryModelVisitor queryModelVisitor)
             : this(queryModelVisitor, navigationExpansionSubquery: false)
         {
         }
 
         /// <inheritdoc />
-        public MongoDbNavigationRewritingExpressionVisitor(
+        public DocumentNavigationRewritingExpressionVisitor(
             [NotNull] EntityQueryModelVisitor queryModelVisitor,
             bool navigationExpansionSubquery)
             : base(
@@ -217,14 +217,15 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
             Check.NotNull(queryModelVisitor, nameof(queryModelVisitor));
 
             _queryModelVisitor = queryModelVisitor;
-            _mongoDbNavigationRewritingQueryModelVisitor = new MongoDbNavigationRewritingQueryModelVisitor(this, _queryModelVisitor, navigationExpansionSubquery);
+            _documentNavigationRewritingQueryModelVisitor = new DocumentNavigationRewritingQueryModelVisitor(this, _queryModelVisitor, navigationExpansionSubquery);
         }
 
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        protected virtual bool RewriteOwnedNavigations { get; set; } = false;
+        protected virtual bool ShouldRewrite(INavigation navigation)
+            => !navigation.ForeignKey.IsOwnership;
 
         /// <inheritdoc />
         public override void Rewrite(QueryModel queryModel, QueryModel parentQueryModel)
@@ -232,7 +233,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
             _queryModel = queryModel;
             _parentQueryModel = parentQueryModel;
 
-            _mongoDbNavigationRewritingQueryModelVisitor.VisitQueryModel(_queryModel);
+            _documentNavigationRewritingQueryModelVisitor.VisitQueryModel(_queryModel);
 
             foreach (NavigationJoin navigationJoin in _navigationJoins)
             {
@@ -293,8 +294,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
             JoinClause leftJoin = leftNavigationJoin?.JoinClause ?? leftNavigationJoin?.GroupJoinClause?.JoinClause;
             JoinClause rightJoin = rightNavigationJoin?.JoinClause ?? rightNavigationJoin?.GroupJoinClause?.JoinClause;
 
-            if (leftNavigationJoin != null
-                && !leftNavigationJoin.Navigation.GetTargetType().IsOwned())
+            if (leftNavigationJoin?.Navigation.GetTargetType().IsOwned() == false)
             {
                 if (newRight.IsNullConstantExpression())
                 {
@@ -317,8 +317,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                 }
             }
 
-            if (rightNavigationJoin != null
-                && !rightNavigationJoin.Navigation.GetTargetType().IsOwned())
+            if (rightNavigationJoin?.Navigation.GetTargetType().IsOwned() == false)
             {
                 if (newLeft.IsNullConstantExpression())
                 {
@@ -652,7 +651,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
             {
                 QuerySourceReferenceExpression outerQuerySourceReferenceExpression = new QuerySourceReferenceExpression(querySource);
 
-                AdditionalFromClause additionalFromClauseBeingProcessed = _mongoDbNavigationRewritingQueryModelVisitor.AdditionalFromClauseBeingProcessed;
+                AdditionalFromClause additionalFromClauseBeingProcessed = _documentNavigationRewritingQueryModelVisitor.AdditionalFromClauseBeingProcessed;
                 if (additionalFromClauseBeingProcessed != null
                     && navigations.Last().IsCollection()
                     && !_insideMaterializeCollectionNavigation)
@@ -976,10 +975,17 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                     optionalNavigationInChain = true;
                 }
 
-                if (!RewriteOwnedNavigations
-                    && navigation.ForeignKey.IsOwnership)
+                if (!ShouldRewrite(navigation))
                 {
-                    sourceExpression = Expression.Property(sourceExpression, navigation.PropertyInfo);
+                    if (sourceExpression.Type != navigation.DeclaringEntityType.ClrType)
+                    {
+                        sourceExpression = Expression.Condition(
+                            Expression.TypeIs(sourceExpression, navigation.DeclaringEntityType.ClrType),
+                            Expression.Convert(sourceExpression, navigation.DeclaringEntityType.ClrType),
+                            Expression.Constant(null, navigation.DeclaringEntityType.ClrType));
+                    }
+
+                    sourceExpression = new NullConditionalExpression(sourceExpression, Expression.Property(sourceExpression, navigation.PropertyInfo));
 
                     continue;
                 }
@@ -1149,7 +1155,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
             {
                 IEntityType targetEntityType = navigation.GetTargetType();
 
-                if (!RewriteOwnedNavigations && navigation.ForeignKey.IsOwnership)
+                if (!ShouldRewrite(navigation))
                 {
                     sourceExpression = Expression.Property(sourceExpression, navigation.PropertyInfo);
 
@@ -1169,7 +1175,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                 sourceExpression = innerQuerySourceReferenceExpression;
             }
 
-            if (RewriteOwnedNavigations || !navigations.Last().ForeignKey.IsOwnership)
+            if (ShouldRewrite(navigations.Last()))
             {
                 _queryModel.BodyClauses.RemoveAt(additionalJoinIndex);
             }
@@ -1183,7 +1189,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                 _queryModel.BodyClauses.Insert(additionalJoinIndex + i, joinClauses[i]);
             }
 
-            if (RewriteOwnedNavigations || !navigations.Last().ForeignKey.IsOwnership)
+            if (ShouldRewrite(navigations.Last()))
             {
                 QuerySourceMapping querySourceMapping = new QuerySourceMapping();
                 querySourceMapping.AddMapping(additionalFromClauseBeingProcessed, querySourceReferenceExpression);
@@ -1198,7 +1204,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                     querySourceReferenceExpression.ReferencedQuerySource);
             }
 
-            return RewriteOwnedNavigations || !navigations.Last().ForeignKey.IsOwnership
+            return ShouldRewrite(navigations.Last())
                 ? querySourceReferenceExpression
                 : sourceExpression;
         }
@@ -1261,9 +1267,30 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                     return navigationJoin.QuerySourceReferenceExpression;
                 }
 
-                adddedJoinClauses.Add(joinClause);
+                DefaultIfEmptyResultOperator defaultIfEmptyOperator = fromSubqueryExpression.QueryModel.ResultOperators.OfType<DefaultIfEmptyResultOperator>().FirstOrDefault();
+                if (defaultIfEmptyOperator != null)
+                {
+                    RewriteNavigationIntoGroupJoin(
+                        joinClause,
+                        navigation,
+                        targetEntityType,
+                        outerQuerySourceReferenceExpression,
+                        null,
+                        new List<IBodyClause>(),
+                        new List<ResultOperatorBase>
+                        {
+                            defaultIfEmptyOperator
+                        },
+                        out NavigationJoin navigationJoin);
 
-                outerQuerySourceReferenceExpression = innerQuerySourceReferenceExpression;
+                    _navigationJoins.Add(navigationJoin);
+                    outerQuerySourceReferenceExpression = navigationJoin.QuerySourceReferenceExpression;
+                }
+                else
+                {
+                    adddedJoinClauses.Add(joinClause);
+                    outerQuerySourceReferenceExpression = innerQuerySourceReferenceExpression;
+                }
             }
 
             return outerQuerySourceReferenceExpression;
@@ -1405,7 +1432,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                 : expression;
         }
 
-        private class MongoDbNavigationRewritingQueryModelVisitor : ExpressionTransformingQueryModelVisitor<MongoDbNavigationRewritingExpressionVisitor>
+        private class DocumentNavigationRewritingQueryModelVisitor : ExpressionTransformingQueryModelVisitor<DocumentNavigationRewritingExpressionVisitor>
         {
             private readonly CollectionNavigationSubqueryInjector _subqueryInjector;
             private readonly bool _navigationExpansionSubquery;
@@ -1413,8 +1440,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
 
             public AdditionalFromClause AdditionalFromClauseBeingProcessed { get; private set; }
 
-            public MongoDbNavigationRewritingQueryModelVisitor(
-                MongoDbNavigationRewritingExpressionVisitor transformingVisitor,
+            public DocumentNavigationRewritingQueryModelVisitor(
+                DocumentNavigationRewritingExpressionVisitor transformingVisitor,
                 EntityQueryModelVisitor queryModelVisitor,
                 bool navigationExpansionSubquery)
                 : base(transformingVisitor)
@@ -1623,6 +1650,23 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                     originalType);
 
                 adjuster(resultOperator, translatedExpression);
+            }
+        }
+
+        private class ProjectionSubqueryInjectingQueryModelVisitor : QueryModelVisitorBase
+        {
+            private readonly CollectionNavigationSubqueryInjector _subqueryInjector;
+
+            public ProjectionSubqueryInjectingQueryModelVisitor(EntityQueryModelVisitor queryModelVisitor)
+            {
+                _subqueryInjector = new CollectionNavigationSubqueryInjector(queryModelVisitor, shouldInject: true);
+            }
+
+            public override void VisitSelectClause(SelectClause selectClause, QueryModel queryModel)
+            {
+                selectClause.Selector = _subqueryInjector.Visit(selectClause.Selector);
+
+                base.VisitSelectClause(selectClause, queryModel);
             }
         }
     }

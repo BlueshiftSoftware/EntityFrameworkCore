@@ -33,7 +33,12 @@ namespace Blueshift.Identity.MongoDB
     /// <typeparam name="TKey">The type of the primary key for this object.</typeparam>
     [MongoCollection("users")]
     public class MongoDbIdentityUser<TKey>
-        : MongoDbIdentityUser<TKey, MongoDbIdentityClaim, MongoDbIdentityUserRole, MongoDbIdentityUserLogin, MongoDbIdentityUserToken>
+        : MongoDbIdentityUser<
+            TKey,
+            MongoDbIdentityClaim,
+            MongoDbIdentityUserRole,
+            MongoDbIdentityUserLogin,
+            MongoDbIdentityUserToken>
         where TKey : IEquatable<TKey>
     {
         /// <summary>

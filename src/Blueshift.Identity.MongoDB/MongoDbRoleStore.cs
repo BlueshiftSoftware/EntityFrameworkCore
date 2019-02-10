@@ -12,16 +12,18 @@ using MongoDB.Bson;
 
 namespace Blueshift.Identity.MongoDB
 {
+    /// <inheritdoc />
     /// <summary>
     /// Creates a new instance of a persistence store for roles.
     /// </summary>
     public class MongoDbRoleStore : MongoDbRoleStore<MongoDbIdentityRole, IdentityMongoDbContext>
     {
+        /// <inheritdoc />
         /// <summary>
-        /// Constructs a new instance of <see cref="MongoDbRoleStore"/>.
+        /// Constructs a new instance of <see cref="T:Blueshift.Identity.MongoDB.MongoDbRoleStore" />.
         /// </summary>
-        /// <param name="context">The <see cref="DbContext"/>.</param>
-        /// <param name="describer">The <see cref="IdentityErrorDescriber"/>.</param>
+        /// <param name="context">The <see cref="T:Microsoft.EntityFrameworkCore.DbContext" />.</param>
+        /// <param name="describer">The <see cref="T:Microsoft.AspNetCore.Identity.IdentityErrorDescriber" />.</param>
         public MongoDbRoleStore(IdentityMongoDbContext context, IdentityErrorDescriber describer = null)
             : base(context, describer)
         {

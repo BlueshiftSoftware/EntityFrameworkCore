@@ -54,7 +54,10 @@ namespace Blueshift.Identity.MongoDB
     /// <typeparam name="TUser">The type of the user objects for this store.</typeparam>
     /// <typeparam name="TRole">The type of the role objects for this store.</typeparam>
     public class MongoDbUserStore<TUser, TRole> :
-        MongoDbUserStore<TUser, TRole, ObjectId>
+        MongoDbUserStore<
+            TUser,
+            TRole,
+            ObjectId>
         where TUser : MongoDbIdentityUser<ObjectId>, new()
         where TRole : MongoDbIdentityRole<ObjectId>, new()
     {
@@ -77,9 +80,28 @@ namespace Blueshift.Identity.MongoDB
     /// <typeparam name="TRole">The type of the role objects for this store.</typeparam>
     /// <typeparam name="TKey">The type of the identifiers for this store's objects.</typeparam>
     public class MongoDbUserStore<TUser, TRole, TKey> :
-        MongoDbUserStore<TUser, TRole, IdentityMongoDbContext<TUser, TRole, TKey>, TKey, MongoDbIdentityClaim,
-            MongoDbIdentityUserRole, MongoDbIdentityUserLogin, MongoDbIdentityUserToken>
-        where TUser : MongoDbIdentityUser<TKey>, new()
+        MongoDbUserStore<
+            TUser,
+            TRole,
+            IdentityMongoDbContext<
+                TUser,
+                TRole,
+                TKey,
+                MongoDbIdentityClaim,
+                MongoDbIdentityUserRole,
+                MongoDbIdentityUserLogin,
+                MongoDbIdentityUserToken>,
+            TKey,
+            MongoDbIdentityClaim,
+            MongoDbIdentityUserRole,
+            MongoDbIdentityUserLogin,
+            MongoDbIdentityUserToken>
+        where TUser : MongoDbIdentityUser<
+            TKey,
+            MongoDbIdentityClaim,
+            MongoDbIdentityUserRole,
+            MongoDbIdentityUserLogin,
+            MongoDbIdentityUserToken>, new()
         where TRole : MongoDbIdentityRole<TKey>, new()
         where TKey : IEquatable<TKey>
     {
@@ -88,25 +110,45 @@ namespace Blueshift.Identity.MongoDB
         /// </summary>
         /// <param name="context">The context used to access the store.</param>
         /// <param name="describer">The <see cref="IdentityErrorDescriber" /> used to describe store errors.</param>
-        public MongoDbUserStore(IdentityMongoDbContext<TUser, TRole, TKey> context,
+        public MongoDbUserStore(
+            IdentityMongoDbContext<TUser,
+                TRole,
+                TKey,
+                MongoDbIdentityClaim,
+                MongoDbIdentityUserRole,
+                MongoDbIdentityUserLogin,
+                MongoDbIdentityUserToken> context,
             IdentityErrorDescriber describer = null)
             : base(context, describer)
         {
         }
     }
 
+    /// <inheritdoc />
     /// <summary>
     ///     Represents a new instance of a persistence store for the specified user and role types.
     /// </summary>
     /// <typeparam name="TUser">The type of the user objects for this store.</typeparam>
     /// <typeparam name="TRole">The type of the role objects for this store.</typeparam>
-    /// <typeparam name="TContext">The type of the <see cref="DbContext" /> with which this store communicates.</typeparam>
+    /// <typeparam name="TContext">The type of the <see cref="T:Microsoft.EntityFrameworkCore.DbContext" /> with which this store communicates.</typeparam>
     /// <typeparam name="TKey">The type of the identifiers for this store's objects.</typeparam>
     public class MongoDbUserStore<TUser, TRole, TContext, TKey> :
-        MongoDbUserStore<TUser, TRole, TContext, TKey, MongoDbIdentityClaim, MongoDbIdentityUserRole,
-            MongoDbIdentityUserLogin, MongoDbIdentityUserToken>
-        where TUser : MongoDbIdentityUser<TKey>, new()
-        where TRole : MongoDbIdentityRole<TKey>, new()
+        MongoDbUserStore<
+            TUser,
+            TRole,
+            TContext,
+            TKey,
+            MongoDbIdentityClaim,
+            MongoDbIdentityUserRole,
+            MongoDbIdentityUserLogin,
+            MongoDbIdentityUserToken>
+        where TUser : MongoDbIdentityUser<
+            TKey,
+            MongoDbIdentityClaim,
+            MongoDbIdentityUserRole,
+            MongoDbIdentityUserLogin,
+            MongoDbIdentityUserToken>, new()
+        where TRole : MongoDbIdentityRole<TKey, MongoDbIdentityClaim>, new()
         where TContext : DbContext
         where TKey : IEquatable<TKey>
     {
@@ -662,7 +704,8 @@ namespace Blueshift.Identity.MongoDB
             Check.NotNull(claim, nameof(claim));
             return await Users
                 .Where(user => user.Claims
-                    .Any(userClaim => userClaim.ClaimType == claim.Type && userClaim.ClaimValue == claim.Value))
+                    .Any(userClaim => userClaim.ClaimType == claim.Type
+                                      && userClaim.ClaimValue == claim.Value))
                 .ToListAsync(cancellationToken);
         }
 

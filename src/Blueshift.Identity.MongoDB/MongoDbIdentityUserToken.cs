@@ -1,8 +1,11 @@
-﻿namespace Blueshift.Identity.MongoDB
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace Blueshift.Identity.MongoDB
 {
     /// <summary>
     /// A representation of an external user login provider token for use with a MongoDB EntityFramework provider.
     /// </summary>
+    [Owned]
     public class MongoDbIdentityUserToken
     {
         /// <summary>

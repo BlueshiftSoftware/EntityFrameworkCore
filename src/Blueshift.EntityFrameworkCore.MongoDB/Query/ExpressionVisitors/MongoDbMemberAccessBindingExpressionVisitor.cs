@@ -62,16 +62,19 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                 if (property.IsShadowProperty && property.IsForeignKey())
                 {
                     IForeignKey foreignKey = property.AsProperty().ForeignKeys.Single();
-                    INavigation navigation = foreignKey.PrincipalEntityType == entityType 
-                                             && !foreignKey.IsSelfPrimaryKeyReferencing()
+                    INavigation navigation = foreignKey.PrincipalEntityType == entityType
+                                             || foreignKey.IsSelfPrimaryKeyReferencing()
                         ? foreignKey.PrincipalToDependent
                         : foreignKey.DependentToPrincipal;
 
-                    targetExpression = Expression.MakeMemberAccess(targetExpression, navigation.PropertyInfo);
+                    if (navigation != null)
+                    {
+                        targetExpression = Expression.MakeMemberAccess(targetExpression, navigation.PropertyInfo);
 
-                    IEntityType targetEntityType = navigation.GetTargetType();
-                    property = targetEntityType.FindPrimaryKey().Properties.Single();
-                    propertyInfo = property.PropertyInfo;
+                        IEntityType targetEntityType = navigation.GetTargetType();
+                        property = targetEntityType.FindPrimaryKey().Properties.Single();
+                        propertyInfo = property.PropertyInfo;
+                    }
                 }
 
                 newExpression = Expression.Convert(

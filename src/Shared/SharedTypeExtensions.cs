@@ -1,11 +1,7 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
 namespace System
@@ -23,6 +19,8 @@ namespace System
                    || (typeInfo.IsGenericType
                        && (typeInfo.GetGenericTypeDefinition() == typeof(Nullable<>)));
         }
+        public static bool IsValidEntityType(this Type type)
+            => type.GetTypeInfo().IsClass;
 
         public static Type MakeNullable(this Type type)
             => type.IsNullableType()

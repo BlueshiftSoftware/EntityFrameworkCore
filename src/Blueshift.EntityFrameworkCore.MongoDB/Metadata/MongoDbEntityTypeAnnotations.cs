@@ -5,16 +5,10 @@ using MongoDB.Driver;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata
 {
-    /// <summary>
-    ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
-    /// </summary>
-    public class MongoDbEntityTypeAnnotations : MongoDbAnnotations<IEntityType>
+    /// <inheritdoc />
+    public class MongoDbEntityTypeAnnotations : DocumentEntityTypeAnnotations
     {
-        /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
+        /// <inheritdoc />
         public MongoDbEntityTypeAnnotations([NotNull] IEntityType entityType)
             : base(entityType)
         {
@@ -72,16 +66,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata
         {
             get => GetAnnotation<bool?>(MongoDbAnnotationNames.DiscriminatorIsRequired) ?? false;
             set => SetAnnotation(MongoDbAnnotationNames.DiscriminatorIsRequired, value);
-        }
-
-        /// <summary>
-        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        public virtual bool IsComplexType
-        {
-            get => GetAnnotation<bool?>(MongoDbAnnotationNames.IsComplexType) ?? false;
-            set => SetAnnotation(MongoDbAnnotationNames.IsComplexType, value);
         }
 
         /// <summary>

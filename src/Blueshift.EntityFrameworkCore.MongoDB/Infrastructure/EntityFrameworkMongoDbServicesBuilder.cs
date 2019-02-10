@@ -73,7 +73,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
             TryAdd<IEntityQueryableExpressionVisitorFactory, MongoDbEntityQueryableExpressionVisitorFactory>();
             TryAdd<IEntityQueryModelVisitorFactory, MongoDbEntityQueryModelVisitorFactory>();
             TryAdd<IMemberAccessBindingExpressionVisitorFactory, MongoDbMemberAccessBindingExpressionVisitorFactory>();
-            TryAdd<INavigationRewritingExpressionVisitorFactory, MongoDbNavigationRewritingExpressionVisitorFactory>();
+            TryAdd<INavigationRewritingExpressionVisitorFactory, DocumentNavigationRewritingExpressionVisitorFactory>();
 
             TryAddProviderSpecificServices(serviceCollectionMap =>
             {

@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Utilities;
 
 namespace Blueshift.Identity.MongoDB
@@ -6,6 +7,7 @@ namespace Blueshift.Identity.MongoDB
     /// <summary>
     /// A representation of an authorization claim for use with a MongoDB EntityFramework provider.
     /// </summary>
+    [Owned]
     public class MongoDbIdentityClaim
     {
         /// <summary>

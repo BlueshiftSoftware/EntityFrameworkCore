@@ -52,6 +52,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
 
             var bsonRequiredAttributeConvention
                 = new BsonRequiredAttributeConvention();
+
+            PropertyMappingValidationConvention propertyMappingValidationConvention
+                = new DocumentPropertyMappingValidationConvention(
+                    _mongoDbConventionSetBuilderDependencies.MongoDbTypeMapperSource,
+                    _mongoDbConventionSetBuilderDependencies.MemberClassifier);
             
             conventionSet.ModelInitializedConventions
                 .With(mongoDatabaseConvention);
@@ -59,7 +64,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
             conventionSet.EntityTypeAddedConventions
                 .Replace(relationshipDiscoveryConvention)
                 .With(ownedDocumentConvention)
-                .With(new MongoDbEntityTypeAddedConvention())
                 .With(new MongoCollectionAttributeConvention())
                 .With(new BsonDiscriminatorAttributeConvention())
                 .With(new BsonIgnoreAttributeConvention())
@@ -78,6 +82,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
             conventionSet.KeyRemovedConventions
                 .With(ownedDocumentConvention);
 
+            conventionSet.ForeignKeyAddedConventions
+                .With(ownedDocumentConvention);
+
             conventionSet.ForeignKeyOwnershipChangedConventions
                 .With(mongoDbRelationshipDiscoveryConvention)
                 .Without(item => item is NavigationEagerLoadingConvention);
@@ -93,13 +100,16 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
                 .With(bsonRequiredAttributeConvention);
 
             conventionSet.NavigationAddedConventions
-                .Replace(relationshipDiscoveryConvention);
+                .Replace(relationshipDiscoveryConvention)
+                .With(ownedDocumentConvention);
 
             conventionSet.NavigationRemovedConventions
-                .Replace(relationshipDiscoveryConvention);
+                .Replace(relationshipDiscoveryConvention)
+                .With(ownedDocumentConvention);
 
             conventionSet.ModelBuiltConventions
                 .Replace(keyAttributeConvention)
+                .Replace(propertyMappingValidationConvention)
                 .With(ownedDocumentConvention);
 
             return conventionSet;

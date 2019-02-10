@@ -355,6 +355,31 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
             });
         }
 
+        [Fact(Skip = "Test currently fails.")]
+        public async Task Can_include_self_reference()
+        {
+            await ExecuteUnitOfWorkAsync(async zooDbContext =>
+            {
+                zooDbContext.AddRange(_zooEntities.Employees);
+                Assert.Equal(
+                    _zooEntities.Employees.Count,
+                    await zooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
+            });
+
+            await ExecuteUnitOfWorkAsync(async zooDbContext =>
+            {
+                IEnumerable<Employee> queriedEmployees = await zooDbContext.Employees
+                    .Include(employee => employee.Manager)
+                    .OrderBy(employee => employee.FullName)
+                    .ToListAsync();
+                Assert.Equal(_zooEntities.Employees,
+                    queriedEmployees,
+                    new EmployeeEqualityComparer()
+                        .WithManagerComparer(managerEqualityComparer =>
+                            managerEqualityComparer.WithDirectReportsComparer()));
+            });
+        }
+
         [Fact(Skip = "IncludeCompiler does not currently support DI or being independently overriden.")]
         public async Task Can_include_owned_collection()
         {
@@ -528,6 +553,38 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
 
             Assert.All(employees, Assert.NotNull);
             Assert.Equal(expectedEmployees, employees, new EmployeeEqualityComparer());
+        }
+
+        [Fact(Skip = "Test currently fails.")]
+        public async Task Can_list_async_twice()
+        {
+            await ExecuteUnitOfWorkAsync(async zooDbContext =>
+            {
+                zooDbContext.Animals.AddRange(_zooEntities.Animals);
+                Assert.Equal(
+                    _zooEntities.Entities.Count,
+                    await zooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
+            });
+
+            await ExecuteUnitOfWorkAsync(async zooDbContext =>
+            {
+                Assert.Equal(_zooEntities.Animals,
+                    await zooDbContext.Animals
+                        .OrderBy(animal => animal.Name)
+                        .ThenBy(animal => animal.Height)
+                        .ToListAsync(),
+                    new AnimalEqualityComparer());
+            });
+
+            await ExecuteUnitOfWorkAsync(async zooDbContext =>
+            {
+                Assert.Equal(_zooEntities.Animals,
+                    await zooDbContext.Animals
+                        .OrderBy(animal => animal.Name)
+                        .ThenBy(animal => animal.Height)
+                        .ToListAsync(),
+                    new AnimalEqualityComparer());
+            });
         }
 
         [Fact(Skip = "This test is a performance test and take a long time to execute.")]

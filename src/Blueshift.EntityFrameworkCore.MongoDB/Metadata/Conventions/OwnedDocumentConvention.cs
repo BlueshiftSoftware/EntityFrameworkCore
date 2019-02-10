@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders;
 using Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration;
 using Microsoft.EntityFrameworkCore;
@@ -11,18 +12,20 @@ using Microsoft.EntityFrameworkCore.Utilities;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
 {
-    /// <inheritdoc cref="IEntityTypeAddedConvention"/>
     /// <inheritdoc cref="IBaseTypeChangedConvention"/>
+    /// <inheritdoc cref="IEntityTypeAddedConvention"/>
+    /// <inheritdoc cref="IForeignKeyAddedConvention"/>
     /// <inheritdoc cref="IKeyAddedConvention"/>
     /// <inheritdoc cref="IKeyRemovedConvention"/>
-    /// <inheritdoc cref="INavigationAddedConvention"/>
-    /// <inheritdoc cref="INavigationRemovedConvention"/>
     /// <inheritdoc cref="IModelBuiltConvention"/>
     public class OwnedDocumentConvention :
-        IEntityTypeAddedConvention,
         IBaseTypeChangedConvention,
+        IEntityTypeAddedConvention,
+        IForeignKeyAddedConvention,
         IKeyAddedConvention,
         IKeyRemovedConvention,
+        INavigationAddedConvention,
+        INavigationRemovedConvention,
         IModelBuiltConvention
     {
         /// <inheritdoc />
@@ -30,10 +33,13 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
         {
             Check.NotNull(entityTypeBuilder, nameof(entityTypeBuilder));
 
-            if (entityTypeBuilder.Metadata.FindPrimaryKey() == null)
-            {
-                entityTypeBuilder.MongoDb().IsComplexType = true;
-            }
+            EntityType entityType = entityTypeBuilder.Metadata;
+            Key primaryKey = entityType.FindPrimaryKey();
+
+            bool isComplexType = primaryKey == null
+                                 || primaryKey.Document().IsOwnershipKey;
+
+            entityTypeBuilder.Document().IsComplexType = isComplexType;
 
             return entityTypeBuilder;
         }
@@ -60,6 +66,42 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
         public void Apply(InternalEntityTypeBuilder entityTypeBuilder, Key key)
         {
             Apply(entityTypeBuilder);
+        }
+
+        /// <inheritdoc />
+        public InternalRelationshipBuilder Apply(InternalRelationshipBuilder relationshipBuilder)
+        {
+            Check.NotNull(relationshipBuilder, nameof(relationshipBuilder));
+
+            IEntityType principalEntityType = relationshipBuilder.Metadata.PrincipalEntityType;
+
+            bool principalIsOwned = principalEntityType.IsOwned()
+                                    || principalEntityType.MongoDb().IsComplexType;
+
+            if (principalIsOwned)
+            {
+                relationshipBuilder.IsOwnership(true, ConfigurationSource.Explicit);
+            }
+
+            return relationshipBuilder;
+        }
+
+        /// <inheritdoc />
+        public InternalRelationshipBuilder Apply(
+            InternalRelationshipBuilder relationshipBuilder,
+            Navigation navigation)
+        {
+            return relationshipBuilder;
+        }
+
+        /// <inheritdoc />
+        public bool Apply(
+            InternalEntityTypeBuilder sourceEntityTypeBuilder,
+            InternalEntityTypeBuilder targetEntityTypeBuilder,
+            string navigationName,
+            MemberInfo memberInfo)
+        {
+            return true;
         }
 
         /// <inheritdoc />
@@ -92,30 +134,34 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
                     }
                 }
 
-                IKey primaryKey = ownedEntityType.FindPrimaryKey();
-                string ownershipKeyName = $"{ownedEntityType.ShortName()}Id";
-
-                if (primaryKey != null && !primaryKey.Properties.All(property => property.IsShadowProperty))
+                if (ownedEntityType.BaseType == null)
                 {
-                    throw new InvalidOperationException(
-                        $"Owned entity type {ownedEntityType.Name} has a non-shadow primary key defined.");
-                }
+                    IKey primaryKey = ownedEntityType.FindPrimaryKey();
+                    string ownershipKeyName = $"{ownedEntityType.ShortName()}Id";
 
-                if (primaryKey == null || !string.Equals(ownershipKeyName, primaryKey.Properties.First().Name))
-                {
-                    ownedEntityType.Builder
-                        .Property(
-                            ownershipKeyName,
-                            typeof(int?),
-                            ConfigurationSource.Convention)
-                        .HasValueGenerator(
-                            typeof(HashCodeValueGenerator),
-                            ConfigurationSource.Convention);
+                    if (primaryKey != null && primaryKey.Properties.Any(property => !property.IsShadowProperty))
+                    {
+                        throw new InvalidOperationException(
+                            $"Owned entity type {ownedEntityType.Name} has a non-shadow primary key defined.");
+                    }
 
-                    ownedEntityType.Builder
-                        .PrimaryKey(
-                            new[] { ownershipKeyName },
-                            ConfigurationSource.Convention);
+                    if (primaryKey == null || !string.Equals(ownershipKeyName, primaryKey.Properties.First().Name))
+                    {
+                        ownedEntityType.Builder
+                            .Property(
+                                ownershipKeyName,
+                                typeof(int?),
+                                ConfigurationSource.Convention)
+                            .HasValueGenerator(
+                                typeof(HashCodeValueGenerator),
+                                ConfigurationSource.Convention);
+
+                        ownedEntityType.Builder
+                            .PrimaryKey(
+                                new[] { ownershipKeyName },
+                                ConfigurationSource.Convention)
+                            .IsDocumentOwnershipKey(true);
+                    }
                 }
             }
 
