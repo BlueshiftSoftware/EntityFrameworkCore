@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Utilities;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
 using MongoDB.Driver;
 
-namespace Blueshift.EntityFrameworkCore.MongoDB.Update
+namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter.Update
 {
     /// <summary>
     /// Creates <see cref="DeleteOneModel{TEntity}"/> from a given <see cref="IUpdateEntry"/>.

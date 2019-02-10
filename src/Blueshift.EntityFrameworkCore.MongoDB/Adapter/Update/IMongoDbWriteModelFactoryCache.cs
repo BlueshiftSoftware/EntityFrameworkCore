@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using MongoDB.Driver;
 
-namespace Blueshift.EntityFrameworkCore.MongoDB.Update
+namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter.Update
 {
     /// <summary>
     /// Caches <see cref="IMongoDbWriteModelFactory{TEntity}"/> instances.

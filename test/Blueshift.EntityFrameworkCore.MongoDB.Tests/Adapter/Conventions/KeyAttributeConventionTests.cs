@@ -13,13 +13,13 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Conventions
         [Fact]
         public void Should_set_id_member_when_key_attribute_present()
         {
-            MemberInfo memberInfo = typeof(ZooEntity)
+            MemberInfo memberInfo = typeof(Animal)
                 .GetTypeInfo()
-                .GetProperty(nameof(ZooEntity.Id));
+                .GetProperty(nameof(Animal.AnimalId));
             Assert.NotNull(memberInfo);
             Assert.True(memberInfo.IsDefined(typeof(KeyAttribute), false));
             var keyAttributeConvention = new KeyAttributeConvention();
-            var bsonClasspMap = new BsonClassMap<ZooEntity>();
+            var bsonClasspMap = new BsonClassMap<Animal>();
             BsonMemberMap bsonMemberMap = bsonClasspMap.MapMember(memberInfo);
             keyAttributeConvention.Apply(bsonMemberMap);
             Assert.Same(bsonMemberMap, bsonClasspMap.IdMemberMap);

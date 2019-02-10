@@ -1,5 +1,5 @@
 ﻿using Blueshift.EntityFrameworkCore.MongoDB.Annotations;
-using Microsoft.EntityFrameworkCore;
+using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Utilities;

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Microsoft.EntityFrameworkCore.Utilities
 {
@@ -28,18 +29,26 @@ namespace Microsoft.EntityFrameworkCore.Utilities
         }
 
         [ContractAnnotation("value:null => halt")]
-        public static T Is<T>([NoEnumeration] object value, [InvokerParameterName] [NotNull] string parameterName)
-            where T : class
+        public static object IsInstanceOfType(
+            [NoEnumeration] object value,
+            [NotNull] Type type,
+            [InvokerParameterName] [NotNull] string parameterName)
         {
-            T t = value as T;
-            if (ReferenceEquals(t, default(T)))
+            if (!Check.NotNull(type, nameof(type)).IsInstanceOfType(value))
             {
                 NotEmpty(parameterName, nameof(parameterName));
-                throw new ArgumentException($"Argument {parameterName} is not an instance of {typeof(T).FullName}.", parameterName);
+                throw new ArgumentException($@"Argument {parameterName} is not an instance of {type.FullName}.", parameterName);
             }
 
-            return t;
+            return value;
         }
+
+        [ContractAnnotation("value:null => halt")]
+        public static T Is<T>(
+            [NoEnumeration] object value,
+            [InvokerParameterName] [NotNull] string parameterName)
+            where T : class
+            => IsInstanceOfType(value, typeof(T), parameterName) as T;
 
         [ContractAnnotation("value:null => halt")]
         public static T NotNull<T>(
@@ -124,16 +133,10 @@ namespace Microsoft.EntityFrameworkCore.Utilities
             return value;
         }
 
-        public static Type ValidEntityType(Type value, [InvokerParameterName] [NotNull] string parameterName)
-        {
-            if (!value.GetTypeInfo().IsClass)
-            {
-                NotEmpty(parameterName, nameof(parameterName));
-
-                throw new ArgumentException(CoreStrings.InvalidEntityType(value, parameterName));
-            }
-
-            return value;
-        }
+        public static IEntityType NotOwned(IEntityType entityType,
+            [InvokerParameterName] [NotNull] string parameterName)
+            => NotNull(entityType, parameterName).IsOwned()
+                ? throw new ArgumentException($@"{entityType.Name} is an owned EntityType.", parameterName)
+                : entityType;
     }
 }

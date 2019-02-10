@@ -22,6 +22,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration
         ///     otherwise <code>false</code>.
         /// </summary>
         /// <remarks>Always returns <c>true</c>.</remarks>
-        public override bool GeneratesTemporaryValues => true;
+        public override bool GeneratesTemporaryValues => false;
     }
 }

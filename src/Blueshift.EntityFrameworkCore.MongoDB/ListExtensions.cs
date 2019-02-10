@@ -1,9 +1,11 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Utilities;
 
 // ReSharper disable once CheckNamespace
-namespace System.Collections.Generic
+namespace Blueshift.EntityFrameworkCore.MongoDB
 {
     /// <summary>
     /// Provides a set of extensions for <see cref="IList{T}"/>.

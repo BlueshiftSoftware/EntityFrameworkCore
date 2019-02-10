@@ -13,6 +13,10 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static class IdentityEntityFrameworkMongoDbBuilderExtensions
     {
+        private static readonly Type BaseUserType = typeof(MongoDbIdentityUser<,,,,>);
+        private static readonly Type BaseRoleType = typeof(MongoDbIdentityRole<,>);
+        private static readonly Type BaseStoreType = typeof(MongoDbUserStore<,,,,,,,>);
+
         /// <summary>
         /// Adds a MongoDB for Entity Framework implementation of identity information stores.
         /// </summary>
@@ -43,18 +47,18 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static void AddMongoDbStores(IServiceCollection services, Type userType, Type roleType, Type contextType, Type keyType = null)
         {
-            TypeInfo identityUserType = FindGenericBaseType(userType, typeof(MongoDbIdentityUser<,,,,>));
+            TypeInfo identityUserType = FindGenericBaseType(userType, BaseUserType);
             if (identityUserType == null)
             {
-                throw new InvalidOperationException($"User type does not derive from {typeof(MongoDbIdentityUser<,,,,>).FullName}.");
+                throw new InvalidOperationException($"User type does not derive from {BaseUserType.FullName}.");
             }
-            TypeInfo identityRoleType = FindGenericBaseType(roleType, typeof(MongoDbIdentityRole<,>));
+            TypeInfo identityRoleType = FindGenericBaseType(roleType, BaseRoleType);
             if (identityRoleType == null)
             {
-                throw new InvalidOperationException($"Role type does not derive from {typeof(MongoDbIdentityRole<,>).FullName}.");
+                throw new InvalidOperationException($"Role type does not derive from {BaseRoleType.FullName}.");
             }
 
-            Type userStoreType = typeof(MongoDbUserStore<,,,,,,,>)
+            Type userStoreType = BaseStoreType
                     .MakeGenericType(
                         userType,
                         roleType,
@@ -99,14 +103,16 @@ namespace Microsoft.Extensions.DependencyInjection
         private static TypeInfo FindGenericBaseType(Type currentType, Type genericBaseType)
         {
             var type = currentType.GetTypeInfo();
-            while (type.BaseType != null)
+            while (type != null)
             {
-                type = type.BaseType.GetTypeInfo();
+                type = type.GetTypeInfo();
                 var genericType = type.IsGenericType ? type.GetGenericTypeDefinition() : null;
                 if (genericType != null && genericType == genericBaseType)
                 {
                     return type;
                 }
+
+                type = type.BaseType.GetTypeInfo();
             }
             return null;
         }

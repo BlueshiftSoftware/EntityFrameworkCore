@@ -4,12 +4,6 @@ clone_depth: 1
 test: off
 services:
   - mongodb
-branches:
-  only:
-    - release
-    - develop
-    - master
-    - /^(.*\/)?ci-.*$/
 environment:
   global:
     DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true

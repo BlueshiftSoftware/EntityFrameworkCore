@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using MongoDB.Bson;
 using Xunit;
 
 namespace Blueshift.Identity.MongoDB.Tests

@@ -4,11 +4,11 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Blueshift.EntityFrameworkCore.MongoDB.Metadata;
-using Blueshift.EntityFrameworkCore.MongoDB.Update;
+using Blueshift.EntityFrameworkCore.MongoDB.Adapter.Update;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Update;
@@ -59,21 +59,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
         /// <param name="entries">A list of entries to be persisted.</param>
         /// <returns>The number of entries that were persisted.</returns>
         public override int SaveChanges(IReadOnlyList<IUpdateEntry> entries)
-            => Check.NotNull(entries, nameof(entries))
-                .ToLookup(entry => GetCollectionEntityType(entry.EntityType))
+            => GetDocumentUpdateDefinitions(entries)
+                .ToLookup(entry => entry.EntityType.GetMongoDbCollectionEntityType())
                 .Sum(grouping => (int)GenericUpdateEntries.MakeGenericMethod(grouping.Key.ClrType)
                     .Invoke(this, new object[] { grouping }));
-
-        private IEntityType GetCollectionEntityType(IEntityType entityType)
-        {
-            MongoDbEntityTypeAnnotations annotations = entityType.MongoDb();
-            while (annotations.IsDerivedType && entityType.BaseType != null)
-            {
-                entityType = entityType.BaseType;
-                annotations = entityType.MongoDb();
-            }
-            return entityType;
-        }
 
         private int UpdateEntries<TEntity>(IEnumerable<IUpdateEntry> entries)
         {
@@ -83,6 +72,31 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
             BulkWriteResult result = _mongoDbConnection.GetCollection<TEntity>()
                 .BulkWrite(writeModels);
             return (int) (result.DeletedCount + result.InsertedCount + result.ModifiedCount);
+        }
+
+        private ISet<IUpdateEntry> GetDocumentUpdateDefinitions(IReadOnlyCollection<IUpdateEntry> entries)
+        {
+            Check.NotNull(entries, nameof(entries));
+
+            ISet<IUpdateEntry> rootEntries = new HashSet<IUpdateEntry>();
+
+            foreach (IUpdateEntry updateEntry in entries)
+            {
+                if (updateEntry.EntityType.IsDocumentRootEntityType())
+                {
+                    rootEntries.Add(updateEntry);
+                }
+                else if (updateEntry is InternalEntityEntry internalEntityEntry)
+                {
+                    rootEntries.Add(GetRootDocument(internalEntityEntry));
+                }
+                else
+                {
+                    // TBD - throw error
+                }
+            }
+
+            return rootEntries;
         }
 
         /// <summary>
@@ -98,10 +112,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
             IReadOnlyList<IUpdateEntry> entries,
             CancellationToken cancellationToken = default)
         {
-            IEnumerable<Task<int>> tasks = Check.NotNull(entries, nameof(entries))
-                .ToLookup(entry => GetCollectionEntityType(entry.EntityType))
+            IEnumerable<Task<int>> tasks = GetDocumentUpdateDefinitions(entries)
+                .ToLookup(entry => entry.EntityType.GetMongoDbCollectionEntityType())
                 .Select(async grouping => await InvokeUpdateEntriesAsync(grouping, cancellationToken))
                 .ToList();
+
             int[] totals = await Task.WhenAll(tasks);
             return totals.Sum();
         }
@@ -127,5 +142,25 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
         /// <inheritdoc />
         public override Func<QueryContext, IAsyncEnumerable<TResult>> CompileAsyncQuery<TResult>(QueryModel queryModel)
             => queryContext => CompileQuery<TResult>(queryModel)(queryContext).ToAsyncEnumerable();
+
+        private IUpdateEntry GetRootDocument(InternalEntityEntry entry)
+        {
+            var stateManager = entry.StateManager;
+
+            InternalEntityEntry owningEntityEntry = entry.EntityType
+                .GetForeignKeys()
+                .Where(foreignKey => foreignKey.IsOwnership)
+                .Select(foreignKey => stateManager.GetPrincipal(entry, foreignKey))
+                .SingleOrDefault(owner => owner != null);
+
+            if (owningEntityEntry == null)
+            {
+                throw new InvalidOperationException($"Encountered orphaned document of type {entry.EntityType.DisplayName()}.");
+            }
+
+            return owningEntityEntry.EntityType.IsDocumentRootEntityType()
+                ? owningEntityEntry
+                : GetRootDocument(owningEntityEntry);
+        }
     }
 }

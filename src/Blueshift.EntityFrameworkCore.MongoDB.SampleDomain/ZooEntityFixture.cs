@@ -22,9 +22,16 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
             return enclosure;
         }
 
-        public static Schedule WithApprover(this Schedule schedule, Employee employee)
+        public static Employee WithManager(this Employee employee, Employee manager)
         {
-            schedule.Approver = employee;
+            employee.Manager = manager;
+            manager.DirectReports.Add(employee);
+            return employee;
+        }
+
+        public static Schedule WithApprover(this Schedule schedule, Employee manager)
+        {
+            schedule.Approver = manager;
             return schedule;
         }
 
@@ -61,56 +68,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
     {
         public ZooEntities()
         {
-            TaigaMasuta = new Employee
-            {
-                FirstName = "Taiga",
-                LastName = "Masuta",
-                Age = 31.7M,
-                Specialties =
-                {
-                    new Specialty {AnimalType = nameof(Tiger), Task = ZooTask.Feeding},
-                    new Specialty {AnimalType = nameof(Tiger), Task = ZooTask.Exercise},
-                    new Specialty {AnimalType = nameof(Tiger), Task = ZooTask.Training}
-                }
-            };
-
-            OttoVonEssenmacher = new Employee
-            {
-                FirstName = "Otto",
-                LastName = "von Essenmacher",
-                Age = 22.1M,
-                Specialties =
-                {
-                    new Specialty {AnimalType = nameof(Otter), Task = ZooTask.Feeding},
-                    new Specialty {AnimalType = nameof(Otter), Task = ZooTask.Exercise}
-                }
-            };
-
-            BearOCreary = new Employee
-            {
-                FirstName = "Bear",
-                LastName = "O'Creary",
-                Age = 41.4M,
-                Specialties =
-                {
-                    new Specialty {AnimalType = nameof(PolarBear), Task = ZooTask.Feeding},
-                    new Specialty {AnimalType = nameof(PolarBear), Task = ZooTask.Training}
-                }
-            };
-
-            TurGuidry = new Employee
-            {
-                FirstName = "Tur",
-                LastName = "Guidry",
-                Age = 36.7M,
-                Specialties =
-                {
-                    new Specialty {AnimalType = nameof(Tiger), Task = ZooTask.TourGuide},
-                    new Specialty {AnimalType = nameof(Otter), Task = ZooTask.TourGuide},
-                    new Specialty {AnimalType = nameof(PolarBear), Task = ZooTask.TourGuide}
-                }
-            };
-
             ManAgier = new Employee
             {
                 FirstName = "Man",
@@ -121,6 +78,60 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
                     // those who can't zoo, manage!
                 }
             };
+
+            TaigaMasuta = new Employee
+                {
+                    FirstName = "Taiga",
+                    LastName = "Masuta",
+                    Age = 31.7M,
+                    Specialties =
+                    {
+                        new Specialty {AnimalType = nameof(Tiger), Task = ZooTask.Feeding},
+                        new Specialty {AnimalType = nameof(Tiger), Task = ZooTask.Exercise},
+                        new Specialty {AnimalType = nameof(Tiger), Task = ZooTask.Training}
+                    }
+                }
+                .WithManager(ManAgier);
+
+            OttoVonEssenmacher = new Employee
+                {
+                    FirstName = "Otto",
+                    LastName = "von Essenmacher",
+                    Age = 22.1M,
+                    Specialties =
+                    {
+                        new Specialty {AnimalType = nameof(Otter), Task = ZooTask.Feeding},
+                        new Specialty {AnimalType = nameof(Otter), Task = ZooTask.Exercise}
+                    }
+                }
+                .WithManager(ManAgier);
+
+            BearOCreary = new Employee
+                {
+                    FirstName = "Bear",
+                    LastName = "O'Creary",
+                    Age = 41.4M,
+                    Specialties =
+                    {
+                        new Specialty {AnimalType = nameof(PolarBear), Task = ZooTask.Feeding},
+                        new Specialty {AnimalType = nameof(PolarBear), Task = ZooTask.Training}
+                    }
+                }
+                .WithManager(ManAgier);
+
+            TurGuidry = new Employee
+                {
+                    FirstName = "Tur",
+                    LastName = "Guidry",
+                    Age = 36.7M,
+                    Specialties =
+                    {
+                        new Specialty {AnimalType = nameof(Tiger), Task = ZooTask.TourGuide},
+                        new Specialty {AnimalType = nameof(Otter), Task = ZooTask.TourGuide},
+                        new Specialty {AnimalType = nameof(PolarBear), Task = ZooTask.TourGuide}
+                    }
+                }
+                .WithManager(ManAgier);
 
             TigerEnclosure = new Enclosure
                 {
@@ -162,75 +173,75 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
                         .WithAssignment(TimeSpan.FromHours(7), BearOCreary, ZooTask.Feeding));
 
             Tigger = new Tiger
-            {
-                Name = "Tigger",
-                Age = 6.4M,
-                Weight = 270,
-                Height = .98M
-            }
-            .WithEnclosure(TigerEnclosure);
+                {
+                    Name = "Tigger",
+                    Age = 6.4M,
+                    Weight = 270,
+                    Height = .98M
+                }
+                .WithEnclosure(TigerEnclosure);
 
             Ursus = new PolarBear
-            {
-                Name = "Ursus",
-                Age = 4.9M,
-                Weight = 612,
-                Height = 2.7M
-            }
-            .WithEnclosure(PolarBearEnclosure);
+                {
+                    Name = "Ursus",
+                    Age = 4.9M,
+                    Weight = 612,
+                    Height = 2.7M
+                }
+                .WithEnclosure(PolarBearEnclosure);
 
             Hydron = new SeaOtter
-            {
-                Name = "Hydron",
-                Age = 1.8M,
-                Weight = 19,
-                Height = .3M
-            }
-            .WithEnclosure(OtterEnclosure);
+                {
+                    Name = "Hydron",
+                    Age = 1.8M,
+                    Weight = 19,
+                    Height = .3M
+                }
+                .WithEnclosure(OtterEnclosure);
 
             Yuri = new EurasianOtter
-            {
-                Name = "Yuri",
-                Age = 1.8M,
-                Weight = 19,
-                Height = .3M
-            }
-            .WithEnclosure(OtterEnclosure);
+                {
+                    Name = "Yuri",
+                    Age = 1.8M,
+                    Weight = 19,
+                    Height = .3M
+                }
+                .WithEnclosure(OtterEnclosure);
 
             Animals = new Animal[]
-            {
-                Tigger,
-                Ursus,
-                Hydron,
-                Yuri
-            }
-            .OrderBy(animal => animal.Name)
-            .ThenBy(animal => animal.Height)
-            .ToList();
+                {
+                    Tigger,
+                    Ursus,
+                    Hydron,
+                    Yuri
+                }
+                .OrderBy(animal => animal.Name)
+                .ThenBy(animal => animal.Height)
+                .ToList();
 
             Enclosures = new[]
-            {
-                TigerEnclosure,
-                PolarBearEnclosure,
-                OtterEnclosure
-            }
-            .OrderBy(enclosure => enclosure.AnimalEnclosureType)
-            .ThenBy(enclosure => enclosure.Name)
-            .ToList();
+                {
+                    TigerEnclosure,
+                    PolarBearEnclosure,
+                    OtterEnclosure
+                }
+                .OrderBy(enclosure => enclosure.AnimalEnclosureType)
+                .ThenBy(enclosure => enclosure.Name)
+                .ToList();
 
             Employees = new[]
-            {
-                TaigaMasuta,
-                BearOCreary,
-                OttoVonEssenmacher,
-                TurGuidry,
-                ManAgier
-            }
-            .OrderBy(employee => employee.FullName)
-            .ToList();
+                {
+                    TaigaMasuta,
+                    BearOCreary,
+                    OttoVonEssenmacher,
+                    TurGuidry,
+                    ManAgier
+                }
+                .OrderBy(employee => employee.FullName)
+                .ToList();
 
             Entities = Animals
-                .Cast<ZooEntity>()
+                .Cast<object>()
                 .Concat(Enclosures)
                 .Concat(Employees)
                 .ToList();
@@ -266,6 +277,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
 
         public ICollection<Employee> Employees { get; }
 
-        public ICollection<ZooEntity> Entities { get; }
+        public ICollection<object> Entities { get; }
     }
 }

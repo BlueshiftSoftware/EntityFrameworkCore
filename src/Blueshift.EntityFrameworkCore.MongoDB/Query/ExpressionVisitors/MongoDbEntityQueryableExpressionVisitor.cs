@@ -2,11 +2,10 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Blueshift.EntityFrameworkCore.MongoDB.Metadata;
+using Blueshift.EntityFrameworkCore.MongoDB.Query.Expressions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors;
 using Microsoft.EntityFrameworkCore.Utilities;
 using Remotion.Linq.Clauses;
@@ -16,19 +15,22 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
     /// <inheritdoc />
     public class MongoDbEntityQueryableExpressionVisitor : EntityQueryableExpressionVisitor
     {
-        [CanBeNull] private readonly IQuerySource _querySource;
         private readonly IModel _model;
+        private readonly IQuerySource _querySource;
+        private readonly IDocumentQueryExpressionFactory _documentQueryExpressionFactory;
 
         /// <inheritdoc />
         public MongoDbEntityQueryableExpressionVisitor(
             // ReSharper disable once SuggestBaseTypeForParameter
             [NotNull] MongoDbEntityQueryModelVisitor entityQueryModelVisitor,
             [NotNull] IModel model,
-            [CanBeNull] IQuerySource querySource)
+            [CanBeNull] IQuerySource querySource,
+            [NotNull] IDocumentQueryExpressionFactory documentQueryExpressionFactory)
             : base(entityQueryModelVisitor)
         {
             _model = Check.NotNull(model, nameof(model));
             _querySource = querySource;
+            _documentQueryExpressionFactory = Check.NotNull(documentQueryExpressionFactory, nameof(documentQueryExpressionFactory));
         }
 
         private new MongoDbEntityQueryModelVisitor QueryModelVisitor => (MongoDbEntityQueryModelVisitor)base.QueryModelVisitor;
@@ -40,42 +42,25 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
 
             IEntityType entityType = QueryModelVisitor.QueryCompilationContext.FindEntityType(_querySource)
                                      ?? _model.FindEntityType(elementType);
-            MongoDbEntityTypeAnnotations annotations = entityType.MongoDb();
 
-            while (annotations.IsDerivedType && entityType.BaseType != null)
+            entityType = entityType.GetMongoDbCollectionEntityType();
+
+            var documentQueryExpression = _documentQueryExpressionFactory
+                .CreateDocumentQueryExpression(entityType);
+
+            if (entityType.ClrType != elementType)
             {
-                entityType = entityType.BaseType;
-                annotations = entityType.MongoDb();
+                MethodInfo ofTypeMethodInfo = MethodHelper
+                    .GetGenericMethodDefinition<object>(() => Enumerable.OfType<object>(null))
+                    .MakeGenericMethod(elementType);
+
+                documentQueryExpression = Expression.Call(
+                    null,
+                    ofTypeMethodInfo,
+                    documentQueryExpression);
             }
 
-            return Expression.Call(
-                entityType.ClrType == elementType
-                    ? EntityQueryMethodInfo.MakeGenericMethod(elementType)
-                    : SubEntityQueryMethodInfo.MakeGenericMethod(entityType.ClrType, elementType),
-                EntityQueryModelVisitor.QueryContextParameter);
+            return documentQueryExpression;
         }
-
-        private static readonly MethodInfo EntityQueryMethodInfo
-            = typeof(MongoDbEntityQueryableExpressionVisitor).GetTypeInfo()
-                .GetDeclaredMethod(nameof(EntityQuery));
-
-        [UsedImplicitly]
-        private static IQueryable<TEntity> EntityQuery<TEntity>(
-            QueryContext queryContext)
-            where TEntity : class
-            => ((MongoDbQueryContext)queryContext).MongoDbConnection
-                .Query<TEntity>();
-
-        private static readonly MethodInfo SubEntityQueryMethodInfo
-            = typeof(MongoDbEntityQueryableExpressionVisitor).GetTypeInfo()
-                .GetDeclaredMethod(nameof(SubEntityQuery));
-
-        [UsedImplicitly]
-        private static IQueryable<TEntity> SubEntityQuery<TBaseEntity, TEntity>(
-            QueryContext queryContext)
-            where TBaseEntity : class
-            where TEntity : class, TBaseEntity
-            => EntityQuery<TEntity>(queryContext)
-                .OfType<TEntity>();
     }
 }

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Update;
 using MongoDB.Driver;
 
-namespace Blueshift.EntityFrameworkCore.MongoDB.Update
+namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter.Update
 {
     /// <summary>
     /// Interface for generating <see cref="WriteModel{TEntity}"/> instances from <see cref="IUpdateEntry"/> instances.

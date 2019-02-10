@@ -5,7 +5,6 @@ using System.Reflection;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Microsoft.EntityFrameworkCore.Utilities;
 using MongoDB.Bson;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Storage

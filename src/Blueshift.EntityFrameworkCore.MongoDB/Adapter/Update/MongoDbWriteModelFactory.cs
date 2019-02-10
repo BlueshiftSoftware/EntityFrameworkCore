@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -12,7 +13,7 @@ using Microsoft.EntityFrameworkCore.Utilities;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
 using MongoDB.Driver;
 
-namespace Blueshift.EntityFrameworkCore.MongoDB.Update
+namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter.Update
 {
     /// <summary>
     /// Base class for generating <see cref="WriteModel{TEntity}"/> instances.
@@ -20,20 +21,17 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Update
     /// <typeparam name="TEntity">The type of entity to write.</typeparam>
     public abstract class MongoDbWriteModelFactory<TEntity> : IMongoDbWriteModelFactory<TEntity>
     {
-        private static readonly MethodInfo GenericEqMethodInfo =
-            typeof(FilterDefinitionBuilder<TEntity>)
-            .GetTypeInfo()
-            .GetDeclaredMethods(nameof(FilterDefinitionBuilder<TEntity>.Eq))
-            .First(methodInfo => methodInfo.GetParameters().Length == 2 &&
-                methodInfo.GetParameters()[0].ParameterType.GetTypeInfo().IsGenericType &&
-                methodInfo.GetParameters()[0].ParameterType.GetTypeInfo().GetGenericTypeDefinition() == typeof(Expression<>))
-            .GetGenericMethodDefinition();
+        private static readonly MethodInfo GenericEqMethodInfo = MethodHelper
+            .GetGenericMethodDefinition<FilterDefinitionBuilder<TEntity>, object>(
+                filterDefinitionBuilder => filterDefinitionBuilder.Eq(
+                    (Expression<Func<TEntity, object>>) null,
+                    null));
 
         private readonly IValueGeneratorSelector _valueGeneratorSelector;
         private readonly IEnumerable<IProperty> _keyProperties;
         private readonly IEnumerable<IProperty> _dbGeneratedProperties;
         private readonly IEnumerable<IProperty> _concurrencyProperties;
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbWriteModelFactory{TEntity}"/> class.
         /// </summary>

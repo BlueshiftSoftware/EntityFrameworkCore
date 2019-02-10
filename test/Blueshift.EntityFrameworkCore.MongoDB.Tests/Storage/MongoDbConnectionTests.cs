@@ -4,6 +4,7 @@ using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders;
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
 using Blueshift.EntityFrameworkCore.MongoDB.Storage;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -41,7 +42,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Storage
                         new CurrentDbContext(
                             new ZooDbContext(
                                 new DbContextOptions<ZooDbContext>())),
-                        _mockMongoDbTypeMappingSource.Object))
+                        _mockMongoDbTypeMappingSource.Object,
+                        Mock.Of<IMemberClassifier>(),
+                        Mock.Of<IDiagnosticsLogger<DbLoggerCategory.Model>>()))
                     .AddConventions(
                         new CoreConventionSetBuilder(
                             new CoreConventionSetBuilderDependencies(

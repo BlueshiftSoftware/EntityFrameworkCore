@@ -10,7 +10,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata
     ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
     ///     directly from your code. This API may change or be removed in future releases.
     /// </summary>
-    public class MongoDbModelAnnotations : MongoDbAnnotations<IModel>
+    public class MongoDbModelAnnotations : DocumentAnnotations<IModel>
     {
         /// <summary>
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
@@ -27,9 +27,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata
         /// </summary>
         public virtual string Database
         {
-            get { return GetAnnotation<string>(MongoDbAnnotationNames.Database); }
+            get => GetAnnotation<string>(MongoDbAnnotationNames.Database);
+
             [param: NotNull]
-            set { SetAnnotation(MongoDbAnnotationNames.Database, Check.NotEmpty(value, nameof(Database))); }
+            set => SetAnnotation(MongoDbAnnotationNames.Database, Check.NotEmpty(value, nameof(Database)));
         }
 
         /// <summary>
@@ -38,9 +39,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata
         /// </summary>
         public virtual MongoDatabaseSettings DatabaseSettings
         {
-            get { return GetAnnotation<MongoDatabaseSettings>(MongoDbAnnotationNames.DatabaseSettings); }
+            get => GetAnnotation<MongoDatabaseSettings>(MongoDbAnnotationNames.DatabaseSettings);
+
             [param: NotNull]
-            set { SetAnnotation(MongoDbAnnotationNames.DatabaseSettings, Check.NotNull(value, nameof(DatabaseSettings))); }
+            set => SetAnnotation(MongoDbAnnotationNames.DatabaseSettings, Check.NotNull(value, nameof(DatabaseSettings)));
         }
     }
 }

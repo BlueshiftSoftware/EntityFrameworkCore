@@ -1,14 +1,14 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
-using Blueshift.EntityFrameworkCore.MongoDB;
 using Blueshift.EntityFrameworkCore.MongoDB.Adapter;
 using Blueshift.EntityFrameworkCore.MongoDB.Infrastructure;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
 
 // ReSharper disable once CheckNamespace
-namespace Microsoft.Extensions.DependencyInjection
+namespace Blueshift.EntityFrameworkCore.MongoDB.DependencyInjection
 {
     /// <summary>
     /// Extends <see cref="IServiceCollection"/> with methods for use with the MongoDb EntityFrameworkCore provider.

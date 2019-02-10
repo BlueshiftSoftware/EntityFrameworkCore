@@ -33,7 +33,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter.Serialization
             _classMap = bsonClassMap;
             DenormalizedMemberMaps = (denormalizedMemberNames ?? new string[0])
                 .Select(bsonClassMap.GetMemberMap)
-                .Except(new[] { _classMap.IdMemberMap })
+                .Except(new[] { null, _classMap.IdMemberMap })
                 .OrderBy(bsonMemberMap => bsonMemberMap.MemberName)
                 .ToList();
         }
@@ -42,13 +42,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter.Serialization
         /// Gets the <see cref="IEnumerable{T}"/> of <see cref="BsonMemberMap"/> that this serializer is configured to denormalize.
         /// </summary>
         public IEnumerable<BsonMemberMap> DenormalizedMemberMaps { get; }
-
-        /// <inheritdoc />
-        public override TClass Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
-        {
-            TClass item = base.Deserialize(context, args);
-            return item;
-        }
 
         /// <inheritdoc />
         public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, TClass value)

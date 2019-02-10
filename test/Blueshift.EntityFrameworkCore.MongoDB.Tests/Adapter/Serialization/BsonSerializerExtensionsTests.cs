@@ -74,7 +74,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Serialization
                 originalEnumerable = originalEnumerable.Reverse();
             }
             IEnumerable<string> documents = originalEnumerable
-                .Select(animal => $"{{ \"_id\" : ObjectId(\"{animal.Id}\"), {GetDiscriminator(animal)}, \"Age\" : \"{animal.Age}\", \"Height\" : \"{animal.Height}\", \"Weight\" : \"{animal.Weight}\" }}");
+                .Select(animal => $"{{ \"_id\" : ObjectId(\"{animal.AnimalId}\"), {GetDiscriminator(animal)}, \"Age\" : \"{animal.Age}\", \"Height\" : \"{animal.Height}\", \"Weight\" : \"{animal.Weight}\" }}");
             string expectedDocument =
                 $"[{string.Join(", ", documents)}]";
 
@@ -101,7 +101,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Serialization
 
             var enumerable = (IEnumerable<Animal>)Activator.CreateInstance(concreteType, _zooEntities.Animals);
             IEnumerable<string> documents = enumerable
-                .Select(animal => $"{{ \"_id\" : ObjectId(\"{animal.Id}\"), {GetDiscriminator(animal)}, \"Age\" : \"{animal.Age}\", \"Height\" : \"{animal.Height}\", \"Weight\" : \"{animal.Weight}\" }}");
+                .Select(animal => $"{{ \"_id\" : ObjectId(\"{animal.AnimalId}\"), {GetDiscriminator(animal)}, \"Age\" : \"{animal.Age}\", \"Height\" : \"{animal.Height}\", \"Weight\" : \"{animal.Weight}\" }}");
             string expectedDocument =
                 $"[{string.Join(", ", documents)}]";
 
@@ -125,7 +125,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Serialization
                 .OrderBy(kvp => kvp.Key)
                 .ThenBy(kvp => kvp.Value.Height)
                 .Select(kvp => kvp.Value)
-                .Select(animal => $"\"{animal.Name}\" : {{ \"_id\" : ObjectId(\"{animal.Id}\"), {GetDiscriminator(animal)}, \"Age\" : \"{animal.Age}\", \"Height\" : \"{animal.Height}\", \"Weight\" : \"{animal.Weight}\" }}");
+                .Select(animal => $"\"{animal.Name}\" : {{ \"_id\" : ObjectId(\"{animal.AnimalId}\"), {GetDiscriminator(animal)}, \"Age\" : \"{animal.Age}\", \"Height\" : \"{animal.Height}\", \"Weight\" : \"{animal.Weight}\" }}");
             string expectedDocument =
                 $"{{ {string.Join(", ", documents)} }}";
 
@@ -158,7 +158,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Serialization
 
             var readOnlyCollection = new ReadOnlyCollection<Animal>(_zooEntities.Animals.ToList());
             IEnumerable<string> documents = readOnlyCollection
-                .Select(animal => $"{{ \"_id\" : ObjectId(\"{animal.Id}\"), {GetDiscriminator(animal)}, \"Age\" : \"{animal.Age}\", \"Height\" : \"{animal.Height}\", \"Weight\" : \"{animal.Weight}\" }}");
+                .Select(animal => $"{{ \"_id\" : ObjectId(\"{animal.AnimalId}\"), {GetDiscriminator(animal)}, \"Age\" : \"{animal.Age}\", \"Height\" : \"{animal.Height}\", \"Weight\" : \"{animal.Weight}\" }}");
             string expectedDocument =
                 $"[{string.Join(", ", documents)}]";
 
@@ -178,7 +178,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Serialization
             var observableCollection = new ObservableCollection<Animal>(_zooEntities.Animals.ToList());
             var readOnlyObservableCollection = new ReadOnlyObservableCollection<Animal>(observableCollection);
             IEnumerable<string> documents = readOnlyObservableCollection
-                .Select(animal => $"{{ \"_id\" : ObjectId(\"{animal.Id}\"), {GetDiscriminator(animal)}, \"Age\" : \"{animal.Age}\", \"Height\" : \"{animal.Height}\", \"Weight\" : \"{animal.Weight}\" }}");
+                .Select(animal => $"{{ \"_id\" : ObjectId(\"{animal.AnimalId}\"), {GetDiscriminator(animal)}, \"Age\" : \"{animal.Age}\", \"Height\" : \"{animal.Height}\", \"Weight\" : \"{animal.Weight}\" }}");
             string expectedDocument =
                 $"[{string.Join(", ", documents)}]";
 

@@ -1,5 +1,7 @@
 ﻿using System;
 using Blueshift.EntityFrameworkCore.MongoDB.Annotations;
+using Blueshift.EntityFrameworkCore.MongoDB.Infrastructure;
+using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 

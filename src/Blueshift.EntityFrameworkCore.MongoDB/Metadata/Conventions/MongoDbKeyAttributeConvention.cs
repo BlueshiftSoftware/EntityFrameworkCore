@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
+using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -23,7 +24,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
 
             MemberInfo memberInfo = propertyBuilder.Metadata.GetIdentifyingMemberInfo();
             return (memberInfo?.IsDefined(typeof(BsonIdAttribute), true) ?? false)
-                ? base.Apply(propertyBuilder, KeyAttribute, memberInfo)
+                ? Apply(propertyBuilder, KeyAttribute, memberInfo)
                 : base.Apply(propertyBuilder);
         }
 
@@ -32,7 +33,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
         {
             IEnumerable<EntityType> entityTypes = modelBuilder.Metadata
                 .GetEntityTypes()
-                .Where(entityType => entityType.BaseType != null);
+                .Where(entityType => entityType.MongoDb().IsDerivedType);
+
             foreach (EntityType entityType in entityTypes)
             {
                 foreach (Property declaredProperty in entityType.GetDeclaredProperties())

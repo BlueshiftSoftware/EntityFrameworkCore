@@ -40,12 +40,32 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
     {
         private readonly SpecialtyEqualityComparer _specialtyEqualityComparer = new SpecialtyEqualityComparer();
 
+        private EmployeeEqualityComparer _managerEqualityComparer;
+
+        private EmployeeEqualityComparer _directReportsEqualityComparer;
+
+        public EmployeeEqualityComparer WithDirectReportsComparer(Action<EmployeeEqualityComparer> configurator = null)
+        {
+            _directReportsEqualityComparer = new EmployeeEqualityComparer();
+            configurator?.Invoke(_directReportsEqualityComparer);
+            return this;
+        }
+
+        public EmployeeEqualityComparer WithManagerComparer(Action<EmployeeEqualityComparer> configurator = null)
+        {
+            _managerEqualityComparer = new EmployeeEqualityComparer();
+            configurator?.Invoke(_managerEqualityComparer);
+            return this;
+        }
+
         protected override bool MemberwiseEquals(Employee employee1, Employee employee2)
-            => Equals(employee1.Id, employee2.Id)
+            => Equals(employee1.EmployeeId, employee2.EmployeeId)
                && string.Equals(employee1.FirstName, employee2.FirstName, StringComparison.Ordinal)
                && string.Equals(employee1.LastName, employee2.LastName, StringComparison.Ordinal)
                && employee1.Age == employee2.Age
-               && (_specialtyEqualityComparer?.CompareCollections(employee1.Specialties, employee2.Specialties) ?? true);
+               && (_specialtyEqualityComparer?.CompareCollections(employee1.Specialties, employee2.Specialties) ?? true)
+               && (_managerEqualityComparer?.Equals(employee1.Manager, employee2.Manager) ?? true)
+               && (_directReportsEqualityComparer?.CompareCollections(employee1.DirectReports, employee2.DirectReports) ?? true);
     }
 
     public class SpecialtyEqualityComparer : BaseEqualityComparer<Specialty>
@@ -60,13 +80,13 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
         private EnclosureEqualityComparer _enclosureEqualityComparer;
 
         protected override bool MemberwiseEquals(Animal animal1, Animal animal2)
-            => Equals(animal1.Id, animal2.Id)
+            => Equals(animal1.AnimalId, animal2.AnimalId)
                && animal1.GetType() == animal2.GetType()
                && string.Equals(animal1.Name, animal2.Name, StringComparison.Ordinal)
                && animal1.Age == animal2.Age
                && animal1.Height == animal2.Height
                && animal1.Weight == animal2.Weight
-               && Equals(animal1.Enclosure?.Id, animal2.Enclosure?.Id)
+               && Equals(animal1.Enclosure?.EnclosureId, animal2.Enclosure?.EnclosureId)
                && (_enclosureEqualityComparer?.Equals(animal1.Enclosure, animal2.Enclosure) ?? true);
 
         public AnimalEqualityComparer WithEnclosureEqualityComparer(Action<EnclosureEqualityComparer> configurator = null)
@@ -84,7 +104,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
             = new ScheduleEqualityComparer();
 
         protected override bool MemberwiseEquals(Enclosure enclosure1, Enclosure enclosure2)
-            => Equals(enclosure1.Id, enclosure2.Id)
+            => Equals(enclosure1.EnclosureId, enclosure2.EnclosureId)
                && string.Equals(enclosure1.Name, enclosure2.Name, StringComparison.Ordinal)
                && string.Equals(enclosure1.AnimalEnclosureType, enclosure2.AnimalEnclosureType, StringComparison.Ordinal)
                && (_animalEqualityComparer?.CompareCollections(enclosure1.Animals, enclosure2.Animals) ?? true)
@@ -109,6 +129,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
     {
         private readonly ZooAssignmentEqualityComparer _zooAssignmentEqualityComparer
             = new ZooAssignmentEqualityComparer();
+
         private EmployeeEqualityComparer _approverEqualityComparer;
 
         protected override bool MemberwiseEquals(Schedule schedule1, Schedule schedule2)
