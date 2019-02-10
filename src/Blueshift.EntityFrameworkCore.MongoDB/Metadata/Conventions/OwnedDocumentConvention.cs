@@ -24,8 +24,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
         IForeignKeyAddedConvention,
         IKeyAddedConvention,
         IKeyRemovedConvention,
-        INavigationAddedConvention,
-        INavigationRemovedConvention,
         IModelBuiltConvention
     {
         /// <inheritdoc />
@@ -84,24 +82,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Conventions
             }
 
             return relationshipBuilder;
-        }
-
-        /// <inheritdoc />
-        public InternalRelationshipBuilder Apply(
-            InternalRelationshipBuilder relationshipBuilder,
-            Navigation navigation)
-        {
-            return relationshipBuilder;
-        }
-
-        /// <inheritdoc />
-        public bool Apply(
-            InternalEntityTypeBuilder sourceEntityTypeBuilder,
-            InternalEntityTypeBuilder targetEntityTypeBuilder,
-            string navigationName,
-            MemberInfo memberInfo)
-        {
-            return true;
         }
 
         /// <inheritdoc />

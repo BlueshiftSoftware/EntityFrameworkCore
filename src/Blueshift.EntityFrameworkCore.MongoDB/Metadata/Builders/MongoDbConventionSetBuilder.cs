@@ -100,12 +100,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders
                 .With(bsonRequiredAttributeConvention);
 
             conventionSet.NavigationAddedConventions
-                .Replace(relationshipDiscoveryConvention)
-                .With(ownedDocumentConvention);
+                .Replace(relationshipDiscoveryConvention);
 
             conventionSet.NavigationRemovedConventions
-                .Replace(relationshipDiscoveryConvention)
-                .With(ownedDocumentConvention);
+                .Replace(relationshipDiscoveryConvention);
 
             conventionSet.ModelBuiltConventions
                 .Replace(keyAttributeConvention)
