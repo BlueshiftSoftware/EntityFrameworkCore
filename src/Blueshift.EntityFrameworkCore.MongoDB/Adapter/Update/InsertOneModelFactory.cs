@@ -25,8 +25,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter.Update
             [NotNull] IValueGeneratorSelector valueGeneratorSelector,
             [NotNull] IEntityType entityType)
             : base(
-                  Check.NotNull(valueGeneratorSelector, nameof(valueGeneratorSelector)),
-                  Check.NotNull(entityType, nameof(entityType)))
+                Check.NotNull(valueGeneratorSelector, nameof(valueGeneratorSelector)),
+                Check.NotNull(entityType, nameof(entityType)))
         {
         }
 
@@ -40,7 +40,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter.Update
         public override WriteModel<TEntity> CreateWriteModel(IUpdateEntry updateEntry)
         {
             InternalEntityEntry internalEntityEntry = Check.Is<InternalEntityEntry>(updateEntry, nameof(updateEntry));
-            UpdateDbGeneratedProperties(internalEntityEntry);
+            UpdateConcurrencyProperties(internalEntityEntry);
             return new InsertOneModel<TEntity>((TEntity)internalEntityEntry.Entity);
         }
     }

@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Blueshift.EntityFrameworkCore.MongoDB.SampleDomain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MongoDB.Driver.Linq;
 using Xunit;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
 {
+    [Collection("MongoDbContext")]
     public class MongoDbContextTests : MongoDbContextTestBase, IClassFixture<ZooEntityFixture>
     {
         private readonly ZooEntities _zooEntities;
@@ -169,15 +168,28 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
 
             await ExecuteUnitOfWorkAsync(async zooDbContext =>
             {
-                EntityEntry entityEntry = zooDbContext.Update(_zooEntities.Tigger);
-                string newConcurrencyToken = Guid.NewGuid().ToString();
-                PropertyEntry propertyEntry = entityEntry.Property(nameof(Animal.ConcurrencyField));
-                propertyEntry.OriginalValue = newConcurrencyToken;
-                propertyEntry.Metadata.GetSetter().SetClrValue(_zooEntities.Tigger, newConcurrencyToken);
+                Tiger tigger = _zooEntities.Tigger;
+
+                zooDbContext.Update(tigger);
+
+                string concurrencyToken = tigger.ConcurrencyField;
+
+                await ExecuteUnitOfWorkAsync(async innerZooDbContext =>
+                {
+                    Tiger innerTigger = await innerZooDbContext.Animals
+                        .OfType<Tiger>()
+                        .SingleOrDefaultAsync(tiger => tiger.Name == _zooEntities.Tigger.Name);
+
+                    innerZooDbContext.Update(innerTigger);
+
+                    Assert.Equal(1, await innerZooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
+
+                    Assert.NotEqual(concurrencyToken, innerTigger.ConcurrencyField);
+                });
+
+                Assert.Equal(concurrencyToken, tigger.ConcurrencyField);
 
                 Assert.Equal(0, await zooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
-
-                Assert.False(string.IsNullOrWhiteSpace(_zooEntities.Tigger.ConcurrencyField));
             });
         }
 

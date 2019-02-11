@@ -9,11 +9,12 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.ValueGeneration
     /// </summary>
     public class ObjectIdValueGenerator : ValueGenerator<ObjectId>
     {
+        /// <inheritdoc />
         /// <summary>
-        ///     Generates a new <see cref="ObjectId"/> value.
+        ///     Generates a new <see cref="T:MongoDB.Bson.ObjectId" /> value.
         /// </summary>
-        /// <param name="entry">The <see cref="EntityEntry"/> whose value is to be generated.</param>
-        /// <returns>A new <see cref="ObjectId"/> for <see cref="EntityEntry"/>.</returns>
+        /// <param name="entry">The <see cref="T:Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry" /> whose value is to be generated.</param>
+        /// <returns>A new <see cref="T:MongoDB.Bson.ObjectId" /> for <see cref="T:Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry" />.</returns>
         public override ObjectId Next(EntityEntry entry)
             => ObjectId.GenerateNewId();
 

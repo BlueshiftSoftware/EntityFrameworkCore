@@ -29,7 +29,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter.Update
 
         private readonly IValueGeneratorSelector _valueGeneratorSelector;
         private readonly IEnumerable<IProperty> _keyProperties;
-        private readonly IEnumerable<IProperty> _dbGeneratedProperties;
         private readonly IEnumerable<IProperty> _concurrencyProperties;
         
         /// <summary>
@@ -42,12 +41,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter.Update
             [NotNull] IEntityType entityType)
         {
             _valueGeneratorSelector = Check.NotNull(valueGeneratorSelector, nameof(valueGeneratorSelector));
-            _keyProperties = Check.NotNull(entityType, nameof(entityType)).FindPrimaryKey().Properties;
-            _dbGeneratedProperties = entityType
+            _keyProperties = Check.NotNull(entityType, nameof(entityType))
+                .FindPrimaryKey()
+                .Properties;
+            _concurrencyProperties = entityType
                 .GetProperties()
-                .Where(property => property.ValueGenerated == ValueGenerated.OnAddOrUpdate)
-                .ToList();
-            _concurrencyProperties = _dbGeneratedProperties
                 .Where(property => property.IsConcurrencyToken)
                 .ToList();
         }
@@ -84,13 +82,13 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Adapter.Update
         }
 
         /// <summary>
-        /// Updates the database-generated properties for <paramref name="internalEntityEntry"/>.
+        /// Updates the concurrency properties for <paramref name="internalEntityEntry"/>.
         /// </summary>
         /// <param name="internalEntityEntry">The <see cref="IUpdateEntry"/> the <see cref="IUpdateEntry"/> representing the document being updated.</param>
-        protected void UpdateDbGeneratedProperties(InternalEntityEntry internalEntityEntry)
+        protected void UpdateConcurrencyProperties(InternalEntityEntry internalEntityEntry)
         {
             var entityEntry = internalEntityEntry.ToEntityEntry();
-            foreach (IProperty property in _dbGeneratedProperties)
+            foreach (IProperty property in _concurrencyProperties)
             {
                 ValueGenerator valueGenerator = _valueGeneratorSelector.Select(property, internalEntityEntry.EntityType);
                 object dbGeneratedValue = valueGenerator.Next(entityEntry);
