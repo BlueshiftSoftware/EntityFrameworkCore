@@ -114,7 +114,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
         {
             IEnumerable<Task<int>> tasks = GetDocumentUpdateDefinitions(entries)
                 .ToLookup(entry => entry.EntityType.GetMongoDbCollectionEntityType())
-                .Select(async grouping => await InvokeUpdateEntriesAsync(grouping, cancellationToken))
+                .Select(grouping => InvokeUpdateEntriesAsync(grouping, cancellationToken))
                 .ToList();
 
             int[] totals = await Task.WhenAll(tasks);

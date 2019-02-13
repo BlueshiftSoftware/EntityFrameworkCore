@@ -44,8 +44,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
             //};
             //optionsBuilder.UseMongoDb(settings);
 
-            var mongoClient = new MongoClient(settings);
-            optionsBuilder.UseMongoDb(mongoClient);
+            IMongoClient MongoClientFactory(MongoClientSettings mongoClientSettings)
+                => new MongoClient(mongoClientSettings);
+            optionsBuilder.UseMongoDb(MongoClientFactory);
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
         }
     }
 

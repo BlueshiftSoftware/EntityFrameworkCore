@@ -1,4 +1,0 @@
-﻿﻿<#
-    Session["ResourceFile"] = "DocumentDbStrings.resx";
-    Session["NoDiagnostics"] = true;
-#>

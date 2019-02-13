@@ -11,6 +11,12 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
     public interface IMongoDbConnection
     {
         /// <summary>
+        ///     Gets the <see cref="IMongoClient"/> used by the current model.
+        /// </summary>
+        /// <returns>The <see cref="IMongoClient"/> used by the MongoDB C# driver to communicate with the MongoDB instance.</returns>
+        IMongoClient MongoClient { get; }
+
+        /// <summary>
         ///     Gets the <see cref="IMongoDatabase"/> used by the current model.
         /// </summary>
         /// <returns>The <see cref="IMongoDatabase"/> used by the MongoDB C# driver to communicate with the MongoDB instance.</returns>
@@ -42,7 +48,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
         ///     Gets a <see cref="IMongoCollection{TEntity}"/> instance that can be used to store instances of <typeparamref name="TEntity"/>.
         /// </summary>
         /// <typeparam name="TEntity">The type of entity stored in the collection.</typeparam>
-        /// <returns>The <see cref="IMongoCollection{TEntity}"/> instance that can store <typeparamref name="TEntity"/>.</returns>
+        /// <returns>An <see cref="IMongoCollection{TEntity}"/> instance that can store <typeparamref name="TEntity"/>.</returns>
         IMongoCollection<TEntity> GetCollection<TEntity>();
+
+        /// <summary>
+        ///     Queries the underlying MongoDB instance for instances of <typeparamref name="TEntity" />.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of entity stored in the collection.</typeparam>
+        /// <returns>An <see cref="IMongoQueryable{T}"/> that can be used to query for <typeparamref name="TEntity"/> documents.</returns>
+        IMongoQueryable<TEntity> Query<TEntity>();
     }
 }

@@ -16,7 +16,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         {
             ServiceProvider = new ServiceCollection()
                 .AddDbContext<ZooDbContext>(options => options
-                    .UseMongoDb(MongoUrl)
+                    .UseMongoDb(MongoUrl, mongoDbContextOptionsBuilder =>
+                        mongoDbContextOptionsBuilder.EnableQueryLogging())
                     .EnableSensitiveDataLogging(true))
                 .BuildServiceProvider();
 

@@ -21,55 +21,43 @@ using MongoDB.Driver;
 namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
 {
     /// <inheritdoc />
-    /// <summary>
-    ///     A builder API that populates an <see cref="IServiceCollection" /> with a set of EntityFrameworkCore
-    ///     provider dependencies for MongoDb.
-    /// </summary>
     public class EntityFrameworkMongoDbServicesBuilder : EntityFrameworkServicesBuilder
     {
-        private static readonly IDictionary<Type, ServiceCharacteristics> RelationalServices
+        private static IMongoClient DefaultMongoClientFactory(MongoClientSettings mongoClientSettings)
+            => new MongoClient(mongoClientSettings);
+
+        private static readonly IDictionary<Type, ServiceCharacteristics> DocumentServiceCharacteristics
             = new Dictionary<Type, ServiceCharacteristics>
             {
-                { typeof(IMongoClient), new ServiceCharacteristics(ServiceLifetime.Scoped) },
-                { typeof(IMongoDbConnection), new ServiceCharacteristics(ServiceLifetime.Scoped) },
-                { typeof(IMongoDbTypeMappingSource), new ServiceCharacteristics(ServiceLifetime.Singleton) },
                 { typeof(MongoDbEntityQueryModelVisitorDependencies), new ServiceCharacteristics(ServiceLifetime.Scoped) },
                 { typeof(MongoDbConventionSetBuilderDependencies), new ServiceCharacteristics(ServiceLifetime.Scoped) }
             };
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityFrameworkMongoDbServicesBuilder"/> class.
-        /// </summary>
-        /// <param name="serviceCollection">The <see cref="IServiceCollection"/> instance to populate.</param>
-        public EntityFrameworkMongoDbServicesBuilder([NotNull] IServiceCollection serviceCollection) : base(serviceCollection)
+        /// <inheritdoc />
+        public EntityFrameworkMongoDbServicesBuilder(
+            [NotNull] IServiceCollection serviceCollection)
+            : base(serviceCollection)
         {
         }
 
-        /// <summary>
-        /// This API supports the Entity Framework Core infrastructure and is not intended to be used directly from your code.
-        /// This API may change or be removed in future releases.
-        /// </summary>
+        /// <inheritdoc />
         protected override ServiceCharacteristics GetServiceCharacteristics(Type serviceType)
-            => RelationalServices.TryGetValue(serviceType, out ServiceCharacteristics characteristics)
+            => DocumentServiceCharacteristics.TryGetValue(serviceType, out ServiceCharacteristics characteristics)
                 ? characteristics
                 : base.GetServiceCharacteristics(serviceType);
 
-        /// <summary>
-        /// Registers default implementations of all services not already registered by the provider. Database providers must call
-        /// this method as the last step of service registration--that is, after all provider services have been registered.
-        /// </summary>
-        /// <returns>This builder, such that further calls can be chained.</returns>
+        /// <inheritdoc />
         public override EntityFrameworkServicesBuilder TryAddCoreServices()
         {
             TryAdd<IDatabaseProvider, DatabaseProvider<MongoDbOptionsExtension>>();
             TryAdd<IModelValidator, MongoDbModelValidator>();
             TryAdd<ITypeMappingSource>(serviceProvider => serviceProvider.GetRequiredService<IMongoDbTypeMappingSource>());
-            TryAdd<IMongoDbTypeMappingSource, MongoDbTypeMappingSource>();
             TryAdd<IDatabase, MongoDbDatabase>();
             TryAdd<IDatabaseCreator, MongoDbDatabaseCreator>();
             TryAdd<IValueGeneratorSelector, MongoDbValueGeneratorSelector>();
             TryAdd<IConventionSetBuilder, MongoDbConventionSetBuilder>();
             TryAdd<IQueryContextFactory, MongoDbQueryContextFactory>();
+            TryAdd<IQueryCompilationContextFactory, MongoDbQueryCompilationContextFactory>();
             TryAdd<IEntityQueryableExpressionVisitorFactory, MongoDbEntityQueryableExpressionVisitorFactory>();
             TryAdd<IEntityQueryModelVisitorFactory, MongoDbEntityQueryModelVisitorFactory>();
             TryAdd<IMemberAccessBindingExpressionVisitorFactory, MongoDbMemberAccessBindingExpressionVisitorFactory>();
@@ -78,12 +66,12 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
             TryAddProviderSpecificServices(serviceCollectionMap =>
             {
                 serviceCollectionMap.TryAddScoped(serviceProvider =>
-                {
-                    MongoDbOptionsExtension extension = serviceProvider
+                    serviceProvider
                         .GetRequiredService<IDbContextOptions>()
-                        .FindExtension<MongoDbOptionsExtension>();
-                    return extension?.MongoClient ?? new MongoClient();
-                });
+                        .FindExtension<MongoDbOptionsExtension>()
+                        .MongoClientSettings);
+
+                serviceCollectionMap.TryAddScoped<IMongoClientFactory, MongoClientFactory>();
                 serviceCollectionMap.TryAddScoped<IMongoDbConnection, MongoDbConnection>();
                 serviceCollectionMap.TryAddScoped<IMongoDbDenormalizedCollectionCompensatingVisitorFactory, MongoDbDenormalizedCollectionCompensatingVisitorFactory>();
                 serviceCollectionMap.TryAddScoped<IDocumentQueryExpressionFactory, MongoDbDocumentQueryExpressionFactory>();
@@ -91,9 +79,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
                 serviceCollectionMap.TryAddScoped<IMongoDbWriteModelFactorySelector, MongoDbWriteModelFactorySelector>();
                 serviceCollectionMap.TryAddScoped<IEntityLoadInfoFactory, EntityLoadInfoFactory>();
                 serviceCollectionMap.TryAddScoped<IValueBufferFactory, ValueBufferFactory>();
+                serviceCollectionMap.TryAddScoped<IMongoDbTypeMappingSource, MongoDbTypeMappingSource>();
             });
 
-            ServiceCollectionMap.GetInfrastructure()
+            ServiceCollectionMap
+                .GetInfrastructure()
                 .AddDependencyScoped<MongoDbConventionSetBuilderDependencies>()
                 .AddDependencyScoped<MongoDbEntityQueryModelVisitorDependencies>();
 

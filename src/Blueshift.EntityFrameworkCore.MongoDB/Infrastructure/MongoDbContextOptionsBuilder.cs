@@ -2,6 +2,8 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Utilities;
+using MongoDB.Bson;
+using MongoDB.Driver.Core.Events;
 
 // ReSharper disable once CheckNamespace
 namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
@@ -52,5 +54,17 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
         /// <returns>A cloned instance of this builder's <see cref="MongoDbOptionsExtension"/>.</returns>
         protected virtual MongoDbOptionsExtension CloneExtension()
             => new MongoDbOptionsExtension(OptionsBuilder.Options.GetExtension<MongoDbOptionsExtension>());
+
+        /// <summary>
+        /// Sets the name of the MongoDB database to use with the <see cref="DbContext"/> being configured.
+        /// </summary>
+        /// <returns>This <see cref="MongoDbOptionsExtension"/>, so that calls can be chained.</returns>
+        public MongoDbContextOptionsBuilder EnableQueryLogging()
+        {
+            MongoDbOptionsExtension extension = CloneExtension();
+            extension.IsQueryLoggingEnabled = true;
+            ((IDbContextOptionsBuilderInfrastructure)OptionsBuilder).AddOrUpdateExtension(extension);
+            return this;
+        }
     }
 }

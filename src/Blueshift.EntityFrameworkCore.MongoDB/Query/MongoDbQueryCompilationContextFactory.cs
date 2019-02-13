@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Query.Internal;
 namespace Blueshift.EntityFrameworkCore.MongoDB.Query
 {
     /// <inheritdoc />
-    public class LinqQueryCompilationContextFactory : QueryCompilationContextFactory
+    public class MongoDbQueryCompilationContextFactory : QueryCompilationContextFactory
     {
         /// <inheritdoc />
-        public LinqQueryCompilationContextFactory(
+        public MongoDbQueryCompilationContextFactory(
             [NotNull] QueryCompilationContextDependencies dependencies) : base(dependencies)
         {
         }
@@ -17,7 +17,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         public override QueryCompilationContext Create(bool async)
             => new QueryCompilationContext(
                 Dependencies,
-                new QueryableLinqOperatorProvider(),
+                new MongoQueryableLinqOperatorProvider(),
                 TrackQueryResults);
     }
 }

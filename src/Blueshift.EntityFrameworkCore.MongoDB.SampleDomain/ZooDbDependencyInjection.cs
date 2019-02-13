@@ -8,7 +8,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
         public static IServiceCollection AddZooDbContext(this IServiceCollection serviceCollection)
         {
             return serviceCollection
-                .AddDbContext<ZooDbContext>(options => options.UseMongoDb("mongodb://localhost"));
+                .AddDbContext<ZooDbContext>(options => options
+                    .UseMongoDb("mongodb://localhost", mongoDbContextOptionsBuilder =>
+                            mongoDbContextOptionsBuilder.EnableQueryLogging()
+                ));
         }
     }
 }

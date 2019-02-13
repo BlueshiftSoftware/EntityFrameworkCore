@@ -22,6 +22,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         private readonly IMongoDbDenormalizedCollectionCompensatingVisitorFactory
             _mongoDbDenormalizedCollectionCompensatingVisitorFactory;
 
+        private readonly IQueryableLinqOperatorProvider _queryableLinqOperatorProvider;
+
         /// <inheritdoc />
         public MongoDbEntityQueryModelVisitor(
             [NotNull] EntityQueryModelVisitorDependencies entityQueryModelVisitorDependencies,
@@ -37,6 +39,15 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
             _mongoDbDenormalizedCollectionCompensatingVisitorFactory
                 = Check.NotNull(mongoDbEntityQueryModelVisitorDependencies, nameof(mongoDbEntityQueryModelVisitorDependencies))
                     .MongoDbDenormalizedCollectionCompensatingVisitorFactory;
+            _queryableLinqOperatorProvider = Check.Is<IQueryableLinqOperatorProvider>(
+                queryCompilationContext.LinqOperatorProvider,
+                nameof(LinqOperatorProvider));
+        }
+
+        /// <inheritdoc />
+        public override void VisitQueryModel(QueryModel queryModel)
+        {
+            base.VisitQueryModel(queryModel);
         }
 
         /// <inheritdoc />
@@ -105,6 +116,40 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
                 constructorInfo,
                 outerExpression,
                 innerExpression);
+        }
+
+        /// <summary>
+        ///     Visits <see cref="Ordering" /> nodes.
+        /// </summary>
+        /// <param name="ordering"> The node being visited. </param>
+        /// <param name="queryModel"> The query. </param>
+        /// <param name="orderByClause"> The <see cref="OrderByClause" /> for the ordering. </param>
+        /// <param name="index"> Index of the node being visited. </param>
+        public override void VisitOrdering(
+            Ordering ordering,
+            QueryModel queryModel,
+            OrderByClause orderByClause,
+            int index)
+        {
+            Check.NotNull(ordering, nameof(ordering));
+            Check.NotNull(queryModel, nameof(queryModel));
+            Check.NotNull(orderByClause, nameof(orderByClause));
+
+            var expression = ReplaceClauseReferences(ordering.Expression);
+
+            MethodInfo orderingMethodInfo = index == 0
+                ? ordering.OrderingDirection == OrderingDirection.Asc
+                    ? _queryableLinqOperatorProvider.OrderBy
+                    : _queryableLinqOperatorProvider.OrderByDescending
+                : ordering.OrderingDirection == OrderingDirection.Asc
+                    ? _queryableLinqOperatorProvider.ThenBy
+                    : _queryableLinqOperatorProvider.ThenByDescending;
+
+            Expression
+                = Expression.Call(
+                    orderingMethodInfo.MakeGenericMethod(CurrentParameter.Type, expression.Type),
+                    Expression,
+                    Expression.Lambda(expression, CurrentParameter));
         }
     }
 }

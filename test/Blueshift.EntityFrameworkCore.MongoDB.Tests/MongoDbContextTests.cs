@@ -286,6 +286,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
 
             await ExecuteUnitOfWorkAsync(async zooDbContext =>
             {
+                IQueryable<Animal> animalQuery = zooDbContext.Animals
+                    .OrderBy(animal => animal.Name)
+                    .ThenBy(animal => animal.Height);
+
                 Assert.Equal(_zooEntities.Animals,
                     await zooDbContext.Animals
                         .OrderBy(animal => animal.Name)
@@ -567,7 +571,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
             Assert.Equal(expectedEmployees, employees, new EmployeeEqualityComparer());
         }
 
-        [Fact(Skip = "Test currently fails.")]
+        [Fact]
         public async Task Can_list_async_twice()
         {
             await ExecuteUnitOfWorkAsync(async zooDbContext =>

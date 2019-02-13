@@ -23,34 +23,23 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Properties\DocumentDbStrings.cs">
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\DocumentStrings.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>DocumentDbStrings.tt</DependentUpon>
-    </Compile>
-    <Compile Update="Properties\DocumentDbStrings.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>DocumentDbStrings.resx</DependentUpon>
+      <DependentUpon>DocumentStrings.Designer.tt</DependentUpon>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Properties\DocumentDbStrings.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>DocumentDbStrings.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Properties\DocumentDbStrings.tt">
+    <None Update="Properties\DocumentStrings.Designer.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>DocumentDbStrings.cs</LastGenOutput>
+      <LastGenOutput>DocumentStrings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
-  </ItemGroup>
 
 </Project>

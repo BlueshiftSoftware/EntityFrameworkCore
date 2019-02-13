@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Text;
 using Blueshift.EntityFrameworkCore.MongoDB.DependencyInjection;
@@ -17,7 +18,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
     /// </summary>
     public class MongoDbOptionsExtension : IDbContextOptionsExtension
     {
-        private IMongoClient _mongoClient;
+        private Func<MongoClientSettings, IMongoClient> _mongoClientFactory;
+        private MongoClientSettings _mongoClientSettings;
         private string _databaseName;
         private string _logFragment;
 
@@ -29,8 +31,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
         {
             if (existing != null)
             {
-                _mongoClient = existing.MongoClient;
+                _mongoClientFactory = existing.MongoClientFactory;
+                _mongoClientSettings = existing.MongoClientSettings;
                 _databaseName = existing.DatabaseName;
+                IsQueryLoggingEnabled = existing.IsQueryLoggingEnabled;
             }
         }
 
@@ -49,11 +53,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
         /// This API supports the Entity Framework Core infrastructure and is not intended to be used
         /// directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public virtual IMongoClient MongoClient
+        public virtual Func<MongoClientSettings, IMongoClient> MongoClientFactory
         {
-            get => _mongoClient;
+            get => _mongoClientFactory;
             [param: NotNull] set
-                => _mongoClient = Check.NotNull(value, nameof(MongoClient));
+                => _mongoClientFactory = Check.NotNull(value, nameof(MongoClientFactory));
         }
 
         /// <summary>
@@ -62,9 +66,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
         /// </summary>
         public virtual MongoClientSettings MongoClientSettings
         {
-            get => _mongoClient?.Settings;
+            get => _mongoClientSettings;
             [param: NotNull] set
-                => _mongoClient = new MongoClient(Check.NotNull(value, nameof(MongoClientSettings)).Clone());
+                => _mongoClientSettings = Check.NotNull(value, nameof(MongoClientSettings)).Clone();
         }
 
         /// <summary>
@@ -73,9 +77,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
         /// </summary>
         public virtual MongoUrl MongoUrl
         {
-            get => _mongoClient == null
+            get => _mongoClientSettings == null
                 ? null
-                : MongoUrl.Create($"mongodb://{string.Join(",", _mongoClient.Settings.Servers.Select(server => $"{server.Host}:{server.Port}"))}");
+                : MongoUrl.Create($"mongodb://{string.Join(",", _mongoClientSettings.Servers.Select(server => $"{server.Host}:{server.Port}"))}");
             [param: NotNull] set
                 => MongoClientSettings = MongoClientSettings.FromUrl(Check.NotNull(value, nameof(MongoUrl)));
         }
@@ -89,6 +93,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
             [param: NotNull] set => _databaseName = Check.NotEmpty(value, nameof(value));
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether or not logging of queries is enabled.
+        /// </summary>
+        public bool IsQueryLoggingEnabled { get; set; }
+
         /// <inheritdoc/>
         public string LogFragment
         {
@@ -98,14 +107,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
                 {
                     var logBuilder = new StringBuilder();
 
-                    if (_mongoClient?.Settings != null)
+                    if (_mongoClientSettings != null)
                     {
-                        logBuilder.Append("MongoClient.Settings=").Append(_mongoClient.Settings.ToString());
+                        logBuilder.Append($"MongoClient.Settings={_mongoClientSettings}");
                     }
 
-                    if (!string.IsNullOrEmpty(DatabaseName))
+                    if (!string.IsNullOrEmpty(_databaseName))
                     {
-                        logBuilder.Append("DatabaseName=").Append(DatabaseName);
+                        logBuilder.Append($"DatabaseName={_databaseName}");
                     }
 
                     _logFragment = logBuilder.ToString();
