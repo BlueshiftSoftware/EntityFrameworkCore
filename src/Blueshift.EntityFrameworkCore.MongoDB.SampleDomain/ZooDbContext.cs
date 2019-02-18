@@ -19,11 +19,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Enclosure> Enclosures { get; set; }
 
-        public ZooDbContext()
-            : this(new DbContextOptions<ZooDbContext>())
-        {
-        }
-
         public ZooDbContext(DbContextOptions<ZooDbContext> zooDbContextOptions)
             : base(zooDbContextOptions)
         {
@@ -42,11 +37,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
             //{
             //    EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12
             //};
-            //optionsBuilder.UseMongoDb(settings);
 
-            IMongoClient MongoClientFactory(MongoClientSettings mongoClientSettings)
-                => new MongoClient(mongoClientSettings);
-            optionsBuilder.UseMongoDb(MongoClientFactory);
+            optionsBuilder.UseMongoDb(settings);
         }
 
         public override void Dispose()

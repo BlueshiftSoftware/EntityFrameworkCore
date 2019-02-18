@@ -5,13 +5,13 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.SampleDomain
 {
     public static class ZooDbDependencyInjection
     {
-        public static IServiceCollection AddZooDbContext(this IServiceCollection serviceCollection)
-        {
-            return serviceCollection
+        public static IServiceCollection AddZooDbContext(
+            this IServiceCollection serviceCollection,
+            string mongoUrl = "mongodb://localhost")
+            => serviceCollection
                 .AddDbContext<ZooDbContext>(options => options
-                    .UseMongoDb("mongodb://localhost", mongoDbContextOptionsBuilder =>
-                            mongoDbContextOptionsBuilder.EnableQueryLogging()
-                ));
-        }
+                    .UseMongoDb(mongoUrl, mongoDbContextOptionsBuilder =>
+                        mongoDbContextOptionsBuilder.EnableQueryLogging())
+                    .EnableSensitiveDataLogging(true));
     }
 }

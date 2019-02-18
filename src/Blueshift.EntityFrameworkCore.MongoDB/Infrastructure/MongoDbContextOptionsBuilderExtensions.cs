@@ -35,24 +35,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
         ///     Configures the context to connect to a MongoDb instance.
         /// </summary>
         /// <param name="optionsBuilder">The builder being used to configure the context.</param>
-        /// <param name="mongoClientFactory">The <see cref="IMongoClient"/> to use when connecting to MongoDb.</param>
-        /// <param name="mongoDbOptionsAction">An optional action to allow additional MongoDb-specific configuration.</param>
-        /// <returns> The options builder so that further configuration can be chained. </returns>
-        public static DbContextOptionsBuilder UseMongoDb(
-            [NotNull] this DbContextOptionsBuilder optionsBuilder,
-            [NotNull] Func<MongoClientSettings, IMongoClient> mongoClientFactory,
-            [CanBeNull] Action<MongoDbContextOptionsBuilder> mongoDbOptionsAction = null)
-        {
-            Check.NotNull(mongoClientFactory, nameof(mongoClientFactory));
-            return SetupMongoDb(Check.NotNull(optionsBuilder, nameof(optionsBuilder)),
-                extension => extension.MongoClientFactory = mongoClientFactory,
-                mongoDbOptionsAction);
-        }
-
-        /// <summary>
-        ///     Configures the context to connect to a MongoDb instance.
-        /// </summary>
-        /// <param name="optionsBuilder">The builder being used to configure the context.</param>
         /// <param name="mongoClientSettings">The <see cref="MongoClientSettings"/> to use when connecting to MongoDb.</param>
         /// <param name="mongoDbOptionsAction">An optional action to allow additional MongoDb-specific configuration.</param>
         /// <returns> The options builder so that further configuration can be chained. </returns>

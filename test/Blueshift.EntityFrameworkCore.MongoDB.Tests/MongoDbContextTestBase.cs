@@ -15,10 +15,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         protected MongoDbContextTestBase()
         {
             ServiceProvider = new ServiceCollection()
-                .AddDbContext<ZooDbContext>(options => options
-                    .UseMongoDb(MongoUrl, mongoDbContextOptionsBuilder =>
-                        mongoDbContextOptionsBuilder.EnableQueryLogging())
-                    .EnableSensitiveDataLogging(true))
+                .AddZooDbContext(MongoUrl)
                 .BuildServiceProvider();
 
             ExecuteUnitOfWork(zooDbContext => zooDbContext.Database.EnsureCreated());
@@ -33,8 +30,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         {
             using (IServiceScope serviceScope = ServiceProvider.CreateScope())
             {
-                ZooDbContext zooDbContext = serviceScope.ServiceProvider.GetService<ZooDbContext>();
-                unitOfWork(zooDbContext);
+                unitOfWork(serviceScope.ServiceProvider.GetService<ZooDbContext>());
             }
         }
 
@@ -42,8 +38,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         {
             using (IServiceScope serviceScope = ServiceProvider.CreateScope())
             {
-                ZooDbContext zooDbContext = serviceScope.ServiceProvider.GetService<ZooDbContext>();
-                await unitOfWork(zooDbContext);
+                await unitOfWork(serviceScope.ServiceProvider.GetService<ZooDbContext>());
             }
         }
 
@@ -51,8 +46,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         {
             using (IServiceScope serviceScope = ServiceProvider.CreateScope())
             {
-                ZooDbContext zooDbContext = serviceScope.ServiceProvider.GetService<ZooDbContext>();
-                return await unitOfWork(zooDbContext);
+                return await unitOfWork(serviceScope.ServiceProvider.GetService<ZooDbContext>());
             }
         }
     }
