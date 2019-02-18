@@ -16,7 +16,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests.Adapter.Update
     {
         private IUpdateEntry GetUpdateEntry(EntityState entityState, object entity)
         {
-            var zooDbContext = new ZooDbContext();
+            var zooDbContext = new ZooDbContext(new DbContextOptions<ZooDbContext>());
             var entityEntry = zooDbContext.Add(entity);
 
             entityEntry.State = entityState;

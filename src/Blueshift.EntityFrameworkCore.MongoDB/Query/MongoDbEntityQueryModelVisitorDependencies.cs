@@ -43,19 +43,30 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         /// <param name="mongoDbDenormalizedCollectionCompensatingVisitorFactory">
         ///     The <see cref="IMongoDbDenormalizedCollectionCompensatingVisitorFactory" /> to be used when processing the query.
         /// </param>
+        /// <param name="queryableMethodProvider">
+        ///     The <see cref="IQueryableMethodProvider" /> to be used when processing a query.
+        /// </param>
         public MongoDbEntityQueryModelVisitorDependencies(
-            [NotNull] IMongoDbDenormalizedCollectionCompensatingVisitorFactory mongoDbDenormalizedCollectionCompensatingVisitorFactory
-            )
+            [NotNull] IMongoDbDenormalizedCollectionCompensatingVisitorFactory mongoDbDenormalizedCollectionCompensatingVisitorFactory,
+            [NotNull] IQueryableMethodProvider queryableMethodProvider)
         {
             MongoDbDenormalizedCollectionCompensatingVisitorFactory
                 = Check.NotNull(mongoDbDenormalizedCollectionCompensatingVisitorFactory,
                     nameof(mongoDbDenormalizedCollectionCompensatingVisitorFactory));
+            QueryableMethodProvider = Check.NotNull(queryableMethodProvider, nameof(queryableMethodProvider));
         }
 
         /// <summary>
         ///     Gets the <see cref="IMongoDbDenormalizedCollectionCompensatingVisitorFactory" /> to be used when processing a query.
         /// </summary>
+        [NotNull]
         public IMongoDbDenormalizedCollectionCompensatingVisitorFactory
             MongoDbDenormalizedCollectionCompensatingVisitorFactory { get; }
+
+        /// <summary>
+        ///     Gets the <see cref="IQueryableMethodProvider" /> to be used when processing a query.
+        /// </summary>
+        [NotNull]
+        public IQueryableMethodProvider QueryableMethodProvider { get; }
     }
 }

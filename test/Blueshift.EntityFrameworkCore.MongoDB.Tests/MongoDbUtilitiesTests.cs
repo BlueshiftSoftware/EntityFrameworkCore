@@ -21,7 +21,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         [InlineData("monkeys")]
         [InlineData("horses")]
         [InlineData("ponies")]
-        public void Pluralize_doesnt_change_plurals(string value)
+        public void Pluralize_does_not_change_plurals(string value)
             => Assert.Equal(value, MongoDbUtilities.Pluralize(value));
 
         [Theory]
@@ -37,7 +37,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         [InlineData("NYCity", "nyCity")]
         [InlineData("TLAcronym", "tlAcronym")]
         [InlineData("ThreeLetterAcronym", "threeLetterAcronym")]
-        public void Camel_case_doesnt_change_trailing_words(string value, string expected)
+        public void Camel_case_does_not_change_trailing_words(string value, string expected)
             => Assert.Equal(expected, MongoDbUtilities.ToLowerCamelCase(value));
 
         [Theory]
@@ -51,7 +51,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         [InlineData(typeof(Enclosure), typeof(Enclosure))]
         public void GetCollectionEntityType_returns_least_derived_entity_type(Type documentType, Type expectedType)
         {
-            var zooDbContext = new ZooDbContext();
+            var zooDbContext = new ZooDbContext(new DbContextOptions<ZooDbContext>());
             IEntityType documentEntityType = zooDbContext.Model.FindEntityType(documentType);
             IEntityType expectedEntityType = zooDbContext.Model.FindEntityType(expectedType);
 
@@ -69,7 +69,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         [InlineData(typeof(Enclosure))]
         public void IsDocumentRootEntityType_returns_true_for_root_entity_types(Type documentType)
         {
-            var zooDbContext = new ZooDbContext();
+            var zooDbContext = new ZooDbContext(new DbContextOptions<ZooDbContext>());
             IEntityType documentEntityType = zooDbContext.Model.FindEntityType(documentType);
 
             Assert.True(documentEntityType.IsDocumentRootEntityType());
@@ -81,7 +81,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         [InlineData(typeof(ZooAssignment))]
         public void IsDocumentRootEntityType_returns_false_for_owned_entity_types(Type documentType)
         {
-            var zooDbContext = new ZooDbContext();
+            var zooDbContext = new ZooDbContext(new DbContextOptions<ZooDbContext>());
             IEntityType documentEntityType = zooDbContext.Model.FindEntityType(documentType);
 
             Assert.False(documentEntityType.IsDocumentRootEntityType());

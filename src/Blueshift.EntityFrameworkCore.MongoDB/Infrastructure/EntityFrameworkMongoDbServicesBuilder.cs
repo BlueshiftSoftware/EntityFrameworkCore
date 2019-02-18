@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Blueshift.EntityFrameworkCore.MongoDB.Adapter.Update;
+﻿using Blueshift.EntityFrameworkCore.MongoDB.Adapter.Update;
 using Blueshift.EntityFrameworkCore.MongoDB.Metadata.Builders;
 using Blueshift.EntityFrameworkCore.MongoDB.Query;
 using Blueshift.EntityFrameworkCore.MongoDB.Query.Expressions;
@@ -13,38 +11,22 @@ using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors;
 using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors.Internal;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
 using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Driver;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
 {
     /// <inheritdoc />
     public class EntityFrameworkMongoDbServicesBuilder : EntityFrameworkServicesBuilder
     {
-        private static IMongoClient DefaultMongoClientFactory(MongoClientSettings mongoClientSettings)
-            => new MongoClient(mongoClientSettings);
-
-        private static readonly IDictionary<Type, ServiceCharacteristics> DocumentServiceCharacteristics
-            = new Dictionary<Type, ServiceCharacteristics>
-            {
-                { typeof(MongoDbEntityQueryModelVisitorDependencies), new ServiceCharacteristics(ServiceLifetime.Scoped) },
-                { typeof(MongoDbConventionSetBuilderDependencies), new ServiceCharacteristics(ServiceLifetime.Scoped) }
-            };
-
         /// <inheritdoc />
         public EntityFrameworkMongoDbServicesBuilder(
             [NotNull] IServiceCollection serviceCollection)
             : base(serviceCollection)
         {
         }
-
-        /// <inheritdoc />
-        protected override ServiceCharacteristics GetServiceCharacteristics(Type serviceType)
-            => DocumentServiceCharacteristics.TryGetValue(serviceType, out ServiceCharacteristics characteristics)
-                ? characteristics
-                : base.GetServiceCharacteristics(serviceType);
 
         /// <inheritdoc />
         public override EntityFrameworkServicesBuilder TryAddCoreServices()
@@ -57,14 +39,17 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
             TryAdd<IValueGeneratorSelector, MongoDbValueGeneratorSelector>();
             TryAdd<IConventionSetBuilder, MongoDbConventionSetBuilder>();
             TryAdd<IQueryContextFactory, MongoDbQueryContextFactory>();
-            TryAdd<IQueryCompilationContextFactory, MongoDbQueryCompilationContextFactory>();
             TryAdd<IEntityQueryableExpressionVisitorFactory, MongoDbEntityQueryableExpressionVisitorFactory>();
             TryAdd<IEntityQueryModelVisitorFactory, MongoDbEntityQueryModelVisitorFactory>();
             TryAdd<IMemberAccessBindingExpressionVisitorFactory, MongoDbMemberAccessBindingExpressionVisitorFactory>();
             TryAdd<INavigationRewritingExpressionVisitorFactory, DocumentNavigationRewritingExpressionVisitorFactory>();
+            TryAdd<IQueryCompiler, QueryProviderAdapterQueryCompiler>();
+            TryAdd<IResultOperatorHandler, QueryableResultOperatorHandler>();
 
             TryAddProviderSpecificServices(serviceCollectionMap =>
             {
+                serviceCollectionMap.TryAddSingleton<IMongoDbTypeMappingSource, MongoDbTypeMappingSource>();
+
                 serviceCollectionMap.TryAddScoped(serviceProvider =>
                     serviceProvider
                         .GetRequiredService<IDbContextOptions>()
@@ -73,13 +58,13 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
 
                 serviceCollectionMap.TryAddScoped<IMongoClientFactory, MongoClientFactory>();
                 serviceCollectionMap.TryAddScoped<IMongoDbConnection, MongoDbConnection>();
+                serviceCollectionMap.TryAddScoped<IQueryableMethodProvider, QueryableMethodProvider>();
                 serviceCollectionMap.TryAddScoped<IMongoDbDenormalizedCollectionCompensatingVisitorFactory, MongoDbDenormalizedCollectionCompensatingVisitorFactory>();
                 serviceCollectionMap.TryAddScoped<IDocumentQueryExpressionFactory, MongoDbDocumentQueryExpressionFactory>();
                 serviceCollectionMap.TryAddScoped<IMongoDbWriteModelFactoryCache, MongoDbWriteModelFactoryCache>();
                 serviceCollectionMap.TryAddScoped<IMongoDbWriteModelFactorySelector, MongoDbWriteModelFactorySelector>();
                 serviceCollectionMap.TryAddScoped<IEntityLoadInfoFactory, EntityLoadInfoFactory>();
                 serviceCollectionMap.TryAddScoped<IValueBufferFactory, ValueBufferFactory>();
-                serviceCollectionMap.TryAddScoped<IMongoDbTypeMappingSource, MongoDbTypeMappingSource>();
             });
 
             ServiceCollectionMap

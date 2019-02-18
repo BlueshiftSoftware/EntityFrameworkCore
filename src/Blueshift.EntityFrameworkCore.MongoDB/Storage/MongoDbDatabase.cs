@@ -9,12 +9,10 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Update;
 using Microsoft.EntityFrameworkCore.Utilities;
 using MongoDB.Driver;
-using Remotion.Linq;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
 {
@@ -138,10 +136,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Storage
                     cancellationToken: cancellationToken);
             return (int) (result.DeletedCount + result.InsertedCount + result.ModifiedCount);
         }
-
-        /// <inheritdoc />
-        public override Func<QueryContext, IAsyncEnumerable<TResult>> CompileAsyncQuery<TResult>(QueryModel queryModel)
-            => queryContext => CompileQuery<TResult>(queryModel)(queryContext).ToAsyncEnumerable();
 
         private IUpdateEntry GetRootDocument(InternalEntityEntry entry)
         {

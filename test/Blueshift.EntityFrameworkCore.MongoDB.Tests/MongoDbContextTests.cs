@@ -127,8 +127,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                     .FirstAsync(employee => employee.LastName == _zooEntities.TaigaMasuta.LastName
                                             && employee.FirstName == _zooEntities.TaigaMasuta.FirstName);
 
-                EntityEntry<Employee> entityEntry = zooDbContext.Entry(taigaMasuta);
-
                 Specialty firstSpecialty = taigaMasuta.Specialties[0];
                 EntityEntry<Specialty> specialtyEntry = zooDbContext.Entry(firstSpecialty);
                 Assert.Equal(EntityState.Unchanged, specialtyEntry.State);
@@ -145,10 +143,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
             await ExecuteUnitOfWorkAsync(async zooDbContext =>
             {
                 Employee taigaMasuta = await zooDbContext.Employees
-                    .FirstOrDefaultAsync(employee => employee.LastName == _zooEntities.TaigaMasuta.LastName
-                                                     && employee.FirstName == _zooEntities.TaigaMasuta.FirstName
-                                                     && employee.Specialties.Any(specialty =>
-                                                         specialty.AnimalType == nameof(PolarBear)));
+                    .FirstAsync(employee => employee.LastName == _zooEntities.TaigaMasuta.LastName
+                                            && employee.FirstName == _zooEntities.TaigaMasuta.FirstName
+                                            && employee.Specialties.Any(specialty =>
+                                                specialty.AnimalType == nameof(PolarBear)));
 
                 Assert.NotNull(taigaMasuta);
             });
@@ -211,8 +209,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                     await zooDbContext.Employees
                         .SingleAsync(searchedEmployee => searchedEmployee.Specialties
                             .Any(specialty => specialty.AnimalType == nameof(Tiger)
-                                              && specialty.Task == ZooTask.Feeding))
-                    , new EmployeeEqualityComparer());
+                                              && specialty.Task == ZooTask.Feeding)),
+                    new EmployeeEqualityComparer());
             });
         }
 
@@ -270,6 +268,32 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                     .OrderBy(otter => otter.Name)
                     .ToListAsync();
                 Assert.Equal(originalOtters, queriedOtters, new AnimalEqualityComparer());
+            });
+        }
+
+        [Fact]
+        public void Can_list_sync()
+        {
+            ExecuteUnitOfWork(zooDbContext =>
+            {
+                zooDbContext.Animals.AddRange(_zooEntities.Animals);
+                Assert.Equal(
+                    _zooEntities.Entities.Count,
+                    zooDbContext.SaveChanges(acceptAllChangesOnSuccess: true));
+            });
+
+            ExecuteUnitOfWork(zooDbContext =>
+            {
+                IQueryable<Animal> animalQuery = zooDbContext.Animals
+                    .OrderBy(animal => animal.Name)
+                    .ThenBy(animal => animal.Height);
+
+                Assert.Equal(_zooEntities.Animals,
+                    zooDbContext.Animals
+                        .OrderBy(animal => animal.Name)
+                        .ThenBy(animal => animal.Height)
+                        .ToList(),
+                    new AnimalEqualityComparer());
             });
         }
 
@@ -487,7 +511,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                                     enclosure => enclosure.WeeklySchedule.Assignments,
                                     (enclosure, assignment) => new
                                     {
-                                        EnclosureId = enclosure.EnclosureId,
+                                        enclosure.EnclosureId,
                                         Assignment = assignment
                                     }),
                                 employee => employee.EmployeeId,
@@ -538,7 +562,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
             return assignment;
         }
 
-        [Fact]
+        [Fact(Skip = "DbContext does not support concurrent async queries.")]
         public async Task Concurrent_query()
         {
             await ExecuteUnitOfWorkAsync(async zooDbContext =>
