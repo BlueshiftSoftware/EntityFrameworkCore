@@ -75,7 +75,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
 
         private static readonly MethodInfo IntersectMethodInfo =
             MethodHelper.GetGenericMethodDefinition<IQueryable<object>, IQueryable<object>>(
-                queryable => queryable.Intersect<object>(null));
+                queryable => queryable.Intersect(null));
 
         private static readonly MethodInfo JoinMethodInfo =
             MethodHelper.GetGenericMethodDefinition<IQueryable<object>, IQueryable<object>>(
@@ -272,12 +272,38 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
             => typeof(Queryable).GetTypeInfo().GetDeclaredMethods(name)
                 .Where(mi => mi.GetParameters().Length == parameterCount + 1);
 
+        private static readonly MethodInfo LambdaMethodInfo =
+            MethodHelper.GetGenericMethodDefinition<Expression<Func<object>>>(
+                () => Expression.Lambda<Func<object>>(null, (ParameterExpression[]) null));
+
         /// <inheritdoc />
         public Expression CreateLambdaExpression(
             Expression bodyExpression,
             params ParameterExpression[] parameterExpressions)
-            => Expression.Lambda(
-                bodyExpression,
-                parameterExpressions);
+        {
+            Type[] delegateGenericTypeArgs = parameterExpressions
+                .Concat(new[] {bodyExpression})
+                .Select(expression =>
+                    expression.Type.TryGetImplementationType(typeof(IQueryable<>), out Type queryableType)
+                        ? queryableType
+                        : expression.Type != typeof(string)
+                          && expression.Type != typeof(byte[])
+                          && expression.Type.TryGetImplementationType(typeof(IEnumerable<>), out Type enumerableType)
+                            ? enumerableType
+                            : expression.Type)
+                .ToArray();
+            Type delegateType = Expression.GetFuncType(delegateGenericTypeArgs);
+
+            LambdaExpression lambdaExpression = (LambdaExpression) LambdaMethodInfo
+                .MakeGenericMethod(delegateType)
+                .Invoke(
+                    null,
+                    new object[]
+                    {
+                        bodyExpression,
+                        parameterExpressions
+                    });
+            return lambdaExpression;
+        }
     }
 }

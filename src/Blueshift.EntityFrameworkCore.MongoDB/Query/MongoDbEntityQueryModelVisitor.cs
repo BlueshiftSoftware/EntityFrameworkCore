@@ -56,6 +56,12 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         /// </summary>
         public IQueryableMethodProvider QueryableMethodProvider { get; }
 
+        /// <inheritdoc />
+        public override void VisitQueryModel(QueryModel queryModel)
+        {
+            base.VisitQueryModel(queryModel);
+        }
+
         private Expression ConvertToRelationshipAssignments(Expression expression)
         {
             if (expression is MethodCallExpression methodCallExpression

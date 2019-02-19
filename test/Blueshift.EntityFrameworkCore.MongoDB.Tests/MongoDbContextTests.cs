@@ -145,8 +145,8 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                 Employee taigaMasuta = await zooDbContext.Employees
                     .FirstAsync(employee => employee.LastName == _zooEntities.TaigaMasuta.LastName
                                             && employee.FirstName == _zooEntities.TaigaMasuta.FirstName
-                                            && employee.Specialties.Any(specialty =>
-                                                specialty.AnimalType == nameof(PolarBear)));
+                                            && employee.Specialties
+                                                .Any(specialty => specialty.AnimalType == nameof(PolarBear)));
 
                 Assert.NotNull(taigaMasuta);
             });
@@ -562,7 +562,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
             return assignment;
         }
 
-        [Fact(Skip = "DbContext does not support concurrent async queries.")]
+        [Fact]
         public async Task Concurrent_query()
         {
             await ExecuteUnitOfWorkAsync(async zooDbContext =>
@@ -573,14 +573,13 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                     await zooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
             });
 
-            Employee[] employees = await ExecuteUnitOfWorkAsync(
-                zooDbContext => Task.WhenAll(
-                    zooDbContext.Employees.SingleAsync(employee => employee.FullName == _zooEntities.ManAgier.FullName),
-                    zooDbContext.Employees.SingleAsync(employee => employee.FullName == _zooEntities.BearOCreary.FullName),
-                    zooDbContext.Employees.SingleAsync(employee => employee.FullName == _zooEntities.OttoVonEssenmacher.FullName),
-                    zooDbContext.Employees.SingleAsync(employee => employee.FullName == _zooEntities.TaigaMasuta.FullName),
-                    zooDbContext.Employees.SingleAsync(employee => employee.FullName == _zooEntities.TurGuidry.FullName)
-                ));
+            Employee[] employees = await Task.WhenAll(
+                ExecuteUnitOfWorkAsync(zooDbContext => zooDbContext.Employees.SingleAsync(employee => employee.FullName == _zooEntities.ManAgier.FullName)),
+                ExecuteUnitOfWorkAsync(zooDbContext => zooDbContext.Employees.SingleAsync(employee => employee.FullName == _zooEntities.BearOCreary.FullName)),
+                ExecuteUnitOfWorkAsync(zooDbContext => zooDbContext.Employees.SingleAsync(employee => employee.FullName == _zooEntities.OttoVonEssenmacher.FullName)),
+                ExecuteUnitOfWorkAsync(zooDbContext => zooDbContext.Employees.SingleAsync(employee => employee.FullName == _zooEntities.TaigaMasuta.FullName)),
+                ExecuteUnitOfWorkAsync(zooDbContext => zooDbContext.Employees.SingleAsync(employee => employee.FullName == _zooEntities.TurGuidry.FullName))
+            );
 
             Employee[] expectedEmployees = 
             {
