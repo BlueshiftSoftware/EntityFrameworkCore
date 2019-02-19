@@ -60,7 +60,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
                 serviceCollectionMap.TryAddScoped<IMongoClientFactory, MongoClientFactory>();
                 serviceCollectionMap.TryAddScoped<IMongoDbConnection, MongoDbConnection>();
                 serviceCollectionMap.TryAddScoped<IQueryableMethodProvider, QueryableMethodProvider>();
-                serviceCollectionMap.TryAddScoped<IMongoDbDenormalizedCollectionCompensatingVisitorFactory, MongoDbDenormalizedCollectionCompensatingVisitorFactory>();
+                serviceCollectionMap.TryAddScoped<IMongoDbDenormalizedCollectionCompensatingVisitorFactory,
+                    MongoDbDenormalizedCollectionCompensatingVisitorFactory>();
+                serviceCollectionMap.TryAddScoped<INullConditionalExpressionCompensatingExpressionVisitorFactory,
+                    NullConditionalExpressionCompensatingExpressionVisitorFactory>();
                 serviceCollectionMap.TryAddScoped<IDocumentQueryExpressionFactory, MongoDbDocumentQueryExpressionFactory>();
                 serviceCollectionMap.TryAddScoped<IMongoDbWriteModelFactoryCache, MongoDbWriteModelFactoryCache>();
                 serviceCollectionMap.TryAddScoped<IMongoDbWriteModelFactorySelector, MongoDbWriteModelFactorySelector>();

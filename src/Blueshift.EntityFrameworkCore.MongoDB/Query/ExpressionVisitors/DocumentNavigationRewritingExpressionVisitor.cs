@@ -423,7 +423,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                             node.Member.Name,
                             node.Type,
                             e => e.MakeMemberAccess(node.Member),
-                            e => e.MakeMemberAccess(node.Member))
+                            e => new NullConditionalExpression(e, e.MakeMemberAccess(node.Member)))
                         : null;
                 });
 
@@ -438,7 +438,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                 ? newExpression.MakeMemberAccess(node.Member)
                 : node;
 
-            result = newMemberExpression;
+            result = NeedsNullCompensation(newExpression)
+                ? (Expression)new NullConditionalExpression(
+                    newExpression,
+                    newMemberExpression)
+                : newMemberExpression;
 
             return result.Type == typeof(bool?) && node.Type == typeof(bool)
                 ? Expression.Equal(result, Expression.Constant(true, typeof(bool?)))
@@ -559,8 +563,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                                     ? Expression.Call(node.Method, Expression.Convert(e, node.Arguments[0].Type), node.Arguments[1])
                                     : Expression.Call(node.Method, e, node.Arguments[1]),
                                 e => node.Arguments[0].Type != e.Type
-                                    ? Expression.Call(node.Method, Expression.Convert(e, node.Arguments[0].Type), node.Arguments[1])
-                                    : Expression.Call(node.Method, e, node.Arguments[1]))
+                                    ? new NullConditionalExpression(
+                                        Expression.Convert(e, node.Arguments[0].Type),
+                                        Expression.Call(node.Method, Expression.Convert(e, node.Arguments[0].Type), node.Arguments[1]))
+                                    : new NullConditionalExpression(e, Expression.Call(node.Method, e, node.Arguments[1])))
                             : null;
                     });
 
@@ -575,7 +581,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                     ? Expression.Call(node.Method, propertyArguments[0], node.Arguments[1])
                     : node;
 
-                result = newPropertyExpression;
+                result = NeedsNullCompensation(propertyArguments[0])
+                    ? (Expression)new NullConditionalExpression(propertyArguments[0], newPropertyExpression)
+                    : newPropertyExpression;
 
                 return result.Type == typeof(bool?) && node.Type == typeof(bool)
                     ? Expression.Equal(result, Expression.Constant(true, typeof(bool?)))
@@ -611,7 +619,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
             {
                 if (newObject is NullConditionalExpression nullConditionalExpression)
                 {
-                    return nullConditionalExpression.AccessOperation;
+                    MethodCallExpression newMethodCallExpression = node.Update(nullConditionalExpression.AccessOperation, newArguments);
+
+                    return new NullConditionalExpression(newObject, newMethodCallExpression);
                 }
             }
 
@@ -950,8 +960,21 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
             Expression sourceExpression = outerQuerySourceReferenceExpression;
             NavigationJoins navigationJoins = _navigationJoins;
 
+            bool optionalNavigationInChain
+                = NeedsNullCompensation(outerQuerySourceReferenceExpression);
+
             foreach (INavigation navigation in navigations)
             {
+                bool addNullCheckToOuterKeySelector = optionalNavigationInChain;
+
+                if (!navigation.ForeignKey.IsRequired
+                    || !navigation.IsDependentToPrincipal()
+                    || (navigation.DeclaringEntityType.ClrType != sourceExpression.Type
+                        && navigation.DeclaringEntityType.GetAllBaseTypes().Any(t => t.ClrType == sourceExpression.Type)))
+                {
+                    optionalNavigationInChain = true;
+                }
+
                 if (!ShouldRewrite(navigation))
                 {
                     if (sourceExpression.Type != navigation.DeclaringEntityType.ClrType)
@@ -962,7 +985,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                             Expression.Constant(null, navigation.DeclaringEntityType.ClrType));
                     }
 
-                    sourceExpression = Expression.Property(sourceExpression, navigation.PropertyInfo);
+                    sourceExpression = new NullConditionalExpression(sourceExpression, Expression.Property(sourceExpression, navigation.PropertyInfo));
 
                     continue;
                 }
@@ -1012,17 +1035,35 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                         sourceExpression,
                         navigation,
                         targetEntityType,
-                        false,
+                        addNullCheckToOuterKeySelector,
                         out QuerySourceReferenceExpression innerQuerySourceReferenceExpression);
 
-                    navigationJoin
-                        = new NavigationJoin(
-                            (sourceExpression as QuerySourceReferenceExpression ?? sourceQsre).ReferencedQuerySource,
-                            navigation,
+                    if (optionalNavigationInChain)
+                    {
+                        RewriteNavigationIntoGroupJoin(
                             joinClause,
+                            navigation,
+                            targetEntityType,
+                            sourceExpression as QuerySourceReferenceExpression ?? sourceQsre,
+                            null,
                             new List<IBodyClause>(),
-                            navigation.IsDependentToPrincipal(),
-                            innerQuerySourceReferenceExpression);
+                            new List<ResultOperatorBase>
+                            {
+                                new DefaultIfEmptyResultOperator(null)
+                            },
+                            out navigationJoin);
+                    }
+                    else
+                    {
+                        navigationJoin
+                            = new NavigationJoin(
+                                (sourceExpression as QuerySourceReferenceExpression ?? sourceQsre).ReferencedQuerySource,
+                                navigation,
+                                joinClause,
+                                new List<IBodyClause>(),
+                                navigation.IsDependentToPrincipal(),
+                                innerQuerySourceReferenceExpression);
+                    }
                 }
 
                 navigationJoins.Add(navigationJoin);
@@ -1034,7 +1075,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
 
             return propertyType == null
                 ? sourceExpression
-                : conditionalAccessPropertyCreator(sourceExpression);
+                : optionalNavigationInChain
+                ? conditionalAccessPropertyCreator(sourceExpression)
+                : propertyCreator(sourceExpression);
         }
 
         private void RewriteNavigationIntoGroupJoin(
@@ -1362,7 +1405,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
                     Expression.Constant(null, propertyExpression.Type));
             }
 
-            return propertyExpression;
+            return addNullCheck
+                ? new NullConditionalExpression(target, propertyExpression)
+                : propertyExpression;
         }
 
         private static bool IsCompositeKey([NotNull] Type type)

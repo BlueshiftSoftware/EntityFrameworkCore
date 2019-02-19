@@ -27,6 +27,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
 
         private readonly IEntityQueryableExpressionVisitorFactory _entityQueryableExpressionVisitorFactory;
         private readonly IMemberAccessBindingExpressionVisitorFactory _memberAccessBindingExpressionVisitorFactory;
+        private readonly INullConditionalExpressionCompensatingExpressionVisitorFactory _nullConditionalExpressionCompensatingExpressionVisitorFactory;
 
         /// <inheritdoc />
         public MongoDbEntityQueryModelVisitor(
@@ -45,8 +46,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
             _memberAccessBindingExpressionVisitorFactory =
                 entityQueryModelVisitorDependencies.MemberAccessBindingExpressionVisitorFactory;
             _mongoDbDenormalizedCollectionCompensatingVisitorFactory
-                = Check.NotNull(mongoDbEntityQueryModelVisitorDependencies, nameof(mongoDbEntityQueryModelVisitorDependencies))
+                = Check.NotNull(mongoDbEntityQueryModelVisitorDependencies,
+                        nameof(mongoDbEntityQueryModelVisitorDependencies))
                     .MongoDbDenormalizedCollectionCompensatingVisitorFactory;
+            _nullConditionalExpressionCompensatingExpressionVisitorFactory = mongoDbEntityQueryModelVisitorDependencies
+                .NullConditionalExpressionCompensatingExpressionVisitorFactory;
             QueryableMethodProvider =
                 mongoDbEntityQueryModelVisitorDependencies.QueryableMethodProvider;
         }
@@ -60,6 +64,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         public override void VisitQueryModel(QueryModel queryModel)
         {
             base.VisitQueryModel(queryModel);
+
+            Expression = _nullConditionalExpressionCompensatingExpressionVisitorFactory
+                .Create()
+                .Visit(Expression);
         }
 
         private Expression ConvertToRelationshipAssignments(Expression expression)
@@ -93,6 +101,24 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
                 constructorInfo,
                 outerExpression,
                 innerExpression);
+        }
+
+        /// <inheritdoc />
+        public override void VisitMainFromClause(
+            MainFromClause fromClause,
+            QueryModel queryModel)
+        {
+            Check.NotNull(fromClause, nameof(fromClause));
+            Check.NotNull(queryModel, nameof(queryModel));
+
+            Expression = CompileMainFromClauseExpression(fromClause, queryModel);
+
+            CurrentParameter
+                = Expression.Parameter(
+                    Expression.Type.GetSequenceType(),
+                    fromClause.ItemName);
+
+            QueryCompilationContext.AddOrUpdateMapping(fromClause, CurrentParameter);
         }
 
         /// <inheritdoc />
@@ -338,7 +364,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
                         t => t == typeof(GroupResultOperator)
                              || t == typeof(AllResultOperator)))
             {
-
                 MethodInfo selectMethodInfo = QueryableMethodProvider.IsQueryableExpression(Expression)
                     ? QueryableMethodProvider.Select
                     : LinqOperatorProvider.Select;
@@ -378,51 +403,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
             {
                 base.VisitWhereClause(whereClause, queryModel, index);
             }
-        }
-
-        /// <inheritdoc />
-        public override Expression ReplaceClauseReferences(
-            Expression expression,
-            IQuerySource querySource = null,
-            bool inProjection = false)
-        {
-            Check.NotNull(expression, nameof(expression));
-
-            expression
-                = _entityQueryableExpressionVisitorFactory
-                    .Create(this, querySource)
-                    .Visit(expression);
-
-            expression
-                = _memberAccessBindingExpressionVisitorFactory
-                    .Create(QueryCompilationContext.QuerySourceMapping, this, inProjection)
-                    .Visit(expression);
-
-            if (!inProjection
-                && (expression.Type != typeof(string)
-                    && expression.Type != typeof(byte[])
-                    && Expression?.Type.TryGetElementType(typeof(IAsyncEnumerable<>)) != null
-                    || Expression == null
-                    && expression.Type.IsGenericType
-                    && expression.Type.GetGenericTypeDefinition() == typeof(IGrouping<,>)))
-            {
-                var elementType = expression.Type.TryGetElementType(typeof(IEnumerable<>));
-
-                if (elementType != null)
-                {
-                    if (LinqOperatorProvider is AsyncLinqOperatorProvider asyncLinqOperatorProvider)
-                    {
-                        return
-                            Expression.Call(
-                                asyncLinqOperatorProvider
-                                    .ToAsyncEnumerable
-                                    .MakeGenericMethod(elementType),
-                                expression);
-                    }
-                }
-            }
-
-            return expression;
         }
     }
 }
