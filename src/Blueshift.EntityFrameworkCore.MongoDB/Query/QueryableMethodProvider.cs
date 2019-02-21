@@ -4,10 +4,11 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore.Utilities;
-using MongoDB.Driver.Linq;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Query
 {
+    using MethodInfoUpdateDelegate = Func<IList<Expression>, Type[]>;
+
     /// <inheritdoc />
     public class QueryableMethodProvider : IQueryableMethodProvider
     {
@@ -151,6 +152,83 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
             MethodHelper.GetGenericMethodDefinition<IQueryable<object>, IQueryable<object>>(
                 queryable => queryable.Where(obj => false));
 
+        private static Type GetLambdaReturnType(Expression expression)
+            => expression is UnaryExpression unaryExpression
+               && unaryExpression.Operand is LambdaExpression quotedLambdaExpression
+                ? quotedLambdaExpression.ReturnType
+                : expression is LambdaExpression lambdaExpression
+                    ? lambdaExpression.ReturnType
+                    : expression.Type;
+
+        private static readonly IDictionary<MethodInfo, MethodInfoUpdateDelegate> QueryableMethodUpdateMap =
+            new Dictionary<MethodInfo, MethodInfoUpdateDelegate>()
+            {
+                [GroupByMethodInfo] = args =>  new[]
+                {
+                    args[0].Type.GetSequenceType(),
+                    args[1].Type,
+                    GetLambdaReturnType(args[2])
+                },
+
+                [GroupJoinMethodInfo] = args =>  new[]
+                {
+                    args[0].Type.GetSequenceType(),
+                    args[1].Type.GetSequenceType(),
+                    GetLambdaReturnType(args[2]),
+                    GetLambdaReturnType(args[4])
+                },
+
+                [JoinMethodInfo] = args =>  new[]
+                {
+                    args[0].Type.GetSequenceType(),
+                    args[1].Type.GetSequenceType(),
+                    GetLambdaReturnType(args[2]),
+                    GetLambdaReturnType(args[4])
+                },
+
+                [OrderByMethodInfo] = args => new[]
+                {
+                    args[0].Type.GetSequenceType(),
+                    GetLambdaReturnType(args[1])
+                },
+
+                [OrderByDescendingMethodInfo] = args => new[]
+                {
+                    args[0].Type.GetSequenceType(),
+                    GetLambdaReturnType(args[1])
+                },
+
+                [SelectMethodInfo] = args =>  new[]
+                {
+                    args[0].Type.GetSequenceType(),
+                    GetLambdaReturnType(args[1])
+                },
+
+                [SelectManyMethodInfo] = args =>  new[]
+                {
+                    args[0].Type.GetSequenceType(),
+                    GetLambdaReturnType(args[1]).GetSequenceType(),
+                    GetLambdaReturnType(args[2])
+                },
+
+                [ThenByMethodInfo] = args => new[]
+                {
+                    args[0].Type.GetSequenceType(),
+                    GetLambdaReturnType(args[1])
+                },
+
+                [ThenByDescendingMethodInfo] = args => new[]
+                {
+                    args[0].Type.GetSequenceType(),
+                    GetLambdaReturnType(args[1])
+                },
+
+                [WhereMethodInfo] = args => new[]
+                {
+                    args[0].Type.GetSequenceType()
+                }
+            };
+
         /// <inheritdoc />
         public virtual MethodInfo All => AllMethodInfo;
 
@@ -279,7 +357,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         /// <inheritdoc />
         public Expression CreateLambdaExpression(
             Expression bodyExpression,
-            params ParameterExpression[] parameterExpressions)
+            IEnumerable<ParameterExpression> parameterExpressions)
         {
             Type[] delegateGenericTypeArgs = parameterExpressions
                 .Concat(new[] {bodyExpression})
@@ -303,7 +381,36 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
                         bodyExpression,
                         parameterExpressions
                     });
+
             return lambdaExpression;
+        }
+
+        /// <inheritdoc cref="IQueryableMethodProvider"/>
+        public MethodCallExpression UpdateMethodCallExpression(
+            MethodCallExpression methodCallExpression,
+            Expression target,
+            IList<Expression> arguments)
+        {
+            MethodInfo methodInfo = Check.NotNull(methodCallExpression, nameof(methodCallExpression)).Method;
+
+            if (methodInfo.IsGenericMethod)
+            {
+                MethodInfo genericMethodDefinition = methodInfo.GetGenericMethodDefinition();
+
+                if (QueryableMethodUpdateMap.TryGetValue(genericMethodDefinition,
+                    out MethodInfoUpdateDelegate methodUpdateFunc))
+                {
+                    Type[] newGenericTypeArgs = methodUpdateFunc(arguments);
+                    methodInfo = genericMethodDefinition.MakeGenericMethod(newGenericTypeArgs);
+                }
+            }
+
+            return methodInfo != methodCallExpression.Method
+                ? Expression.Call(
+                    target,
+                    methodInfo,
+                    arguments)
+                : methodCallExpression.Update(target, arguments);
         }
     }
 }

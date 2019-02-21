@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
+using Microsoft.EntityFrameworkCore.Utilities;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Query
 {
@@ -115,6 +117,27 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         /// <inheritdoc cref="IQueryableMethodProvider"/>
         Expression CreateLambdaExpression(
             Expression bodyExpression,
-            params ParameterExpression[] parameterExpressions);
+            IEnumerable<ParameterExpression> parameterExpressions);
+
+        /// <inheritdoc cref="IQueryableMethodProvider"/>
+        MethodCallExpression UpdateMethodCallExpression(
+            MethodCallExpression methodCallExpression,
+            Expression target,
+            IList<Expression> arguments);
+    }
+
+    /// <summary>
+    ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+    ///     directly from your code. This API may change or be removed in future releases.
+    /// </summary>
+    public static class QueryableMethodProviderExtensions
+    {
+        /// <inheritdoc cref="QueryableMethodProviderExtensions"/>
+        public static Expression CreateLambdaExpression(
+            this IQueryableMethodProvider queryableMethodProvider,
+            Expression bodyExpression,
+            params ParameterExpression[] parameterExpressions)
+            => Check.NotNull(queryableMethodProvider, nameof(queryableMethodProvider))
+                .CreateLambdaExpression(bodyExpression, (IEnumerable<ParameterExpression>) parameterExpressions);
     }
 }

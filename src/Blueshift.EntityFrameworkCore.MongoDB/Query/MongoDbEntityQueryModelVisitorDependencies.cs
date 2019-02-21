@@ -46,21 +46,21 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         /// <param name="queryableMethodProvider">
         ///     The <see cref="IQueryableMethodProvider" /> to be used when processing a query.
         /// </param>
-        /// <param name="nullConditionalExpressionCompensatingExpressionVisitorFactory">
-        ///     The <see cref="INullConditionalExpressionCompensatingExpressionVisitorFactory" /> to be used when filtering an expression tree.
+        /// <param name="linqProviderFilteringExpressionVisitorFactory">
+        ///     The <see cref="ILinqProviderFilteringExpressionVisitorFactory" /> to be used when filtering an expression tree.
         /// </param>
         public MongoDbEntityQueryModelVisitorDependencies(
             [NotNull] IMongoDbDenormalizedCollectionCompensatingVisitorFactory mongoDbDenormalizedCollectionCompensatingVisitorFactory,
             [NotNull] IQueryableMethodProvider queryableMethodProvider,
-            [NotNull] INullConditionalExpressionCompensatingExpressionVisitorFactory nullConditionalExpressionCompensatingExpressionVisitorFactory)
+            [NotNull] ILinqProviderFilteringExpressionVisitorFactory linqProviderFilteringExpressionVisitorFactory)
         {
             MongoDbDenormalizedCollectionCompensatingVisitorFactory
                 = Check.NotNull(mongoDbDenormalizedCollectionCompensatingVisitorFactory,
                     nameof(mongoDbDenormalizedCollectionCompensatingVisitorFactory));
             QueryableMethodProvider = Check.NotNull(queryableMethodProvider, nameof(queryableMethodProvider));
-            NullConditionalExpressionCompensatingExpressionVisitorFactory = 
-                Check.NotNull(nullConditionalExpressionCompensatingExpressionVisitorFactory,
-                    nameof(nullConditionalExpressionCompensatingExpressionVisitorFactory));
+            LinqProviderFilteringExpressionVisitorFactory = 
+                Check.NotNull(linqProviderFilteringExpressionVisitorFactory,
+                    nameof(linqProviderFilteringExpressionVisitorFactory));
         }
 
         /// <summary>
@@ -77,10 +77,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         public IQueryableMethodProvider QueryableMethodProvider { get; }
 
         /// <summary>
-        ///     Gets the <see cref="INullConditionalExpressionCompensatingExpressionVisitorFactory" /> to be used when filtering an expression tree.
+        ///     Gets the <see cref="ILinqProviderFilteringExpressionVisitorFactory" /> to be used when filtering an expression tree.
         /// </summary>
         [NotNull]
-        public INullConditionalExpressionCompensatingExpressionVisitorFactory NullConditionalExpressionCompensatingExpressionVisitorFactory { get; }
+        public ILinqProviderFilteringExpressionVisitorFactory LinqProviderFilteringExpressionVisitorFactory { get; }
 
     }
 }

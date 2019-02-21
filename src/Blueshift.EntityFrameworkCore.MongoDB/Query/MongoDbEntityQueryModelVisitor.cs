@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -7,10 +6,8 @@ using Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors;
-using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors.Internal;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.EntityFrameworkCore.Utilities;
-using MongoDB.Driver.Linq;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.Expressions;
@@ -25,9 +22,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         private readonly IMongoDbDenormalizedCollectionCompensatingVisitorFactory
             _mongoDbDenormalizedCollectionCompensatingVisitorFactory;
 
-        private readonly IEntityQueryableExpressionVisitorFactory _entityQueryableExpressionVisitorFactory;
-        private readonly IMemberAccessBindingExpressionVisitorFactory _memberAccessBindingExpressionVisitorFactory;
-        private readonly INullConditionalExpressionCompensatingExpressionVisitorFactory _nullConditionalExpressionCompensatingExpressionVisitorFactory;
+        private readonly ILinqProviderFilteringExpressionVisitorFactory _linqProviderFilteringExpressionVisitorFactory;
 
         /// <inheritdoc />
         public MongoDbEntityQueryModelVisitor(
@@ -41,16 +36,12 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         {
             _projectionExpressionVisitorFactory = entityQueryModelVisitorDependencies
                 .ProjectionExpressionVisitorFactory;
-            _entityQueryableExpressionVisitorFactory =
-                entityQueryModelVisitorDependencies.EntityQueryableExpressionVisitorFactory;
-            _memberAccessBindingExpressionVisitorFactory =
-                entityQueryModelVisitorDependencies.MemberAccessBindingExpressionVisitorFactory;
             _mongoDbDenormalizedCollectionCompensatingVisitorFactory
                 = Check.NotNull(mongoDbEntityQueryModelVisitorDependencies,
                         nameof(mongoDbEntityQueryModelVisitorDependencies))
                     .MongoDbDenormalizedCollectionCompensatingVisitorFactory;
-            _nullConditionalExpressionCompensatingExpressionVisitorFactory = mongoDbEntityQueryModelVisitorDependencies
-                .NullConditionalExpressionCompensatingExpressionVisitorFactory;
+            _linqProviderFilteringExpressionVisitorFactory = mongoDbEntityQueryModelVisitorDependencies
+                .LinqProviderFilteringExpressionVisitorFactory;
             QueryableMethodProvider =
                 mongoDbEntityQueryModelVisitorDependencies.QueryableMethodProvider;
         }
@@ -61,13 +52,13 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         public IQueryableMethodProvider QueryableMethodProvider { get; }
 
         /// <inheritdoc />
-        public override void VisitQueryModel(QueryModel queryModel)
+        protected override Func<QueryContext, TResults> CreateExecutorLambda<TResults>()
         {
-            base.VisitQueryModel(queryModel);
-
-            Expression = _nullConditionalExpressionCompensatingExpressionVisitorFactory
+            Expression = _linqProviderFilteringExpressionVisitorFactory
                 .Create()
                 .Visit(Expression);
+
+            return base.CreateExecutorLambda<TResults>();
         }
 
         private Expression ConvertToRelationshipAssignments(Expression expression)
@@ -365,6 +356,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
                              || t == typeof(AllResultOperator)))
             {
                 MethodInfo selectMethodInfo = QueryableMethodProvider.IsQueryableExpression(Expression)
+                                              && !(selector is MethodCallExpression methodCallExpression)
                     ? QueryableMethodProvider.Select
                     : LinqOperatorProvider.Select;
 
