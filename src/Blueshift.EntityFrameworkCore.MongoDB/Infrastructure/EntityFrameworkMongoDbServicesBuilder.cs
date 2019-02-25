@@ -38,14 +38,14 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
             TryAdd<IDatabaseCreator, MongoDbDatabaseCreator>();
             TryAdd<IValueGeneratorSelector, MongoDbValueGeneratorSelector>();
             TryAdd<IConventionSetBuilder, MongoDbConventionSetBuilder>();
-            TryAdd<IQueryCompilationContextFactory, QueryableQueryCompilationContextFactory>();
+            TryAdd<IQueryCompilationContextFactory, LinqAdapterQueryCompilationContextFactory>();
             TryAdd<IQueryContextFactory, MongoDbQueryContextFactory>();
             TryAdd<IEntityQueryableExpressionVisitorFactory, MongoDbEntityQueryableExpressionVisitorFactory>();
             TryAdd<IEntityQueryModelVisitorFactory, MongoDbEntityQueryModelVisitorFactory>();
             TryAdd<IMemberAccessBindingExpressionVisitorFactory, MongoDbMemberAccessBindingExpressionVisitorFactory>();
             TryAdd<INavigationRewritingExpressionVisitorFactory, DocumentNavigationRewritingExpressionVisitorFactory>();
-            TryAdd<IQueryCompiler, QueryProviderAdapterQueryCompiler>();
-            TryAdd<IResultOperatorHandler, QueryableResultOperatorHandler>();
+            TryAdd<IQueryCompiler, LinqAdapterQueryCompiler>();
+            TryAdd<IResultOperatorHandler, LinqAdapterResultOperatorHandler>();
 
             TryAddProviderSpecificServices(serviceCollectionMap =>
             {
@@ -60,10 +60,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Infrastructure
                 serviceCollectionMap.TryAddScoped<IMongoClientFactory, MongoClientFactory>();
                 serviceCollectionMap.TryAddScoped<IMongoDbConnection, MongoDbConnection>();
                 serviceCollectionMap.TryAddScoped<IQueryableMethodProvider, QueryableMethodProvider>();
-                serviceCollectionMap.TryAddScoped<IMongoDbDenormalizedCollectionCompensatingVisitorFactory,
-                    MongoDbDenormalizedCollectionCompensatingVisitorFactory>();
-                serviceCollectionMap.TryAddScoped<ILinqProviderFilteringExpressionVisitorFactory,
-                    LinqProviderFilteringExpressionVisitorFactory>();
+                serviceCollectionMap.TryAddScoped<IDenormalizationCompensatingExpressionVisitorFactory,
+                    DenormalizationCompensatingExpressionVisitorFactory>();
+                serviceCollectionMap.TryAddScoped<ILinqAdapterFilteringExpressionVisitorFactory,
+                    LinqAdapterFilteringExpressionVisitorFactory>();
                 serviceCollectionMap.TryAddScoped<IDocumentQueryExpressionFactory, MongoDbDocumentQueryExpressionFactory>();
                 serviceCollectionMap.TryAddScoped<IMongoDbWriteModelFactoryCache, MongoDbWriteModelFactoryCache>();
                 serviceCollectionMap.TryAddScoped<IMongoDbWriteModelFactorySelector, MongoDbWriteModelFactorySelector>();

@@ -14,10 +14,10 @@ using Microsoft.EntityFrameworkCore.Storage;
 namespace Blueshift.EntityFrameworkCore.MongoDB.Query
 {
     /// <inheritdoc />
-    public class QueryProviderAdapterQueryCompiler : QueryCompiler
+    public class LinqAdapterQueryCompiler : QueryCompiler
     {
         /// <inheritdoc />
-        public QueryProviderAdapterQueryCompiler(
+        public LinqAdapterQueryCompiler(
             [NotNull] IQueryContextFactory queryContextFactory,
             [NotNull] ICompiledQueryCache compiledQueryCache,
             [NotNull] ICompiledQueryCacheKeyGenerator compiledQueryCacheKeyGenerator,

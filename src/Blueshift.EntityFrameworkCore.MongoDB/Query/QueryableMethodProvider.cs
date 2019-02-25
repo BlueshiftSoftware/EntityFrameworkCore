@@ -359,7 +359,9 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
             Expression bodyExpression,
             IEnumerable<ParameterExpression> parameterExpressions)
         {
-            Type[] delegateGenericTypeArgs = parameterExpressions
+            ParameterExpression[] parameterArray = parameterExpressions.ToArray();
+
+            Type[] delegateGenericTypeArgs = parameterArray
                 .Concat(new[] {bodyExpression})
                 .Select(expression =>
                     expression.Type.TryGetImplementationType(typeof(IQueryable<>), out Type queryableType)
@@ -379,7 +381,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
                     new object[]
                     {
                         bodyExpression,
-                        parameterExpressions
+                        parameterArray
                     });
 
             return lambdaExpression;

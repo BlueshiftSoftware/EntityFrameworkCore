@@ -40,35 +40,35 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         ///         the constructor at any point in this process.
         ///     </para>
         /// </summary>
-        /// <param name="mongoDbDenormalizedCollectionCompensatingVisitorFactory">
-        ///     The <see cref="IMongoDbDenormalizedCollectionCompensatingVisitorFactory" /> to be used when processing the query.
+        /// <param name="denormalizationCompensatingExpressionVisitorFactory">
+        ///     The <see cref="IDenormalizationCompensatingExpressionVisitorFactory" /> to be used when processing the query.
         /// </param>
         /// <param name="queryableMethodProvider">
         ///     The <see cref="IQueryableMethodProvider" /> to be used when processing a query.
         /// </param>
-        /// <param name="linqProviderFilteringExpressionVisitorFactory">
-        ///     The <see cref="ILinqProviderFilteringExpressionVisitorFactory" /> to be used when filtering an expression tree.
+        /// <param name="linqAdapterFilteringExpressionVisitorFactory">
+        ///     The <see cref="ILinqAdapterFilteringExpressionVisitorFactory" /> to be used when filtering an expression tree.
         /// </param>
         public MongoDbEntityQueryModelVisitorDependencies(
-            [NotNull] IMongoDbDenormalizedCollectionCompensatingVisitorFactory mongoDbDenormalizedCollectionCompensatingVisitorFactory,
+            [NotNull] IDenormalizationCompensatingExpressionVisitorFactory denormalizationCompensatingExpressionVisitorFactory,
             [NotNull] IQueryableMethodProvider queryableMethodProvider,
-            [NotNull] ILinqProviderFilteringExpressionVisitorFactory linqProviderFilteringExpressionVisitorFactory)
+            [NotNull] ILinqAdapterFilteringExpressionVisitorFactory linqAdapterFilteringExpressionVisitorFactory)
         {
-            MongoDbDenormalizedCollectionCompensatingVisitorFactory
-                = Check.NotNull(mongoDbDenormalizedCollectionCompensatingVisitorFactory,
-                    nameof(mongoDbDenormalizedCollectionCompensatingVisitorFactory));
+            DenormalizationCompensatingExpressionVisitorFactory
+                = Check.NotNull(denormalizationCompensatingExpressionVisitorFactory,
+                    nameof(denormalizationCompensatingExpressionVisitorFactory));
             QueryableMethodProvider = Check.NotNull(queryableMethodProvider, nameof(queryableMethodProvider));
-            LinqProviderFilteringExpressionVisitorFactory = 
-                Check.NotNull(linqProviderFilteringExpressionVisitorFactory,
-                    nameof(linqProviderFilteringExpressionVisitorFactory));
+            LinqAdapterFilteringExpressionVisitorFactory = 
+                Check.NotNull(linqAdapterFilteringExpressionVisitorFactory,
+                    nameof(linqAdapterFilteringExpressionVisitorFactory));
         }
 
         /// <summary>
-        ///     Gets the <see cref="IMongoDbDenormalizedCollectionCompensatingVisitorFactory" /> to be used when processing a query.
+        ///     Gets the <see cref="IDenormalizationCompensatingExpressionVisitorFactory" /> to be used when processing a query.
         /// </summary>
         [NotNull]
-        public IMongoDbDenormalizedCollectionCompensatingVisitorFactory
-            MongoDbDenormalizedCollectionCompensatingVisitorFactory { get; }
+        public IDenormalizationCompensatingExpressionVisitorFactory
+            DenormalizationCompensatingExpressionVisitorFactory { get; }
 
         /// <summary>
         ///     Gets the <see cref="IQueryableMethodProvider" /> to be used when processing a query.
@@ -77,10 +77,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         public IQueryableMethodProvider QueryableMethodProvider { get; }
 
         /// <summary>
-        ///     Gets the <see cref="ILinqProviderFilteringExpressionVisitorFactory" /> to be used when filtering an expression tree.
+        ///     Gets the <see cref="ILinqAdapterFilteringExpressionVisitorFactory" /> to be used when filtering an expression tree.
         /// </summary>
         [NotNull]
-        public ILinqProviderFilteringExpressionVisitorFactory LinqProviderFilteringExpressionVisitorFactory { get; }
+        public ILinqAdapterFilteringExpressionVisitorFactory LinqAdapterFilteringExpressionVisitorFactory { get; }
 
     }
 }

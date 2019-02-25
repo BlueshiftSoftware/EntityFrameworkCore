@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Query.Internal;
 namespace Blueshift.EntityFrameworkCore.MongoDB.Query
 {
     /// <inheritdoc />
-    public class QueryableQueryCompilationContextFactory : QueryCompilationContextFactory
+    public class LinqAdapterQueryCompilationContextFactory : QueryCompilationContextFactory
     {
         /// <inheritdoc />
-        public QueryableQueryCompilationContextFactory(
+        public LinqAdapterQueryCompilationContextFactory(
             [NotNull] QueryCompilationContextDependencies dependencies) : base(dependencies)
         {
         }

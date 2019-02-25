@@ -19,10 +19,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
     public class MongoDbEntityQueryModelVisitor : EntityQueryModelVisitor
     {
         private readonly IProjectionExpressionVisitorFactory _projectionExpressionVisitorFactory;
-        private readonly IMongoDbDenormalizedCollectionCompensatingVisitorFactory
-            _mongoDbDenormalizedCollectionCompensatingVisitorFactory;
+        private readonly IDenormalizationCompensatingExpressionVisitorFactory
+            _denormalizationCompensatingExpressionVisitorFactory;
 
-        private readonly ILinqProviderFilteringExpressionVisitorFactory _linqProviderFilteringExpressionVisitorFactory;
+        private readonly ILinqAdapterFilteringExpressionVisitorFactory _linqAdapterFilteringExpressionVisitorFactory;
 
         /// <inheritdoc />
         public MongoDbEntityQueryModelVisitor(
@@ -36,12 +36,12 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         {
             _projectionExpressionVisitorFactory = entityQueryModelVisitorDependencies
                 .ProjectionExpressionVisitorFactory;
-            _mongoDbDenormalizedCollectionCompensatingVisitorFactory
+            _denormalizationCompensatingExpressionVisitorFactory
                 = Check.NotNull(mongoDbEntityQueryModelVisitorDependencies,
                         nameof(mongoDbEntityQueryModelVisitorDependencies))
-                    .MongoDbDenormalizedCollectionCompensatingVisitorFactory;
-            _linqProviderFilteringExpressionVisitorFactory = mongoDbEntityQueryModelVisitorDependencies
-                .LinqProviderFilteringExpressionVisitorFactory;
+                    .DenormalizationCompensatingExpressionVisitorFactory;
+            _linqAdapterFilteringExpressionVisitorFactory = mongoDbEntityQueryModelVisitorDependencies
+                .LinqAdapterFilteringExpressionVisitorFactory;
             QueryableMethodProvider =
                 mongoDbEntityQueryModelVisitorDependencies.QueryableMethodProvider;
         }
@@ -54,7 +54,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         /// <inheritdoc />
         protected override Func<QueryContext, TResults> CreateExecutorLambda<TResults>()
         {
-            Expression = _linqProviderFilteringExpressionVisitorFactory
+            Expression = _linqAdapterFilteringExpressionVisitorFactory
                 .Create()
                 .Visit(Expression);
 
@@ -66,7 +66,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
             if (expression is MethodCallExpression methodCallExpression
                 && IncludeCompiler.IsIncludeMethod(methodCallExpression))
             {
-                expression = (MethodCallExpression) _mongoDbDenormalizedCollectionCompensatingVisitorFactory
+                expression = (MethodCallExpression) _denormalizationCompensatingExpressionVisitorFactory
                     .Create()
                     .Visit(methodCallExpression);
             }

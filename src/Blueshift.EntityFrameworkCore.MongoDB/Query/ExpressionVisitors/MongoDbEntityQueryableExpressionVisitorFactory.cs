@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using Blueshift.EntityFrameworkCore.MongoDB.Query.Expressions;
+﻿using Blueshift.EntityFrameworkCore.MongoDB.Query.Expressions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Query;
@@ -9,10 +8,7 @@ using Remotion.Linq.Clauses;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
 {
-    /// <summary>
-    ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
-    /// </summary>
+    /// <inheritdoc />
     public class MongoDbEntityQueryableExpressionVisitorFactory : IEntityQueryableExpressionVisitorFactory
     {
         private readonly IModel _model;
@@ -34,7 +30,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public virtual ExpressionVisitor Create(
+        public virtual System.Linq.Expressions.ExpressionVisitor Create(
             EntityQueryModelVisitor entityQueryModelVisitor,
             IQuerySource querySource)
             => new MongoDbEntityQueryableExpressionVisitor(

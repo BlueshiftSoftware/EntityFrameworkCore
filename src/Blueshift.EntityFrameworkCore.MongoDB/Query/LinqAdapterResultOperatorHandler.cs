@@ -22,7 +22,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
     /// <summary>
     ///     The default client-eval result operator handler.
     /// </summary>
-    public class QueryableResultOperatorHandler : ResultOperatorHandler
+    public class LinqAdapterResultOperatorHandler : ResultOperatorHandler
     {
         [NotNull] private readonly IQueryableMethodProvider _queryableMethodProvider;
 
@@ -59,7 +59,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
         /// </summary>
         /// <param name="dependencies"> Parameter object containing dependencies for this service. </param>
         /// <param name="queryableMethodProvider">The <see cref="IQueryableMethodProvider"/> to use for referencing <see cref="IQueryable"/> methods.</param>
-        public QueryableResultOperatorHandler(
+        public LinqAdapterResultOperatorHandler(
             [NotNull] ResultOperatorHandlerDependencies dependencies,
             [NotNull] IQueryableMethodProvider queryableMethodProvider)
             : base(Check.NotNull(dependencies, nameof(dependencies)))
