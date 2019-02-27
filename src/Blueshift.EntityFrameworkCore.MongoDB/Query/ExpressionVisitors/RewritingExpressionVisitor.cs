@@ -8,13 +8,13 @@ using Remotion.Linq.Parsing;
 namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
 {
     /// <inheritdoc />
-    public class LinqAdapterFilteringExpressionVisitor : RelinqExpressionVisitor
+    public class RewritingExpressionVisitor : RelinqExpressionVisitor
     {
         [NotNull] private readonly IQueryableMethodProvider _queryableMethodProvider;
         private readonly QueryableMethodScope _queryableMethodScope;
 
         /// <inheritdoc />
-        public LinqAdapterFilteringExpressionVisitor(
+        public RewritingExpressionVisitor(
             [NotNull] IQueryableMethodProvider queryableMethodProvider)
         {
             _queryableMethodProvider = Check.NotNull(queryableMethodProvider, nameof(queryableMethodProvider));

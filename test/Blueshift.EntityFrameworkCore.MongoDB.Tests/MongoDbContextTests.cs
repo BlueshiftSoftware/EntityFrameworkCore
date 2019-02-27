@@ -93,8 +93,6 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
                 Assert.Equal(EntityState.Unchanged, entityEntry.State);
                 Assert.NotNull(_zooEntities.Tigger.ConcurrencyField);
 
-                Assert.NotNull(entityEntry.OriginalValues[nameof(_zooEntities.Tigger.ConcurrencyField)]);
-
                 _zooEntities.Tigger.Name = "Tigra";
                 zooDbContext.ChangeTracker.DetectChanges();
                 Assert.Equal(EntityState.Modified, entityEntry.State);
@@ -103,9 +101,11 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
 
             await ExecuteUnitOfWorkAsync(async zooDbContext =>
             {
+                Tiger tigger = await zooDbContext.Animals.OfType<Tiger>().FirstOrDefaultAsync();
+
                 Assert.Equal(
                     _zooEntities.Tigger,
-                    await zooDbContext.Animals.OfType<Tiger>().FirstOrDefaultAsync(),
+                    tigger,
                     new AnimalEqualityComparer());
             });
         }

@@ -1,4 +1,5 @@
-﻿using Blueshift.EntityFrameworkCore.MongoDB.Query.Expressions;
+﻿using System.Linq.Expressions;
+using Blueshift.EntityFrameworkCore.MongoDB.Query.Expressions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Query;
@@ -30,7 +31,7 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors
         ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public virtual System.Linq.Expressions.ExpressionVisitor Create(
+        public virtual ExpressionVisitor Create(
             EntityQueryModelVisitor entityQueryModelVisitor,
             IQuerySource querySource)
             => new MongoDbEntityQueryableExpressionVisitor(
