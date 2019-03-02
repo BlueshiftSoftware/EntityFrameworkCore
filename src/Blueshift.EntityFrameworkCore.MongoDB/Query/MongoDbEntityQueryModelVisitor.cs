@@ -1,27 +1,29 @@
-using System;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using Blueshift.EntityFrameworkCore.MongoDB.Query.ExpressionVisitors;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors;
-using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors.Internal;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.EntityFrameworkCore.Utilities;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.Expressions;
 using Remotion.Linq.Clauses.ResultOperators;
+using System;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors.Internal;
+using Microsoft.EntityFrameworkCore.Query.ResultOperators.Internal;
+using Remotion.Linq.Clauses.StreamedData;
 
 namespace Blueshift.EntityFrameworkCore.MongoDB.Query
 {
     /// <inheritdoc />
     public class MongoDbEntityQueryModelVisitor : EntityQueryModelVisitor
     {
-        private readonly IProjectionExpressionVisitorFactory _projectionExpressionVisitorFactory;
+        private readonly IQueryOptimizer _queryOptimizer;
         private readonly IEntityQueryModelVisitorServiceFactory _entityQueryModelVisitorServiceFactory;
+        private readonly ModelExpressionApplyingExpressionVisitor _modelExpressionApplyingExpressionVisitor;
 
         /// <inheritdoc />
         public MongoDbEntityQueryModelVisitor(
@@ -33,20 +35,107 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
                 Check.NotNull(queryCompilationContext, nameof(queryCompilationContext))
             )
         {
-            _projectionExpressionVisitorFactory = entityQueryModelVisitorDependencies
-                .ProjectionExpressionVisitorFactory;
+            _queryOptimizer = entityQueryModelVisitorDependencies.QueryOptimizer;
+
             _entityQueryModelVisitorServiceFactory
                 = Check.NotNull(mongoDbEntityQueryModelVisitorDependencies,
                         nameof(mongoDbEntityQueryModelVisitorDependencies))
                     .EntityQueryModelVisitorServiceFactory;
             QueryableMethodProvider =
                 mongoDbEntityQueryModelVisitorDependencies.QueryableMethodProvider;
+
+            _modelExpressionApplyingExpressionVisitor
+                = _entityQueryModelVisitorServiceFactory.CreateModelExpressionApplyingExpressionVisitor(
+                    queryCompilationContext,
+                    this);
         }
 
         /// <summary>
         ///     Gets te <see cref="IQueryableMethodProvider"/> used to reference <see cref="IQueryable"/> methods.
         /// </summary>
         public IQueryableMethodProvider QueryableMethodProvider { get; }
+
+        /// <inheritdoc />
+        protected override void OptimizeQueryModel(
+            QueryModel queryModel,
+            bool asyncQuery)
+        {
+            Check.NotNull(queryModel, nameof(queryModel));
+
+            ExtractQueryAnnotations(queryModel);
+
+            // First pass of optimizations
+
+            _queryOptimizer.Optimize(QueryCompilationContext, queryModel);
+
+            //new NondeterministicResultCheckingVisitor(QueryCompilationContext.Logger, this).VisitQueryModel(queryModel);
+
+            OnBeforeNavigationRewrite(queryModel);
+
+            // Rewrite includes/navigations
+
+            var includeCompiler = _entityQueryModelVisitorServiceFactory.CreateIncludeCompiler(
+                QueryCompilationContext);
+            includeCompiler.CompileIncludes(queryModel, TrackResults(queryModel), asyncQuery);
+
+            queryModel.TransformExpressions(new CollectionNavigationSubqueryInjector(this).Visit);
+            queryModel.TransformExpressions(new CollectionNavigationSetOperatorSubqueryInjector(this).Visit);
+
+            var navigationRewritingExpressionVisitor = _entityQueryModelVisitorServiceFactory
+                .CreateNavigationRewritingExpressionVisitor(this);
+            navigationRewritingExpressionVisitor.InjectSubqueryToCollectionsInProjection(queryModel);
+
+            var correlatedCollectionFinder = new CorrelatedCollectionFindingExpressionVisitor(
+                this,
+                TrackResults(queryModel));
+
+            if (!queryModel.ResultOperators.Any(r => r is GroupResultOperator))
+            {
+                queryModel.SelectClause.TransformExpressions(correlatedCollectionFinder.Visit);
+            }
+
+            navigationRewritingExpressionVisitor.Rewrite(queryModel, parentQueryModel: null);
+
+            includeCompiler.CompileIncludes(queryModel, TrackResults(queryModel), asyncQuery);
+
+            navigationRewritingExpressionVisitor.Rewrite(queryModel, parentQueryModel: null);
+
+            //new EntityQsreToKeyAccessConvertingQueryModelVisitor(QueryCompilationContext).VisitQueryModel(queryModel);
+
+            //includeCompiler.RewriteCollectionQueries();
+
+            //includeCompiler.LogIgnoredIncludes();
+
+            _modelExpressionApplyingExpressionVisitor.ApplyModelExpressions(queryModel);
+
+            // Second pass of optimizations
+
+            ExtractQueryAnnotations(queryModel);
+
+            navigationRewritingExpressionVisitor.Rewrite(queryModel, parentQueryModel: null);
+
+            _queryOptimizer.Optimize(QueryCompilationContext, queryModel);
+
+            // Log results
+
+            QueryCompilationContext.Logger.QueryModelOptimized(queryModel);
+        }
+
+        private bool TrackResults(QueryModel queryModel)
+        {
+            // TODO: Unify with QCC
+
+            var lastTrackingModifier
+                = QueryCompilationContext.QueryAnnotations
+                    .OfType<TrackingResultOperator>()
+                    .LastOrDefault();
+
+            return !_modelExpressionApplyingExpressionVisitor.IsViewTypeQuery
+                   && !(queryModel.GetOutputDataInfo() is StreamedScalarValueInfo)
+                   && (QueryCompilationContext.TrackQueryResults || lastTrackingModifier != null)
+                   && (lastTrackingModifier == null
+                       || lastTrackingModifier.IsTracking);
+        }
 
         /// <inheritdoc />
         protected override Func<QueryContext, TResults> CreateExecutorLambda<TResults>()
@@ -339,8 +428,10 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Query
             }
 
             Expression selector = ReplaceClauseReferences(
-                _projectionExpressionVisitorFactory
-                    .Create(this, queryModel.MainFromClause)
+                _entityQueryModelVisitorServiceFactory
+                    .CreateProjectionExpressionVisitor(
+                        this,
+                        queryModel.MainFromClause)
                     .Visit(selectClause.Selector),
                 inProjection: true);
 
