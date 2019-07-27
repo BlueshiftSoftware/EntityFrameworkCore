@@ -284,6 +284,38 @@ namespace Blueshift.EntityFrameworkCore.MongoDB.Tests
         }
 
         [Fact]
+        public async Task Can_execute_same_async_query_from_different_dbContext_instances()
+        {
+            await ExecuteUnitOfWorkAsync(async zooDbContext =>
+            {
+                zooDbContext.Animals.AddRange(_zooEntities.Animals);
+                Assert.Equal(
+                    _zooEntities.Entities.Count,
+                    await zooDbContext.SaveChangesAsync(acceptAllChangesOnSuccess: true));
+            });
+
+            Func<ZooDbContext, Task<List<Animal>>> query = (zooDbContext) => 
+            zooDbContext.Animals
+                .OrderBy(animal => animal.Name)
+                .ThenBy(animal => animal.Height)
+                .ToListAsync();
+
+            await ExecuteUnitOfWorkAsync(async zooDbContext =>
+            {
+                Assert.Equal(_zooEntities.Animals,
+                    await query.Invoke(zooDbContext),
+                    new AnimalEqualityComparer());
+            });
+
+            await ExecuteUnitOfWorkAsync(async zooDbContext =>
+            {
+                Assert.Equal(_zooEntities.Animals,
+                    await query.Invoke(zooDbContext),
+                    new AnimalEqualityComparer());
+            });
+        }
+
+        [Fact]
         public async Task Can_query_first_or_default_async()
         {
             await ExecuteUnitOfWorkAsync(async zooDbContext =>
