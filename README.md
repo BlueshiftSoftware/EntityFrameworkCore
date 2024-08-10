@@ -1,3 +1,6 @@
+This repository has been defunct for some time. Due to a lack of both public interest and general support from the Microsoft Entity Framework team, I have decided to formally end support for the solution and archive the repository.
+
+
 # Document Database Providers for Entity Framework Core
 
 Welcome to the home of Document Database (NoSQL) Providers for EntityFrameworkCore!
